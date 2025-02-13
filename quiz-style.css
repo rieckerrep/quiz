@@ -1,0 +1,456 @@
+<style>
+/***********************************
+ *   Gesamt-Container mit Rand     *
+ ***********************************/
+#quiz-container {
+  border: 3px solid black;  
+  margin: 20px auto;        
+  max-width: 1200px;        
+  min-height: 600px;        
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background-color: #fff;
+  box-sizing: border-box;
+  font-family: Cambria, sans-serif;
+}
+
+/********************************************
+ *  Frageauswahl (oben, horizontal, LINKS)  *
+ ********************************************/
+.question-selection-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;  
+  background-color: transparent; 
+  padding: 10px;
+  border-bottom: 2px solid black; 
+  gap: 5px; 
+}
+.question-selection {
+  display: flex;
+  gap: 5px;
+}
+.question-select-item {
+  background-color: #000; 
+  color: #fff;
+  width: 30px;
+  height: 30px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.3s;
+  border: none;
+}
+.question-select-item:hover {
+  background-color: #333;
+}
+
+/***********************************************
+ *  2 Spalten: links (1), rechts (3)
+ ***********************************************/
+.content-row {
+  display: flex;
+  flex: 1;
+  flex-direction: row;
+}
+
+/*************************
+ *   Linke Spalte (1)
+ *************************/
+.question-panel {
+  width: 50%;
+  background-color: #000; 
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  box-sizing: border-box;
+}
+.question-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+.question-number {
+  font-weight: bold;
+}
+.progress-bar-container {
+  background-color: #333; 
+  width: 50%;
+  height: 8px;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+}
+.progress-bar {
+  background-color: #FFD700; 
+  height: 100%;
+  width: 0%;
+  transition: width 0.3s;
+}
+#questionText {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin: 0;
+  color: #fff;
+}
+#explanationContainer {
+  background-color: #111;
+  border-radius: 5px;
+  padding: 15px;
+  margin-top: 20px;
+  display: none;
+  text-align: left;
+}
+#explanationText {
+  margin-top: 2em; 
+  margin-bottom: 10px;
+  white-space: pre-line;
+}
+
+/***************************
+ *   Rechte Spalte (3)
+ ***************************/
+.answer-panel {
+  width: 50%;
+  background-color: #fff; 
+  color: #000;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  box-sizing: border-box;
+  position: relative;
+}
+.answer-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+.xp-box {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 10px;
+  font-weight: bold;
+  color: #fff;  
+  background: linear-gradient(135deg, #1e90ff 0%, #5dade2 100%);
+  position: relative;
+}
+.xp-icon {
+  width: 16px;
+  height: 16px;
+}
+.xp-change {
+  position: absolute;
+  font-size: 18px;
+  font-weight: bold;
+  color: green;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+  animation: xp-float-up 2s ease-out forwards;
+}
+@keyframes xp-float-up {
+  0% { opacity: 1; transform: translate(-50%, 0); }
+  100% { opacity: 0; transform: translate(-50%, -40px); }
+}
+.coin-row {
+  display: flex;
+  gap: 10px;
+}
+.coin-box {
+  background: gold;
+  padding: 5px 10px;
+  border-radius: 10px;
+  color: #000;
+  position: relative;
+  font-weight: bold;
+}
+.coin-change {
+  position: absolute;
+  font-size: 18px;
+  font-weight: bold;
+  top: 0;
+  right: 30%;
+  transform: translateX(50%);
+}
+.coin-change.positive {
+  color: green;
+  animation: float-up 2s ease-out forwards;
+}
+.coin-change.negative {
+  color: red;
+  animation: float-down 2s ease-out forwards;
+}
+@keyframes float-up {
+  0% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-50px); }
+}
+@keyframes float-down {
+  0% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(50px); }
+}
+
+#options {
+  background-color: #fff;
+  border-radius: 5px;
+  min-height: 60px;
+  margin-bottom: 20px;
+  text-align: left;
+  padding: 10px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  flex: 1;
+}
+
+/* Buttons */
+button {
+  background: #000;
+  color: #fff;
+  border: 2px solid #000; 
+  border-radius: 5px;
+  padding: 10px;
+  margin: 5px 0;
+  width: 100%;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+  font-family: Cambria, sans-serif;
+}
+button:hover {
+  background-color: #333;
+  color: #fff;
+}
+#approveBtn,
+#rejectBtn,
+#nextBtn {
+  display: none;
+}
+#nextBtn {
+  margin-top: 10px;
+  border-color: green;
+  color: green;
+}
+#nextBtn:hover {
+  background-color: green;
+  color: #fff;
+}
+#repeatBtn {
+  display: none;
+}
+
+/* Drag & Drop */
+.assignment-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.assignment-pair {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+.draggable-item {
+  display: inline-block;
+  background: #333;
+  color: #fff;
+  padding: 8px 10px;
+  border-radius: 5px;
+  margin: 5px;
+  cursor: move;
+}
+.draggable-item:active {
+  opacity: 0.7;
+}
+.target-zone {
+  border: 2px dashed #888;
+  padding: 15px;
+  border-radius: 5px;
+  background-color: #fff;
+  text-align: center;
+  position: relative;
+  min-height: 40px;
+  width: 45%;
+}
+.target-zone.hover {
+  background-color: #eee;
+}
+
+/********************************************
+ *  Halbkreis am Ende
+ ********************************************/
+#endScreen {
+  display: none;
+  text-align: center;
+  margin-top: 20px;
+}
+.justice-icon {
+  width: 80px;
+  height: 80px;
+  fill: #000;
+  margin-bottom: 10px;
+}
+.circular-progress {
+  width: 300px;       
+  height: 150px;      
+  margin: 10px auto;  
+  position: relative;
+  overflow: visible;
+}
+.circular-progress svg {
+  width: 100%;
+  height: 100%;
+}
+.circle-bg {
+  fill: none;
+  stroke: #444;
+  stroke-width: 2.8;
+}
+.circle {
+  fill: none;
+  stroke: #ffd700;
+  stroke-width: 2.8;
+  stroke-linecap: round;
+  transition: stroke-dasharray 1s ease;
+}
+.percentage {
+  font-size: 0.25em; 
+  fill: #000;
+}
+#endTitle {
+  margin: 0;
+  font-size: 1.5rem;
+}
+#endMessage {
+  margin: 10px 0 10px 0;
+}
+#coinBalance {
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+#continueBtn {
+  background: #000; 
+  color: #fff;
+  border: 2px solid #000;
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  font-family: Cambria, sans-serif;
+  transition: background-color 0.3s, color 0.3s;
+  display: inline-block;
+  width: auto;
+}
+#continueBtn:hover {
+  background-color: #333;
+  color: #fff;
+}
+
+/***********************************************
+ *   Mobile Ansicht (XP/Münzen "über" dem Konstrukt)
+ ***********************************************/
+@media (max-width: 768px) {
+  .content-row {
+    flex-direction: column; 
+  }
+  /* XP/Münzen an Position -1 => "über" allem */
+  .answer-top-row {
+    order: -1; 
+    width: 100%;
+    margin-top: 10px;
+  }
+  .question-panel {
+    width: 100%;
+    order: 1;
+  }
+  .answer-panel {
+    width: 100%;
+    order: 2;
+  }
+}
+
+/***********************************************
+ *   Darkmode: 
+ *   - Transparent hinter Buttons
+ *   - Buttons bleiben weiß
+ *   - XP-Stern bleibt blau
+ ***********************************************/
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #222;
+    color: #fff;
+  }
+  #quiz-container {
+    border: 2px solid #999;
+    background-color: #333;
+  }
+  .question-panel {
+    background-color: #111;
+  }
+  .answer-panel {
+    background-color: transparent; /* Hinter Buttons transparent */
+    color: #fff;
+  }
+  button {
+    background-color: rgba(255,255,255,1);
+    color: #000;
+    border: 1px solid #999;
+  }
+  button:hover {
+    background-color: rgba(255,255,255,0.8);
+    color: #000;
+  }
+  .question-select-item {
+    background-color: rgba(255,255,255,1);
+    color: #000;
+  }
+  .question-select-item:hover {
+    background-color: rgba(255,255,255,0.8);
+  }
+  /* XP-Box => unverändert => blau */
+  .coin-box {
+    color: #000;
+    background: gold;
+  }
+  .circle-bg {
+    stroke: #bbb; 
+  }
+  .percentage {
+    fill: #fff;
+  }
+}
+
+/***********************************************
+ *   R/F-Buttons nebeneinander
+ ***********************************************/
+.horizontal-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.subquestions {
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.open-question-textarea {
+  background: #f9f9f9;
+  border: 2px solid #ccc;
+  border-radius: 5px;
+  padding: 10px;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 80px; 
+  width: 100%;
+  box-sizing: border-box;
+}
+</style>
+</head>
