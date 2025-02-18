@@ -6,7 +6,7 @@
   <title>RieckerRep-Quiz</title>
   <!-- Supabase JavaScript Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-   <style>
+  <style>
     /***********************************
      *   Gesamt-Container mit Rand     *
      ***********************************/
@@ -489,7 +489,7 @@
 
 <!-- Quiz-Container -->
 <div id="quiz-container">
-  <!-- Dein HTML-Inhalt, z. B. Frageauswahl, Fragen, Antworten usw. -->
+  <!-- HTML-Inhalt, z. B. Frageauswahl, Fragen, Antworten usw. -->
   <div class="question-selection-row">
     <div class="question-selection" id="questionSelection"></div>
   </div>
@@ -544,6 +544,15 @@
 </div>
 
 <script>
+  // --- Neue Funktionalität: Empfange per postMessage die Wix-User-ID ---
+  window.addEventListener('message', (event) => {
+    // Optional: Hier kann event.origin geprüft werden, um nur Nachrichten von deiner Wix-Seite zu akzeptieren.
+    if (event.data && event.data.wixUserId) {
+      window.wixUserId = event.data.wixUserId;
+      console.log("Wix-Benutzer-ID empfangen:", window.wixUserId);
+    }
+  });
+
   // Supabase-Konfiguration (dein API-Key wird hier verwendet)
   const SUPABASE_URL = 'https://lqoulygftdjbnfxkrihy.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxxb3VseWdmdGRqYm5meGtyaWh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk0NzUzMDAsImV4cCI6MjA1NTA1MTMwMH0.VInK_7i6zY_f5zjHSR0U93Ut0L7ku_Q0C9xS-u4Lols';
@@ -630,8 +639,9 @@
       }
     }
 
+    // Neue getWixUserId-Funktion, die die per postMessage empfangene ID zurückgibt
     function getWixUserId() {
-      return "6d0d2c2a-59c3-4e15-8ec4-8a2991f30b16";
+      return window.wixUserId || null;
     }
 
     // Hier lesen wir die Chapter-ID aus der URL (z.B. ?chapterId=2)
@@ -642,50 +652,39 @@
       await initQuiz();
     });
 
-async function loadQuestions(chapterId) {
-  try {
-    // REST-Endpoint => filter: chapter_id=eq.{chapterId}
-    const url = `${SUPABASE_URL}/rest/v1/questions?chapter_id=eq.${chapterId}`;
-
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+    async function loadQuestions(chapterId) {
+      try {
+        // REST-Endpoint => filter: chapter_id=eq.{chapterId}
+        const url = `${SUPABASE_URL}/rest/v1/questions?chapter_id=eq.${chapterId}`;
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+          }
+        });
+        if (!response.ok) {
+          throw new Error("Fehler: " + response.status);
+        }
+        let data = await response.json();
+        // data ist jetzt ein Array mit allen Fragen, deren chapter_id = chapterId
+        if (Array.isArray(data) && data.length > 0) {
+          questions = data;
+          xpGoal = data.length * 10;
+          createQuestionSelection();
+          showQuestion();
+        } else {
+          document.getElementById("questionText").innerText = "Keine Fragen für dieses Kapitel gefunden!";
+        }
+      } catch (err) {
+        document.getElementById("questionText").innerText = "Fehler beim Laden!";
+        console.error(err);
       }
-    });
-    if (!response.ok) {
-      throw new Error("Fehler: " + response.status);
     }
-    let data = await response.json();
-
-    // data ist jetzt ein Array mit allen Fragen, deren chapter_id = chapterId
-    if (Array.isArray(data) && data.length > 0) {
-      // Speichere sie in ein Array "questions", damit du sie verarbeiten kannst
-      questions = data;
-      
-      // Beispiel: XP-Ziel auf Basis der Anzahl
-      xpGoal = data.length * 10;
-
-      // Falls du eine UI hast, die z. B. eine Frageauswahl anzeigt:
-      createQuestionSelection();
-      showQuestion();  // zeigt die erste Frage
-    } else {
-      document.getElementById("questionText").innerText = "Keine Fragen für dieses Kapitel gefunden!";
-    }
-  } catch (err) {
-    document.getElementById("questionText").innerText = "Fehler beim Laden!";
-    console.error(err);
-  }
-}
-    
-
+        
     function displayQuiz(quizData) {
-      // Beispiel: Zeige die Daten aus der Tabelle "chapters"
       const container = document.getElementById("quiz-container");
-      container.innerHTML = ""; // Clear container
-
-      // Hier gehen wir davon aus, dass jedes Kapitel (Quiz) in einer Zeile steht
+      container.innerHTML = "";
       quizData.forEach((q, index) => {
         const quizDiv = document.createElement("div");
         quizDiv.style.marginBottom = "20px";
@@ -832,93 +831,92 @@ async function loadQuestions(chapterId) {
         return;
       }
 
-async function createDragDropQuestion(q) {
-  const options = document.getElementById("options");
-  options.innerHTML = ""; // reset
+      async function createDragDropQuestion(q) {
+        const options = document.getElementById("options");
+        options.innerHTML = "";
 
-  let { data, error } = await supabaseClient
-    .from('dragdrop_pairs')
-    .select('*')
-    .eq('group_id', q.id);
+        let { data, error } = await supabaseClient
+          .from('dragdrop_pairs')
+          .select('*')
+          .eq('group_id', q.id);
 
-  if (error) {
-    console.error("Fehler beim Laden der Drag & Drop Daten:", error);
-    options.innerHTML = "<p>Fehler beim Laden der Drag-&-Drop-Daten!</p>";
-    return;
-  }
-  if (!data || data.length === 0) {
-    options.innerHTML = "<p>Keine Drag & Drop-Daten vorhanden!</p>";
-    return;
-  }
-
-  const assignment = document.createElement("div");
-  assignment.className = "assignment-container";
-
-  data.forEach((itemObj, index) => {
-    const pair = document.createElement("div");
-    pair.className = "assignment-pair";
-
-    const item = document.createElement("div");
-    item.className = "draggable-item";
-    item.innerText = itemObj.drag_text;
-    item.id = `draggable-${itemObj.id}`;
-    item.draggable = true;
-    item.addEventListener("dragstart", ev => {
-      ev.dataTransfer.setData("text", item.id);
-      ev.dataTransfer.effectAllowed = "move";
-    });
-
-    const target = document.createElement("div");
-    target.className = "target-zone";
-    target.dataset.correct = itemObj.correct_match;
-
-    target.addEventListener("dragover", ev => {
-      ev.preventDefault();
-      target.classList.add("hover");
-      ev.dataTransfer.dropEffect = "move";
-    });
-    target.addEventListener("dragleave", () => {
-      target.classList.remove("hover");
-    });
-    target.addEventListener("drop", ev => {
-      ev.preventDefault();
-      target.classList.remove("hover");
-      const sourceId = ev.dataTransfer.getData("text");
-      const source = document.getElementById(sourceId);
-      if (source) {
-        target.innerText = source.innerText;
-        if (source.innerText === target.dataset.correct) {
-          target.style.backgroundColor = "#a4f9a4";
-        } else {
-          target.style.backgroundColor = "#f9a4a4";
+        if (error) {
+          console.error("Fehler beim Laden der Drag & Drop Daten:", error);
+          options.innerHTML = "<p>Fehler beim Laden der Drag-&-Drop-Daten!</p>";
+          return;
         }
-        source.style.visibility = "hidden";
+        if (!data || data.length === 0) {
+          options.innerHTML = "<p>Keine Drag & Drop-Daten vorhanden!</p>";
+          return;
+        }
+
+        const assignment = document.createElement("div");
+        assignment.className = "assignment-container";
+
+        data.forEach((itemObj, index) => {
+          const pair = document.createElement("div");
+          pair.className = "assignment-pair";
+
+          const item = document.createElement("div");
+          item.className = "draggable-item";
+          item.innerText = itemObj.drag_text;
+          item.id = `draggable-${itemObj.id}`;
+          item.draggable = true;
+          item.addEventListener("dragstart", ev => {
+            ev.dataTransfer.setData("text", item.id);
+            ev.dataTransfer.effectAllowed = "move";
+          });
+
+          const target = document.createElement("div");
+          target.className = "target-zone";
+          target.dataset.correct = itemObj.correct_match;
+
+          target.addEventListener("dragover", ev => {
+            ev.preventDefault();
+            target.classList.add("hover");
+            ev.dataTransfer.dropEffect = "move";
+          });
+          target.addEventListener("dragleave", () => {
+            target.classList.remove("hover");
+          });
+          target.addEventListener("drop", ev => {
+            ev.preventDefault();
+            target.classList.remove("hover");
+            const sourceId = ev.dataTransfer.getData("text");
+            const source = document.getElementById(sourceId);
+            if (source) {
+              target.innerText = source.innerText;
+              if (source.innerText === target.dataset.correct) {
+                target.style.backgroundColor = "#a4f9a4";
+              } else {
+                target.style.backgroundColor = "#f9a4a4";
+              }
+              source.style.visibility = "hidden";
+            }
+          });
+
+          pair.appendChild(item);
+          pair.appendChild(target);
+          assignment.appendChild(pair);
+        });
+
+        options.appendChild(assignment);
+
+        const checkBtn = document.createElement("button");
+        checkBtn.innerText = "Antwort prüfen";
+        checkBtn.onclick = () => {
+          const targetZones = Array.from(assignment.querySelectorAll(".target-zone"));
+          let correctCount = 0;
+          targetZones.forEach(tz => {
+            if (tz.innerText === tz.dataset.correct) {
+              correctCount++;
+            }
+          });
+          const isCorrect = (correctCount === targetZones.length);
+          checkAnswer(isCorrect ? "Richtig" : "Falsch", q, false, "drag_drop");
+        };
+        options.appendChild(checkBtn);
       }
-    });
-
-    pair.appendChild(item);
-    pair.appendChild(target);
-    assignment.appendChild(pair);
-  });
-
-  options.appendChild(assignment);
-
-  const checkBtn = document.createElement("button");
-  checkBtn.innerText = "Antwort prüfen";
-  checkBtn.onclick = () => {
-    const targetZones = Array.from(assignment.querySelectorAll(".target-zone"));
-    let correctCount = 0;
-    targetZones.forEach(tz => {
-      if (tz.innerText === tz.dataset.correct) {
-        correctCount++;
-      }
-    });
-    const isCorrect = (correctCount === targetZones.length);
-    checkAnswer(isCorrect ? "Richtig" : "Falsch", q, false, "drag_drop");
-  };
-  options.appendChild(checkBtn);
-}
-
 
       const userAnswers = new Array(subQuestions.length).fill(null);
       subQuestions.forEach((sq, index) => {
