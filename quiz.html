@@ -6,7 +6,7 @@
   <title>RieckerRep-Quiz</title>
   <!-- Supabase JavaScript Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-  <style>
+   <style>
     /***********************************
      *   Gesamt-Container mit Rand     *
      ***********************************/
@@ -547,7 +547,6 @@
   // Supabase-Konfiguration (dein API-Key wird hier verwendet)
   const SUPABASE_URL = 'https://lqoulygftdjbnfxkrihy.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxxb3VseWdmdGRqYm5meGtyaWh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk0NzUzMDAsImV4cCI6MjA1NTA1MTMwMH0.VInK_7i6zY_f5zjHSR0U93Ut0L7ku_Q0C9xS-u4Lols';
-  // Verwende einen anderen Namen für den Client
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   (function() {
@@ -565,9 +564,7 @@
 
     // Supabase-Funktionen
     async function fetchSupabaseData(table) {
-      const { data, error } = await supabaseClient
-        .from(table)
-        .select('*');
+      const { data, error } = await supabaseClient.from(table).select('*');
       if (error) {
         console.error('Fehler beim Abrufen der Daten:', error);
         return [];
@@ -576,15 +573,12 @@
     }
 
     async function ensureUserInSupabase(userId) {
-      const { data, error } = await supabaseClient
-        .from('user_stats')
+      const { data, error } = await supabaseClient.from('user_stats')
         .select('*')
         .eq('user_id', userId)
         .single();
-
       if (error && error.code === 'PGRST116') {
-        const { data: insertData, error: insertError } = await supabaseClient
-          .from('user_stats')
+        const { data: insertData, error: insertError } = await supabaseClient.from('user_stats')
           .insert([{ user_id: userId, total_xp: 0, total_coins: 100, streak: 0, level: 1 }]);
         if (insertError) {
           console.error('Fehler beim Anlegen des Benutzers:', insertError);
@@ -597,8 +591,7 @@
     }
 
     async function updateUserStatsInSupabase(userId, newXP, newCoins, newStreak) {
-      const { data, error } = await supabaseClient
-        .from('user_stats')
+      const { data, error } = await supabaseClient.from('user_stats')
         .update({ total_xp: newXP, total_coins: newCoins, streak: newStreak })
         .eq('user_id', userId);
       if (error) {
@@ -609,8 +602,7 @@
     }
 
     async function markQuestionAsAnsweredInSupabase(userId, questionId) {
-      const { data, error } = await supabaseClient
-        .from('answered_questions')
+      const { data, error } = await supabaseClient.from('answered_questions')
         .insert([{ user_id: userId, question_id: questionId, is_correct: true }]);
       if (error) {
         console.error('Fehler beim Eintragen der beantworteten Frage:', error);
@@ -620,8 +612,7 @@
     }
 
     async function fetchAlreadyAnsweredQuestions(userId) {
-      const { data, error } = await supabaseClient
-        .from('answered_questions')
+      const { data, error } = await supabaseClient.from('answered_questions')
         .select('question_id')
         .eq('user_id', userId);
       if (error) {
@@ -640,40 +631,70 @@
     }
 
     function getWixUserId() {
-      return "dummyWixUser123";
+      return "6d0d2c2a-59c3-4e15-8ec4-8a2991f30b16";
     }
+
+    // Hier lesen wir die Chapter-ID aus der URL (z.B. ?chapterId=2)
+    const urlParams = new URLSearchParams(window.location.search);
+    const chapterId = urlParams.get('chapterId') || prompt("Bitte gib die Chapter-ID ein:", "1");
 
     document.addEventListener("DOMContentLoaded", async () => {
       await initQuiz();
     });
 
-    async function loadQuiz() {
-      try {
-        const response = await fetch("https://lqoulygftdjbnfxkrihy.supabase.co/rest/v1/questions", {
-          method: 'GET',
-          headers: {
-            'apikey': SUPABASE_ANON_KEY,
-            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
-          }
-        });
-        if (!response.ok) {
-          throw new Error("Fehler: " + response.status);
-        }
-        let data = await response.json();
-        data = data.filter(q => q.Frage && q.Frage.trim() !== "");
-        if (Array.isArray(data) && data.length > 0) {
-          questions = data;
-          answeredCorrectly = new Array(questions.length).fill(false);
-          xpGoal = questions.length * 10;
-          createQuestionSelection();
-          showQuestion();
-        } else {
-          document.getElementById("questionText").innerText = "Keine gültigen Fragen!";
-        }
-      } catch (err) {
-        document.getElementById("questionText").innerText = "Fehler beim Laden!";
-        console.error(err);
+async function loadQuestions(chapterId) {
+  try {
+    // REST-Endpoint => filter: chapter_id=eq.{chapterId}
+    const url = `${SUPABASE_URL}/rest/v1/questions?chapter_id=eq.${chapterId}`;
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
       }
+    });
+    if (!response.ok) {
+      throw new Error("Fehler: " + response.status);
+    }
+    let data = await response.json();
+
+    // data ist jetzt ein Array mit allen Fragen, deren chapter_id = chapterId
+    if (Array.isArray(data) && data.length > 0) {
+      // Speichere sie in ein Array "questions", damit du sie verarbeiten kannst
+      questions = data;
+      
+      // Beispiel: XP-Ziel auf Basis der Anzahl
+      xpGoal = data.length * 10;
+
+      // Falls du eine UI hast, die z. B. eine Frageauswahl anzeigt:
+      createQuestionSelection();
+      showQuestion();  // zeigt die erste Frage
+    } else {
+      document.getElementById("questionText").innerText = "Keine Fragen für dieses Kapitel gefunden!";
+    }
+  } catch (err) {
+    document.getElementById("questionText").innerText = "Fehler beim Laden!";
+    console.error(err);
+  }
+}
+    
+
+    function displayQuiz(quizData) {
+      // Beispiel: Zeige die Daten aus der Tabelle "chapters"
+      const container = document.getElementById("quiz-container");
+      container.innerHTML = ""; // Clear container
+
+      // Hier gehen wir davon aus, dass jedes Kapitel (Quiz) in einer Zeile steht
+      quizData.forEach((q, index) => {
+        const quizDiv = document.createElement("div");
+        quizDiv.style.marginBottom = "20px";
+        quizDiv.innerHTML = `
+          <h3>Quiz ${index + 1}:</h3>
+          <p>${q.Frage || "Keine Frage vorhanden"}</p>
+        `;
+        container.appendChild(quizDiv);
+      });
     }
 
     async function initQuiz() {
@@ -693,7 +714,7 @@
       alreadyAnsweredQuestionIds = await fetchAlreadyAnsweredQuestions(wixUserId);
       document.getElementById("xpValue").innerText = xp;
       document.getElementById("totalCoins").innerText = totalCoins;
-      loadQuiz();
+      loadQuestions(chapterId);
     }
 
     function createQuestionSelection() {
@@ -815,8 +836,6 @@ async function createDragDropQuestion(q) {
   const options = document.getElementById("options");
   options.innerHTML = ""; // reset
 
-  // 1. Lade die Items aus deiner Tabelle, z. B. "dragdrop_pairs"
-  //    Wir gehen davon aus, dass es eine Spalte "question_id" gibt.
   let { data, error } = await supabaseClient
     .from('dragdrop_pairs')
     .select('*')
@@ -832,17 +851,13 @@ async function createDragDropQuestion(q) {
     return;
   }
 
-  // 2. "assignment-container" anlegen
   const assignment = document.createElement("div");
   assignment.className = "assignment-container";
 
-  // data = [{ id: 1, question_id: ..., drag_text: '...', correct_match: '...' }, ...]
-  // Baue daraus Draggable-Items und Zielzonen
   data.forEach((itemObj, index) => {
     const pair = document.createElement("div");
     pair.className = "assignment-pair";
 
-    // Linkes "Draggable"
     const item = document.createElement("div");
     item.className = "draggable-item";
     item.innerText = itemObj.drag_text;
@@ -853,10 +868,9 @@ async function createDragDropQuestion(q) {
       ev.dataTransfer.effectAllowed = "move";
     });
 
-    // Rechtes "Target"
     const target = document.createElement("div");
     target.className = "target-zone";
-    target.dataset.correct = itemObj.correct_match; // z. B. "BGB", "Strafrecht" etc.
+    target.dataset.correct = itemObj.correct_match;
 
     target.addEventListener("dragover", ev => {
       ev.preventDefault();
@@ -873,7 +887,6 @@ async function createDragDropQuestion(q) {
       const source = document.getElementById(sourceId);
       if (source) {
         target.innerText = source.innerText;
-        // optische Markierung
         if (source.innerText === target.dataset.correct) {
           target.style.backgroundColor = "#a4f9a4";
         } else {
@@ -890,7 +903,6 @@ async function createDragDropQuestion(q) {
 
   options.appendChild(assignment);
 
-  // 3. "Antwort prüfen" Button
   const checkBtn = document.createElement("button");
   checkBtn.innerText = "Antwort prüfen";
   checkBtn.onclick = () => {
@@ -969,81 +981,7 @@ async function createDragDropQuestion(q) {
           });
           break;
         case "drag_drop": {
-          const assignment = document.createElement("div");
-          assignment.className = "assignment-container";
-
-          const items = ["Antwort A", "Antwort B", "Antwort C", "Antwort D"]
-            .filter(key => q[key] && q[key].trim() !== "");
-          if (items.length === 0) {
-            const noDataMsg = document.createElement("p");
-            noDataMsg.innerText = "Keine Drag & Drop-Daten vorhanden!";
-            options.appendChild(noDataMsg);
-            return;
-          }
-          const targets = [...items];
-          shuffleArray(targets);
-
-          items.forEach((key, index) => {
-            const pair = document.createElement("div");
-            pair.className = "assignment-pair";
-
-            const item = document.createElement("div");
-            item.className = "draggable-item";
-            item.innerText = q[key];
-            item.id = `item-${index}`;
-            item.draggable = true;
-            item.addEventListener("dragstart", ev => {
-              ev.dataTransfer.setData("text", item.id);
-              ev.dataTransfer.effectAllowed = "move";
-            });
-
-            const target = document.createElement("div");
-            target.className = "target-zone";
-            target.dataset.correct = q[targets[index]];
-            target.addEventListener("dragover", ev => {
-              ev.preventDefault();
-              target.classList.add("hover");
-              ev.dataTransfer.dropEffect = "move";
-            });
-            target.addEventListener("dragleave", () => {
-              target.classList.remove("hover");
-            });
-            target.addEventListener("drop", ev => {
-              ev.preventDefault();
-              target.classList.remove("hover");
-              const text = ev.dataTransfer.getData("text");
-              const source = document.getElementById(text);
-              if (source) {
-                target.innerText = source.innerText;
-                if (source.innerText === target.dataset.correct) {
-                  target.style.backgroundColor = "#a4f9a4";
-                } else {
-                  target.style.backgroundColor = "#f9a4a4";
-                }
-                source.style.visibility = "hidden";
-              }
-            });
-
-            pair.appendChild(item);
-            pair.appendChild(target);
-            assignment.appendChild(pair);
-          });
-          options.appendChild(assignment);
-
-          const checkBtn = document.createElement("button");
-          checkBtn.innerText = "Antwort prüfen";
-          checkBtn.onclick = () => {
-            const targetZones = Array.from(assignment.querySelectorAll(".target-zone"));
-            let correctCount = 0;
-            targetZones.forEach(tz => {
-              if (tz.innerText === tz.dataset.correct) {
-                correctCount++;
-              }
-            });
-            const isCorrect = (correctCount === targetZones.length);
-            checkAnswer(isCorrect ? "Richtig" : "Falsch", q, false, "drag_drop");
-          };
-          options.appendChild(checkBtn);
+          createDragDropQuestion(q);
           break;
         }
       }
@@ -1200,7 +1138,6 @@ async function createDragDropQuestion(q) {
       }
     }
 
-    // Approve/Reject für offene Frage
     document.getElementById("approveBtn").onclick = () => {
       handleOpenQuestionResult(true);
     };
