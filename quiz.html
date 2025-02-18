@@ -544,12 +544,12 @@
 </div>
 
 <script>
-  // --- Neue Funktionalität: Empfange per postMessage die Wix-User-ID ---
+  // --- Empfange per postMessage die Wix-User-ID vom Parent ---
   window.addEventListener('message', (event) => {
-    // Optional: Hier kann event.origin geprüft werden, um nur Nachrichten von deiner Wix-Seite zu akzeptieren.
+    console.log("Nachricht im Iframe empfangen:", event);
     if (event.data && event.data.wixUserId) {
       window.wixUserId = event.data.wixUserId;
-      console.log("Wix-Benutzer-ID empfangen:", window.wixUserId);
+      console.log("Wix-Benutzer-ID gesetzt:", window.wixUserId);
     }
   });
 
@@ -570,6 +570,17 @@
     let answeredCorrectly = [];
     let alreadyAnsweredQuestionIds = [];
     const halfCircleCircumference = 50.265;
+
+    // Hilfsfunktion, um auf die Wix-User-ID zu warten (bis zu 3 Sekunden)
+    async function waitForWixUserId(timeout = 3000) {
+      const interval = 100;
+      let waited = 0;
+      while (!window.wixUserId && waited < timeout) {
+        await new Promise(resolve => setTimeout(resolve, interval));
+        waited += interval;
+      }
+      return window.wixUserId;
+    }
 
     // Supabase-Funktionen
     async function fetchSupabaseData(table) {
@@ -652,6 +663,28 @@
       await initQuiz();
     });
 
+    async function initQuiz() {
+      // Warten, bis die Wix-User-ID empfangen wurde
+      const wixUserId = await waitForWixUserId();
+      console.log("initQuiz: Gefundene Wix-User-ID =", wixUserId);
+      if (!wixUserId) {
+        alert("Bitte melde dich an, um das Quiz zu spielen.");
+        return;
+      }
+      await ensureUserInSupabase(wixUserId);
+      const userStats = await fetchSupabaseData("user_stats");
+      if (userStats.length > 0) {
+        const user = userStats[0];
+        xp = user.total_xp || 0;
+        totalCoins = user.total_coins || 0;
+        streak = user.streak || 0;
+      }
+      alreadyAnsweredQuestionIds = await fetchAlreadyAnsweredQuestions(wixUserId);
+      document.getElementById("xpValue").innerText = xp;
+      document.getElementById("totalCoins").innerText = totalCoins;
+      loadQuestions(chapterId);
+    }
+
     async function loadQuestions(chapterId) {
       try {
         // REST-Endpoint => filter: chapter_id=eq.{chapterId}
@@ -682,40 +715,6 @@
       }
     }
         
-    function displayQuiz(quizData) {
-      const container = document.getElementById("quiz-container");
-      container.innerHTML = "";
-      quizData.forEach((q, index) => {
-        const quizDiv = document.createElement("div");
-        quizDiv.style.marginBottom = "20px";
-        quizDiv.innerHTML = `
-          <h3>Quiz ${index + 1}:</h3>
-          <p>${q.Frage || "Keine Frage vorhanden"}</p>
-        `;
-        container.appendChild(quizDiv);
-      });
-    }
-
-    async function initQuiz() {
-      const wixUserId = getWixUserId();
-      if (!wixUserId) {
-        alert("Bitte melde dich an, um das Quiz zu spielen.");
-        return;
-      }
-      await ensureUserInSupabase(wixUserId);
-      const userStats = await fetchSupabaseData("user_stats");
-      if (userStats.length > 0) {
-        const user = userStats[0];
-        xp = user.total_xp || 0;
-        totalCoins = user.total_coins || 0;
-        streak = user.streak || 0;
-      }
-      alreadyAnsweredQuestionIds = await fetchAlreadyAnsweredQuestions(wixUserId);
-      document.getElementById("xpValue").innerText = xp;
-      document.getElementById("totalCoins").innerText = totalCoins;
-      loadQuestions(chapterId);
-    }
-
     function createQuestionSelection() {
       const selectionDiv = document.getElementById("questionSelection");
       selectionDiv.innerHTML = "";
