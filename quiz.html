@@ -211,7 +211,6 @@
       box-sizing: border-box;
       flex: 1;
     }
-    /* Buttons */
     button {
       background: #fff;
       color: #000;
@@ -234,7 +233,6 @@
     #nextBtn {
       display: none;
     }
-    /* "Weiter" Button => grün mit weißer Schrift */
     #nextBtn {
       margin-top: 10px;
       border-color: green;
@@ -248,7 +246,6 @@
     #repeatBtn {
       display: none;
     }
-    /* Spezielle Buttons für Open Questions */
     .open-approve {
       background-color: green !important;
       color: #fff !important;
@@ -267,7 +264,6 @@
       background-color: #990000 !important;
       color: #fff !important;
     }
-    /* Drag & Drop */
     .assignment-container {
       display: flex;
       flex-direction: column;
@@ -304,9 +300,6 @@
     .target-zone.hover {
       background-color: #eee;
     }
-    /********************************************
-     *  Halbkreis am Ende
-     ********************************************/
     #endScreen {
       display: none;
       text-align: center;
@@ -377,9 +370,6 @@
       margin-top: 10px;
       font-weight: bold;
     }
-    /***********************************************
-     *   Mobile Ansicht (XP/Münzen "über" dem Konstrukt)
-     ***********************************************/
     @media (max-width: 768px) {
       .content-row {
         flex-direction: column; 
@@ -402,9 +392,6 @@
         margin-top: 10px;
       }
     }
-    /***********************************************
-     *   Darkmode
-     ***********************************************/
     @media (prefers-color-scheme: dark) {
       body {
         background-color: #222;
@@ -446,9 +433,6 @@
         fill: #fff;
       }
     }
-    /***********************************************
-     *   R/F-Buttons nebeneinander
-     ***********************************************/
     .horizontal-buttons {
       display: flex;
       gap: 10px;
@@ -483,682 +467,841 @@
       display: flex;
       gap: 10px;
     }
+
+    /* ========== Neue Styles für den Authentifizierungsbereich ========== */
+    #authContainer {
+      margin: 20px auto;
+      max-width: 600px;
+      padding: 20px;
+      border: 2px solid #000;
+      border-radius: 5px;
+      background-color: #f7f7f7;
+      font-family: Cambria;
+    }
+    #authContainer h2 {
+      margin-top: 0;
+      text-align: center;
+      font-family: Cambria;
+    }
+    #authMessage {
+      color: red;
+      font-weight: bold;
+      text-align: center;
+      font-family: Cambria;
+    }
+    .auth-boxes {
+      display: flex;
+      flex-direction: row;
+      gap: 20px;
+      justify-content: space-around;
+      margin-top: 10px;
+      font-family: Cambria;
+    }
+    .auth-box {
+      flex: 1;
+      border: 1px solid #000;
+      border-radius: 5px;
+      padding: 10px;
+      background-color: #fff;
+      font-family: Cambria;
+    }
+    .auth-box h3 {
+      margin-top: 0;
+      text-align: center;
+      font-family: Cambria;
+    }
+    .auth-box input,
+    .auth-box select,
+    .auth-box button {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 8px;
+      box-sizing: border-box;
+      font-size: 14px;
+      font-family: Cambria;
+    }
   </style>
 </head>
 <body>
 
-<!-- Quiz-Container -->
-<div id="quiz-container">
-  <!-- HTML-Inhalt, z. B. Frageauswahl, Fragen, Antworten usw. -->
-  <div class="question-selection-row">
-    <div class="question-selection" id="questionSelection"></div>
-  </div>
-  <div class="content-row">
-    <div class="question-panel">
-      <div class="question-header">
-        <span class="question-number" id="progressInfo">Frage 1 von ?</span>
-        <div class="progress-bar-container">
-          <div class="progress-bar" id="progress-bar"></div>
-        </div>
-      </div>
-      <h2 id="questionText">Quiz wird geladen...</h2>
-      <div id="explanationContainer">
-        <p id="explanationText"></p>
-        <button id="approveBtn" class="open-approve">Als richtig werten</button>
-        <button id="rejectBtn" class="open-reject">Als falsch werten</button>
-        <button id="nextBtn">Weiter →</button>
-      </div>
+<!-- =================== Authentifizierungsbereich =================== -->
+<div id="authContainer">
+  <h2>Registrierung / Login für das Quiz</h2>
+  <p style="text-align:center;">
+    Für die Nutzung der Quizfunktion bei RieckerRep ist eine einmalige eigenständige Anmeldung erforderlich.<br></p> 
+    <p style= "text-align:center;">
+    Wähle auch deine Universität aus, um Punkte für deine Uni zu sammeln und im Leaderboard aufzusteigen!
+  </p>
+
+  <div class="auth-boxes">
+    <!-- Registrierungsbox -->
+    <div class="auth-box" id="registerBox">
+      <h3>Registrieren</h3>
+      <input type="text" id="regUsernameInput" placeholder="Benutzername (Pflicht)">
+      <input type="email" id="regEmailInput" placeholder="E-Mail (Pflicht)">
+      <input type="password" id="regPasswordInput" placeholder="Passwort (Pflicht)">
+      <select id="regUniversitySelect">
+        <option value="">Hochschule auswählen (Pflicht)</option>
+        <option value="Universität Augsburg">Universität Augsburg</option>
+        <option value="Universität Bayreuth">Universität Bayreuth</option>
+        <option value="Freie Universität Berlin">Freie Universität Berlin</option>
+        <option value="Humboldt-Universität zu Berlin">Humboldt-Universität zu Berlin</option>
+        <option value="Ruhr-Universität Bochum">Ruhr-Universität Bochum</option>
+        <option value="Rheinische Friedrich-Wilhelms-Universität Bonn">Rheinische Friedrich-Wilhelms-Universität Bonn</option>
+        <option value="Universität Bremen">Universität Bremen</option>
+        <option value="Heinrich-Heine-Universität Düsseldorf">Heinrich-Heine-Universität Düsseldorf</option>
+        <option value="Friedrich-Alexander-Universität Erlangen-Nürnberg">Friedrich-Alexander-Universität Erlangen-Nürnberg</option>
+        <option value="Johann-Wolfgang-Goethe-Universität Frankfurt am Main">Johann-Wolfgang-Goethe-Universität Frankfurt am Main</option>
+        <option value="Europa-Universität Viadrina Frankfurt (Oder)">Europa-Universität Viadrina Frankfurt (Oder)</option>
+        <option value="Albert-Ludwigs-Universität Freiburg">Albert-Ludwigs-Universität Freiburg</option>
+        <option value="Justus-Liebig-Universität Gießen">Justus-Liebig-Universität Gießen</option>
+        <option value="Georg-August-Universität Göttingen">Georg-August-Universität Göttingen</option>
+        <option value="Universität Greifswald">Universität Greifswald</option>
+        <option value="FernUniversität in Hagen">FernUniversität in Hagen</option>
+        <option value="Martin-Luther-Universität Halle-Wittenberg">Martin-Luther-Universität Halle-Wittenberg</option>
+        <option value="Universität Hamburg">Universität Hamburg</option>
+        <option value="Bucerius Law School (Privatuniversität)">Bucerius Law School (Privatuniversität)</option>
+        <option value="Gottfried Wilhelm Leibniz Universität Hannover">Gottfried Wilhelm Leibniz Universität Hannover</option>
+        <option value="Ruprecht-Karls-Universität Heidelberg">Ruprecht-Karls-Universität Heidelberg</option>
+        <option value="Friedrich-Schiller-Universität Jena">Friedrich-Schiller-Universität Jena</option>
+        <option value="Christian-Albrechts-Universität zu Kiel">Christian-Albrechts-Universität zu Kiel</option>
+        <option value="Universität Leipzig">Universität Leipzig</option>
+        <option value="Universität zu Köln">Universität zu Köln</option>
+        <option value="Universität Konstanz">Universität Konstanz</option>
+        <option value="Universität Mannheim">Universität Mannheim</option>
+        <option value="Westfälische Wilhelms-Universität Münster">Westfälische Wilhelms-Universität Münster</option>
+        <option value="Ludwig-Maximilians-Universität München">Ludwig-Maximilians-Universität München</option>
+        <option value="Universität Passau">Universität Passau</option>
+        <option value="Universität Potsdam">Universität Potsdam</option>
+        <option value="Universität des Saarlandes">Universität des Saarlandes</option>
+        <option value="Eberhard Karls Universität Tübingen">Eberhard Karls Universität Tübingen</option>
+        <option value="Universität Würzburg">Universität Würzburg</option>
+        <option value="Johannes Gutenberg-Universität Mainz">Johannes Gutenberg-Universität Mainz</option>
+        <option value="Philipps-Universität Marburg">Philipps-Universität Marburg</option>
+        <option value="Leuphana Universität Lüneburg">Leuphana Universität Lüneburg</option>
+        <option value="Carl von Ossietzky Universität Oldenburg">Carl von Ossietzky Universität Oldenburg</option>
+        <option value="Technische Universität Berlin">Technische Universität Berlin</option>
+        <option value="Technische Universität Braunschweig">Technische Universität Braunschweig</option>
+        <option value="Technische Universität Dortmund">Technische Universität Dortmund</option>
+        <option value="Technische Universität Dresden">Technische Universität Dresden</option>
+        <option value="Technische Universität Kaiserslautern">Technische Universität Kaiserslautern</option>
+        <option value="Technische Universität München">Technische Universität München</option>
+        <option value="Karlsruher Institut für Technologie (KIT)">Karlsruher Institut für Technologie (KIT)</option>
+        <option value="Hochschule für Wirtschaft und Recht (Privatuniversität)">Hochschule für Wirtschaft und Recht (Privatuniversität)</option>
+        <option value="Andere / Sonstige">Andere / Sonstige</option>
+      </select>
+      <button id="registerBtn">Registrieren</button>
     </div>
-    <div class="answer-panel">
-      <div class="answer-top-row">
-        <div class="xp-box" id="xpBox">
-          <span id="xpValue">0</span>
-          <svg class="xp-icon" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2l2.92 5.92L21 9.24l-4.58 4.47L17.84 21 12 17.77 6.16 21l1.42-7.29L3 9.24l6.08-1.32L12 2z"/>
-          </svg>
+
+    <!-- Loginbox -->
+    <div class="auth-box" id="loginBox">
+      <h3>Anmelden</h3>
+      <input type="email" id="loginEmailInput" placeholder="E-Mail (Pflicht)">
+      <input type="password" id="loginPasswordInput" placeholder="Passwort (Pflicht)">
+      <button id="loginBtn">Anmelden</button>
+    </div>
+  </div>
+
+  <p id="authMessage"></p>
+</div>
+
+<!-- =================== Quiz-Bereich =================== -->
+<div id="quizContainer" style="display:none;">
+  <div id="quiz-container">
+    <div class="question-selection-row">
+      <div class="question-selection" id="questionSelection"></div>
+    </div>
+    <div class="content-row">
+      <div class="question-panel">
+        <div class="question-header">
+          <span class="question-number" id="progressInfo">Frage 1 von ?</span>
+          <div class="progress-bar-container">
+            <div class="progress-bar" id="progress-bar"></div>
+          </div>
         </div>
-        <div class="coin-row">
-          <div class="coin-box">Gesamt: <span id="totalCoins">100</span> 🪙</div>
-          <div class="coin-box">Runde: <span id="roundCoins">0</span> 🪙</div>
+        <h2 id="questionText">Quiz wird geladen...</h2>
+        <div id="explanationContainer">
+          <p id="explanationText"></p>
+          <button id="approveBtn" class="open-approve">Als richtig werten</button>
+          <button id="rejectBtn" class="open-reject">Als falsch werten</button>
+          <button id="nextBtn">Weiter →</button>
         </div>
       </div>
-      <div id="options"></div>
-      <button id="repeatBtn">🔄 Wiederholen</button>
-      <div id="endScreen">
-        <img src="https://lqoulygftdjbnfxkrihy.supabase.co/storage/v1/object/public/quiz-assets/waage.svg" alt="justice" class="justice-icon">
-        <div class="circular-progress">
-          <svg viewBox="0 0 36 36">
-            <path class="circle-bg" d="M2 18 a 16 16 0 0 1 32 0"/>
-            <path id="circleBar" class="circle" stroke-dasharray="0, 50.265" d="M2 18 a 16 16 0 0 1 32 0"/>
-            <text x="18" y="18" id="xpText" class="percentage" text-anchor="middle">0 / 0 XP</text>
-          </svg>
+      <div class="answer-panel">
+        <div class="answer-top-row">
+          <div class="xp-box" id="xpBox">
+            <span id="xpValue">0</span>
+            <svg class="xp-icon" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2l2.92 5.92L21 9.24l-4.58 4.47L17.84 21 12 17.77 6.16 21l1.42-7.29L3 9.24l6.08-1.32L12 2z"/>
+            </svg>
+          </div>
+          <div class="coin-row">
+            <div class="coin-box">Gesamt: <span id="totalCoins">100</span> 🪙</div>
+            <div class="coin-box">Runde: <span id="roundCoins">0</span> 🪙</div>
+          </div>
         </div>
-        <h2 id="endTitle">Quiz beendet!</h2>
-        <p id="endMessage">Ein Schritt näher an deinem Erfolg im Jurastudium!</p>
-        <p id="coinBalance"></p>
-        <p id="medalInfo"></p>
-        <button id="continueBtn">🔄 Wiederholen</button>
+        <div id="options"></div>
+        <button id="repeatBtn">🔄 Wiederholen</button>
+        <div id="endScreen">
+          <img src="https://lqoulygftdjbnfxkrihy.supabase.co/storage/v1/object/public/quiz-assets/waage.svg" alt="justice" class="justice-icon">
+          <div class="circular-progress">
+            <svg viewBox="0 0 36 36">
+              <path class="circle-bg" d="M2 18 a 16 16 0 0 1 32 0"/>
+              <path id="circleBar" class="circle" stroke-dasharray="0, 50.265" d="M2 18 a 16 16 0 0 1 32 0"/>
+              <text x="18" y="18" id="xpText" class="percentage" text-anchor="middle">0 / 0 XP</text>
+            </svg>
+          </div>
+          <h2 id="endTitle">Quiz beendet!</h2>
+          <p id="endMessage">Ein Schritt näher an deinem Erfolg im Jurastudium!</p>
+          <p id="coinBalance"></p>
+          <p id="medalInfo"></p>
+          <button id="continueBtn">🔄 Wiederholen</button>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-  // --- Empfange per postMessage die Wix-User-ID vom Parent ---
-  window.addEventListener('message', (event) => {
-    console.log("Nachricht im Iframe empfangen:", event);
-    if (event.data && event.data.wixUserId) {
-      window.wixUserId = event.data.wixUserId;
-      console.log("Wix-Benutzer-ID gesetzt:", window.wixUserId);
-    }
-  });
-
-  // Supabase-Konfiguration (dein API-Key wird hier verwendet)
+  /*********************************************************
+   *   Supabase-Konfiguration
+   *********************************************************/
   const SUPABASE_URL = 'https://lqoulygftdjbnfxkrihy.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxxb3VseWdmdGRqYm5meGtyaWh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk0NzUzMDAsImV4cCI6MjA1NTA1MTMwMH0.VInK_7i6zY_f5zjHSR0U93Ut0L7ku_Q0C9xS-u4Lols';
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  (function() {
-    // Variablen
-    let questions = [];
-    let currentIndex = 0;
-    let totalCoins = 100;
-    let roundCoins = 0;
-    let xp = 0;
-    let xpGoal = 0;
-    let streak = 0;
-    let answeredCorrectly = [];
-    let alreadyAnsweredQuestionIds = [];
-    const halfCircleCircumference = 50.265;
+  const authContainer = document.getElementById("authContainer");
+  const quizContainer = document.getElementById("quizContainer");
+  const authMessage = document.getElementById("authMessage");
 
-    // Hilfsfunktion, um auf die Wix-User-ID zu warten (bis zu 3 Sekunden)
-    async function waitForWixUserId(timeout = 3000) {
-      const interval = 100;
-      let waited = 0;
-      while (!window.wixUserId && waited < timeout) {
-        await new Promise(resolve => setTimeout(resolve, interval));
-        waited += interval;
-      }
-      return window.wixUserId;
+  // Registrieren
+  document.getElementById("registerBtn").addEventListener("click", async () => {
+    const username = document.getElementById("regUsernameInput").value.trim();
+    const email = document.getElementById("regEmailInput").value.trim();
+    const password = document.getElementById("regPasswordInput").value.trim();
+    const university = document.getElementById("regUniversitySelect").value;
+
+    // Pflichtfelder prüfen
+    if (!username) {
+      authMessage.innerText = "Bitte einen Benutzernamen eingeben!";
+      return;
+    }
+    if (!email) {
+      authMessage.innerText = "Bitte eine E-Mail eingeben!";
+      return;
+    }
+    if (!password) {
+      authMessage.innerText = "Bitte ein Passwort eingeben!";
+      return;
+    }
+    if (!university) {
+      authMessage.innerText = "Bitte eine Hochschule auswählen!";
+      return;
     }
 
-    // Supabase-Funktionen
-    async function fetchSupabaseData(table) {
-      const { data, error } = await supabaseClient.from(table).select('*');
-      if (error) {
-        console.error('Fehler beim Abrufen der Daten:', error);
-        return [];
-      }
-      return data;
+    const { data, error } = await supabaseClient.auth.signUp({ email, password });
+    if (error) {
+      authMessage.innerText = "Registrierung fehlgeschlagen: " + error.message;
+      console.error("Registrierungs-Error:", error);
+    } else {
+      authMessage.innerText = "Registrierung erfolgreich!";
+      // Speichere den Benutzernamen und die Uni in "profiles"
+      await saveUserProfile(data.user.id, username, university);
+      startQuiz(data.user.id);
+    }
+  });
+
+  // Login
+  document.getElementById("loginBtn").addEventListener("click", async () => {
+    const email = document.getElementById("loginEmailInput").value.trim();
+    const password = document.getElementById("loginPasswordInput").value.trim();
+
+    if (!email || !password) {
+      authMessage.innerText = "Bitte E-Mail und Passwort eingeben!";
+      return;
     }
 
-    async function ensureUserInSupabase(userId) {
-      const { data, error } = await supabaseClient.from('user_stats')
-        .select('*')
-        .eq('user_id', userId)
-        .single();
-      if (error && error.code === 'PGRST116') {
-        const { data: insertData, error: insertError } = await supabaseClient.from('user_stats')
-          .insert([{ user_id: userId, total_xp: 0, total_coins: 100, streak: 0, level: 1 }]);
-        if (insertError) {
-          console.error('Fehler beim Anlegen des Benutzers:', insertError);
-        } else {
-          console.log('Benutzer angelegt:', insertData);
-        }
-      } else if (error) {
-        console.error('Fehler bei der Benutzerprüfung:', error);
-      }
+    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    if (error) {
+      authMessage.innerText = "Login fehlgeschlagen: " + error.message;
+      console.error("Login-Error:", error);
+    } else {
+      authMessage.innerText = "Login erfolgreich!";
+      startQuiz(data.user.id);
     }
+  });
 
-    async function updateUserStatsInSupabase(userId, newXP, newCoins, newStreak) {
-      const { data, error } = await supabaseClient.from('user_stats')
-        .update({ total_xp: newXP, total_coins: newCoins, streak: newStreak })
-        .eq('user_id', userId);
-      if (error) {
-        console.error('Fehler beim Update der Stats:', error);
-      } else {
-        console.log('Stats aktualisiert:', data);
-      }
+  // Speichert Benutzernamen und Uni in "profiles"
+  async function saveUserProfile(userId, username, university) {
+    if (!userId) return;
+    const { data, error } = await supabaseClient
+      .from('profiles')
+      .insert([{ id: userId, username: username, university: university }]);
+    if (error) {
+      console.error("Fehler beim Speichern des Profils:", error);
+    } else {
+      console.log("Profil gespeichert:", data);
     }
+  }
 
-    async function markQuestionAsAnsweredInSupabase(userId, questionId) {
-      const { data, error } = await supabaseClient.from('answered_questions')
-        .insert([{ user_id: userId, question_id: questionId, is_correct: true }]);
-      if (error) {
-        console.error('Fehler beim Eintragen der beantworteten Frage:', error);
-      } else {
-        console.log('Frage als beantwortet markiert:', data);
-      }
+  // Quiz starten => Auth-Bereich ausblenden
+  function startQuiz(userId) {
+    console.log("Starte Quiz für User:", userId);
+    authContainer.style.display = "none";
+    quizContainer.style.display = "block";
+    initQuizWithSupabaseUser(userId);
+  }
+
+  // -------------- Quiz-Code --------------
+  let questions = [];
+  let currentIndex = 0;
+  let totalCoins = 100;
+  let roundCoins = 0;
+  let xp = 0;
+  let xpGoal = 0;
+  let streak = 0;
+  let answeredCorrectly = [];
+  let alreadyAnsweredQuestionIds = [];
+  const halfCircleCircumference = 50.265;
+
+  // Wir speichern hier die Supabase User-ID
+  let supabaseUserId = null;
+
+  // Ersetzt getWixUserId durch supabaseUserId
+  function getWixUserId() {
+    return supabaseUserId;
+  }
+
+  async function initQuizWithSupabaseUser(userId) {
+    supabaseUserId = userId; 
+    await ensureUserInSupabase(supabaseUserId);
+    const userStats = await fetchSupabaseData("user_stats");
+    if (userStats.length > 0) {
+      const user = userStats[0];
+      xp = user.total_xp || 0;
+      totalCoins = user.total_coins || 0;
+      streak = user.streak || 0;
     }
+    document.getElementById("xpValue").innerText = xp;
+    document.getElementById("totalCoins").innerText = totalCoins;
 
-    async function fetchAlreadyAnsweredQuestions(userId) {
-      const { data, error } = await supabaseClient.from('answered_questions')
-        .select('question_id')
-        .eq('user_id', userId);
-      if (error) {
-        console.error('Fehler beim Abrufen der beantworteten Fragen:', error);
-        return [];
-      }
-      return data.map(d => d.question_id);
-    }
-
-    async function handleStreak(userId, totalCorrect) {
-      if (totalCorrect > 0) {
-        streak++;
-        console.log("Streak erhöht auf", streak);
-        await updateUserStatsInSupabase(userId, xp, totalCoins, streak);
-      }
-    }
-
-    // Neue getWixUserId-Funktion, die die per postMessage empfangene ID zurückgibt
-    function getWixUserId() {
-      return window.wixUserId || null;
-    }
-
-    // Hier lesen wir die Chapter-ID aus der URL (z.B. ?chapterId=2)
+    // Lese chapterId aus der URL (Standard "1", falls nicht gesetzt)
     const urlParams = new URLSearchParams(window.location.search);
-    const chapterId = urlParams.get('chapterId') || prompt("Bitte gib die Chapter-ID ein:", "1");
+    const chapterId = urlParams.get('chapterId') || "1";
+    loadQuestions(chapterId);
+  }
 
-    document.addEventListener("DOMContentLoaded", async () => {
-      await initQuiz();
-    });
-
-    async function initQuiz() {
-      // Warten, bis die Wix-User-ID empfangen wurde
-      const wixUserId = await waitForWixUserId();
-      console.log("initQuiz: Gefundene Wix-User-ID =", wixUserId);
-      if (!wixUserId) {
-        alert("Bitte melde dich an, um das Quiz zu spielen.");
-        return;
-      }
-      await ensureUserInSupabase(wixUserId);
-      const userStats = await fetchSupabaseData("user_stats");
-      if (userStats.length > 0) {
-        const user = userStats[0];
-        xp = user.total_xp || 0;
-        totalCoins = user.total_coins || 0;
-        streak = user.streak || 0;
-      }
-      alreadyAnsweredQuestionIds = await fetchAlreadyAnsweredQuestions(wixUserId);
-      document.getElementById("xpValue").innerText = xp;
-      document.getElementById("totalCoins").innerText = totalCoins;
-      loadQuestions(chapterId);
+  // Automatisch eingeloggt bleiben, falls Session existiert
+  document.addEventListener("DOMContentLoaded", async () => {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (session) {
+      // User hat noch eine gültige Session
+      console.log("Bestehende Session gefunden:", session);
+      authContainer.style.display = "none";
+      quizContainer.style.display = "block";
+      initQuizWithSupabaseUser(session.user.id);
+    } else {
+      // Keine Session => Zeige Auth-Bereich
+      authContainer.style.display = "block";
     }
+  });
 
-    async function loadQuestions(chapterId) {
-      try {
-        // REST-Endpoint => filter: chapter_id=eq.{chapterId}
-        const url = `${SUPABASE_URL}/rest/v1/questions?chapter_id=eq.${chapterId}`;
-        const response = await fetch(url, {
-          method: 'GET',
-          headers: {
-            'apikey': SUPABASE_ANON_KEY,
-            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
-          }
-        });
-        if (!response.ok) {
-          throw new Error("Fehler: " + response.status);
-        }
-        let data = await response.json();
-        // data ist jetzt ein Array mit allen Fragen, deren chapter_id = chapterId
-        if (Array.isArray(data) && data.length > 0) {
-          questions = data;
-          xpGoal = data.length * 10;
-          createQuestionSelection();
-          showQuestion();
-        } else {
-          document.getElementById("questionText").innerText = "Keine Fragen für dieses Kapitel gefunden!";
-        }
-      } catch (err) {
-        document.getElementById("questionText").innerText = "Fehler beim Laden!";
-        console.error(err);
-      }
+  async function fetchSupabaseData(table) {
+    const { data, error } = await supabaseClient.from(table).select('*');
+    if (error) {
+      console.error('Fehler beim Abrufen der Daten:', error);
+      return [];
     }
-        
-    function createQuestionSelection() {
-      const selectionDiv = document.getElementById("questionSelection");
-      selectionDiv.innerHTML = "";
-      for (let i = 0; i < questions.length; i++) {
-        const item = document.createElement("div");
-        item.className = "question-select-item";
-        item.innerText = (i + 1);
-        item.onclick = () => {
-          currentIndex = i;
-          showQuestion();
-        };
-        selectionDiv.appendChild(item);
-      }
-    }
+    return data;
+  }
 
-    function showQuestion() {
-      const questionText = document.getElementById("questionText");
-      const options = document.getElementById("options");
-      const explanationContainer = document.getElementById("explanationContainer");
-      const endScreen = document.getElementById("endScreen");
-      const repeatBtn = document.getElementById("repeatBtn");
-
-      if (currentIndex >= questions.length) {
-        questionText.innerText = "Fertig!";
-        options.style.display = "none";
-        explanationContainer.style.display = "none";
-        repeatBtn.style.display = "none";
-        endScreen.style.display = "block";
-        updateEndScreen();
-        return;
-      }
-
-      options.style.display = "block";
-      endScreen.style.display = "none";
-      explanationContainer.style.display = "none";
-      document.getElementById("explanationText").innerText = "";
-      repeatBtn.style.display = "none";
-      document.getElementById("nextBtn").style.display = "none";
-      document.getElementById("approveBtn").style.display = "none";
-      document.getElementById("rejectBtn").style.display = "none";
-
-      const q = questions[currentIndex];
-      if (q.type === "lueckentext") {
-        questionText.innerText = "Fülle den Lückentext aus.";
-      } else if (q.type === "drag_drop") {
-        questionText.innerText = "Ordne die Begriffe richtig zu.";
+  async function ensureUserInSupabase(userId) {
+    const { data, error } = await supabaseClient.from('user_stats')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+    if (error && error.code === 'PGRST116') {
+      const { data: insertData, error: insertError } = await supabaseClient.from('user_stats')
+        .insert([{ user_id: userId, total_xp: 0, total_coins: 100, streak: 0, level: 1 }]);
+      if (insertError) {
+        console.error('Fehler beim Anlegen des Benutzers:', insertError);
       } else {
-        questionText.innerText = q.Frage || "Frage fehlt";
+        console.log('Benutzer angelegt:', insertData);
       }
+    } else if (error) {
+      console.error('Fehler bei der Benutzerprüfung:', error);
+    }
+  }
 
-      options.innerHTML = "";
-      updateProgressBar();
+  async function updateUserStatsInSupabase(userId, newXP, newCoins, newStreak) {
+    const { data, error } = await supabaseClient.from('user_stats')
+      .update({ total_xp: newXP, total_coins: newCoins, streak: newStreak })
+      .eq('user_id', userId);
+    if (error) {
+      console.error('Fehler beim Update der Stats:', error);
+    } else {
+      console.log('Stats aktualisiert:', data);
+    }
+  }
 
-      const type = q.type || "multiple_choice";
-      switch (type) {
-        case "multiple_choice":
-        case "drag_drop":
-          createStandardQuestion(q, type);
-          break;
-        case "lueckentext":
-          createLueckentext(q);
-          break;
-        case "true_false":
-          createTrueFalse(q);
-          break;
-        case "case":
-          createCase(q);
-          break;
-        case "open_question":
-          createOpenQuestion(q);
-          break;
-        default:
-          createStandardQuestion(q, "multiple_choice");
-          break;
+  async function markQuestionAsAnsweredInSupabase(userId, questionId) {
+    const { data, error } = await supabaseClient.from('answered_questions')
+      .insert([{ user_id: userId, question_id: questionId, is_correct: true }]);
+    if (error) {
+      console.error('Fehler beim Eintragen der beantworteten Frage:', error);
+    } else {
+      console.log('Frage als beantwortet markiert:', data);
+    }
+  }
+
+  async function fetchAlreadyAnsweredQuestions(userId) {
+    const { data, error } = await supabaseClient.from('answered_questions')
+      .select('question_id')
+      .eq('user_id', userId);
+    if (error) {
+      console.error('Fehler beim Abrufen der beantworteten Fragen:', error);
+      return [];
+    }
+    return data.map(d => d.question_id);
+  }
+
+  async function handleStreak(userId, totalCorrect) {
+    if (totalCorrect > 0) {
+      streak++;
+      console.log("Streak erhöht auf", streak);
+      await updateUserStatsInSupabase(userId, xp, totalCoins, streak);
+    }
+  }
+
+  async function loadQuestions(chapterId) {
+    try {
+      const url = `${SUPABASE_URL}/rest/v1/questions?chapter_id=eq.${chapterId}`;
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+        }
+      });
+      if (!response.ok) {
+        throw new Error("Fehler: " + response.status);
       }
+      let data = await response.json();
+      if (Array.isArray(data) && data.length > 0) {
+        questions = data;
+        xpGoal = data.length * 10;
+        createQuestionSelection();
+        showQuestion();
+      } else {
+        document.getElementById("questionText").innerText = "Keine Fragen für dieses Kapitel gefunden!";
+      }
+    } catch (err) {
+      document.getElementById("questionText").innerText = "Fehler beim Laden!";
+      console.error(err);
+    }
+  }
+
+  function createQuestionSelection() {
+    const selectionDiv = document.getElementById("questionSelection");
+    selectionDiv.innerHTML = "";
+    for (let i = 0; i < questions.length; i++) {
+      const item = document.createElement("div");
+      item.className = "question-select-item";
+      item.innerText = (i + 1);
+      item.onclick = () => {
+        currentIndex = i;
+        showQuestion();
+      };
+      selectionDiv.appendChild(item);
+    }
+  }
+
+  function showQuestion() {
+    const questionText = document.getElementById("questionText");
+    const options = document.getElementById("options");
+    const explanationContainer = document.getElementById("explanationContainer");
+    const endScreen = document.getElementById("endScreen");
+    const repeatBtn = document.getElementById("repeatBtn");
+
+    if (currentIndex >= questions.length) {
+      questionText.innerText = "Fertig!";
+      options.style.display = "none";
+      explanationContainer.style.display = "none";
+      repeatBtn.style.display = "none";
+      endScreen.style.display = "block";
+      updateEndScreen();
+      return;
     }
 
-    function createTrueFalse(q) {
-      const options = document.getElementById("options");
+    options.style.display = "block";
+    endScreen.style.display = "none";
+    explanationContainer.style.display = "none";
+    document.getElementById("explanationText").innerText = "";
+    repeatBtn.style.display = "none";
+    document.getElementById("nextBtn").style.display = "none";
+    document.getElementById("approveBtn").style.display = "none";
+    document.getElementById("rejectBtn").style.display = "none";
+
+    const q = questions[currentIndex];
+    if (q.type === "lueckentext") {
+      questionText.innerText = "Fülle den Lückentext aus.";
+    } else if (q.type === "drag_drop") {
+      questionText.innerText = "Ordne die Begriffe richtig zu.";
+    } else {
+      questionText.innerText = q.Frage || "Frage fehlt";
+    }
+
+    options.innerHTML = "";
+    updateProgressBar();
+
+    const type = q.type || "multiple_choice";
+    switch (type) {
+      case "multiple_choice":
+      case "drag_drop":
+        createStandardQuestion(q, type);
+        break;
+      case "lueckentext":
+        createLueckentext(q);
+        break;
+      case "true_false":
+        createTrueFalse(q);
+        break;
+      case "case":
+        createCase(q);
+        break;
+      case "open_question":
+        createOpenQuestion(q);
+        break;
+      default:
+        createStandardQuestion(q, "multiple_choice");
+        break;
+    }
+  }
+
+  function createTrueFalse(q) {
+    const options = document.getElementById("options");
+    const row = document.createElement("div");
+    row.className = "horizontal-buttons";
+
+    const btnR = document.createElement("button");
+    btnR.innerText = "Richtig";
+    btnR.onclick = () => { checkAnswer("Richtig", q, false, "true_false"); };
+    const btnF = document.createElement("button");
+    btnF.innerText = "Falsch";
+    btnF.onclick = () => { checkAnswer("Falsch", q, false, "true_false"); };
+
+    row.appendChild(btnR);
+    row.appendChild(btnF);
+    options.appendChild(row);
+  }
+
+  function createCase(q) {
+    const options = document.getElementById("options");
+    let subQuestions = q.subQuestions || [];
+
+    if (!Array.isArray(subQuestions) || subQuestions.length === 0) {
       const row = document.createElement("div");
       row.className = "horizontal-buttons";
 
       const btnR = document.createElement("button");
       btnR.innerText = "Richtig";
-      btnR.onclick = () => { checkAnswer("Richtig", q, false, "true_false"); };
+      btnR.onclick = () => { checkAnswer("Richtig", q, false, "case"); };
       const btnF = document.createElement("button");
       btnF.innerText = "Falsch";
-      btnF.onclick = () => { checkAnswer("Falsch", q, false, "true_false"); };
+      btnF.onclick = () => { checkAnswer("Falsch", q, false, "case"); };
 
       row.appendChild(btnR);
       row.appendChild(btnF);
       options.appendChild(row);
+      return;
     }
 
-    function createCase(q) {
+    async function createDragDropQuestion(q) {
       const options = document.getElementById("options");
-      let subQuestions = q.subQuestions || [];
+      options.innerHTML = "";
 
-      if (!Array.isArray(subQuestions) || subQuestions.length === 0) {
-        const row = document.createElement("div");
-        row.className = "horizontal-buttons";
+      let { data, error } = await supabaseClient
+        .from('dragdrop_pairs')
+        .select('*')
+        .eq('group_id', q.id);
 
-        const btnR = document.createElement("button");
-        btnR.innerText = "Richtig";
-        btnR.onclick = () => { checkAnswer("Richtig", q, false, "case"); };
-        const btnF = document.createElement("button");
-        btnF.innerText = "Falsch";
-        btnF.onclick = () => { checkAnswer("Falsch", q, false, "case"); };
-
-        row.appendChild(btnR);
-        row.appendChild(btnF);
-        options.appendChild(row);
+      if (error) {
+        console.error("Fehler beim Laden der Drag & Drop Daten:", error);
+        options.innerHTML = "<p>Fehler beim Laden der Drag-&-Drop-Daten!</p>";
+        return;
+      }
+      if (!data || data.length === 0) {
+        options.innerHTML = "<p>Keine Drag & Drop-Daten vorhanden!</p>";
         return;
       }
 
-      async function createDragDropQuestion(q) {
-        const options = document.getElementById("options");
-        options.innerHTML = "";
+      const assignment = document.createElement("div");
+      assignment.className = "assignment-container";
 
-        let { data, error } = await supabaseClient
-          .from('dragdrop_pairs')
-          .select('*')
-          .eq('group_id', q.id);
+      data.forEach((itemObj, index) => {
+        const pair = document.createElement("div");
+        pair.className = "assignment-pair";
 
-        if (error) {
-          console.error("Fehler beim Laden der Drag & Drop Daten:", error);
-          options.innerHTML = "<p>Fehler beim Laden der Drag-&-Drop-Daten!</p>";
-          return;
-        }
-        if (!data || data.length === 0) {
-          options.innerHTML = "<p>Keine Drag & Drop-Daten vorhanden!</p>";
-          return;
-        }
-
-        const assignment = document.createElement("div");
-        assignment.className = "assignment-container";
-
-        data.forEach((itemObj, index) => {
-          const pair = document.createElement("div");
-          pair.className = "assignment-pair";
-
-          const item = document.createElement("div");
-          item.className = "draggable-item";
-          item.innerText = itemObj.drag_text;
-          item.id = `draggable-${itemObj.id}`;
-          item.draggable = true;
-          item.addEventListener("dragstart", ev => {
-            ev.dataTransfer.setData("text", item.id);
-            ev.dataTransfer.effectAllowed = "move";
-          });
-
-          const target = document.createElement("div");
-          target.className = "target-zone";
-          target.dataset.correct = itemObj.correct_match;
-
-          target.addEventListener("dragover", ev => {
-            ev.preventDefault();
-            target.classList.add("hover");
-            ev.dataTransfer.dropEffect = "move";
-          });
-          target.addEventListener("dragleave", () => {
-            target.classList.remove("hover");
-          });
-          target.addEventListener("drop", ev => {
-            ev.preventDefault();
-            target.classList.remove("hover");
-            const sourceId = ev.dataTransfer.getData("text");
-            const source = document.getElementById(sourceId);
-            if (source) {
-              target.innerText = source.innerText;
-              if (source.innerText === target.dataset.correct) {
-                target.style.backgroundColor = "#a4f9a4";
-              } else {
-                target.style.backgroundColor = "#f9a4a4";
-              }
-              source.style.visibility = "hidden";
-            }
-          });
-
-          pair.appendChild(item);
-          pair.appendChild(target);
-          assignment.appendChild(pair);
+        const item = document.createElement("div");
+        item.className = "draggable-item";
+        item.innerText = itemObj.drag_text;
+        item.id = `draggable-${itemObj.id}`;
+        item.draggable = true;
+        item.addEventListener("dragstart", ev => {
+          ev.dataTransfer.setData("text", item.id);
+          ev.dataTransfer.effectAllowed = "move";
         });
 
-        options.appendChild(assignment);
+        const target = document.createElement("div");
+        target.className = "target-zone";
+        target.dataset.correct = itemObj.correct_match;
 
-        const checkBtn = document.createElement("button");
-        checkBtn.innerText = "Antwort prüfen";
-        checkBtn.onclick = () => {
-          const targetZones = Array.from(assignment.querySelectorAll(".target-zone"));
-          let correctCount = 0;
-          targetZones.forEach(tz => {
-            if (tz.innerText === tz.dataset.correct) {
-              correctCount++;
+        target.addEventListener("dragover", ev => {
+          ev.preventDefault();
+          target.classList.add("hover");
+          ev.dataTransfer.dropEffect = "move";
+        });
+        target.addEventListener("dragleave", () => {
+          target.classList.remove("hover");
+        });
+        target.addEventListener("drop", ev => {
+          ev.preventDefault();
+          target.classList.remove("hover");
+          const sourceId = ev.dataTransfer.getData("text");
+          const source = document.getElementById(sourceId);
+          if (source) {
+            target.innerText = source.innerText;
+            if (source.innerText === target.dataset.correct) {
+              target.style.backgroundColor = "#a4f9a4";
+            } else {
+              target.style.backgroundColor = "#f9a4a4";
             }
-          });
-          const isCorrect = (correctCount === targetZones.length);
-          checkAnswer(isCorrect ? "Richtig" : "Falsch", q, false, "drag_drop");
-        };
-        options.appendChild(checkBtn);
-      }
+            source.style.visibility = "hidden";
+          }
+        });
 
-      const userAnswers = new Array(subQuestions.length).fill(null);
-      subQuestions.forEach((sq, index) => {
-        const container = document.createElement("div");
-        container.className = "case-subquestion-container";
-
-        const sqText = document.createElement("div");
-        sqText.className = "case-subquestion-text";
-        sqText.innerText = sq.text || `Teilfrage ${index + 1}`;
-        container.appendChild(sqText);
-
-        const btnRow = document.createElement("div");
-        btnRow.className = "case-subquestion-buttons";
-
-        const rBtn = document.createElement("button");
-        rBtn.innerText = "Richtig";
-        rBtn.onclick = () => { userAnswers[index] = "Richtig"; };
-
-        const fBtn = document.createElement("button");
-        fBtn.innerText = "Falsch";
-        fBtn.onclick = () => { userAnswers[index] = "Falsch"; };
-
-        btnRow.appendChild(rBtn);
-        btnRow.appendChild(fBtn);
-        container.appendChild(btnRow);
-        options.appendChild(container);
+        pair.appendChild(item);
+        pair.appendChild(target);
+        assignment.appendChild(pair);
       });
+
+      options.appendChild(assignment);
 
       const checkBtn = document.createElement("button");
       checkBtn.innerText = "Antwort prüfen";
       checkBtn.onclick = () => {
-        const allAnswered = userAnswers.every(a => a !== null);
-        if (!allAnswered) {
-          alert("Bitte alle Teilfragen beantworten!");
-          return;
-        }
-        let isAllCorrect = true;
-        for (let i = 0; i < subQuestions.length; i++) {
-          if (subQuestions[i].correctAnswer && userAnswers[i] !== subQuestions[i].correctAnswer) {
-            isAllCorrect = false;
-            break;
+        const targetZones = Array.from(assignment.querySelectorAll(".target-zone"));
+        let correctCount = 0;
+        targetZones.forEach(tz => {
+          if (tz.innerText === tz.dataset.correct) {
+            correctCount++;
           }
-        }
-        checkAnswer(isAllCorrect ? "Richtig" : "Falsch", q, false, "case");
+        });
+        const isCorrect = (correctCount === targetZones.length);
+        checkAnswer(isCorrect ? "Richtig" : "Falsch", q, false, "drag_drop");
       };
       options.appendChild(checkBtn);
     }
 
-    function createStandardQuestion(q, type) {
-      const options = document.getElementById("options");
-      switch (type) {
-        case "multiple_choice":
-          ["Antwort A", "Antwort B", "Antwort C", "Antwort D"].forEach(key => {
-            if (q[key] && q[key].trim() !== "") {
-              const btn = document.createElement("button");
-              btn.innerText = q[key];
-              btn.onclick = () => { checkAnswer(q[key], q, false, "multiple_choice"); };
-              options.appendChild(btn);
-            }
-          });
-          break;
-        case "drag_drop": {
-          createDragDropQuestion(q);
-          break;
-        }
-      }
-    }
+    const userAnswers = new Array(subQuestions.length).fill(null);
+    subQuestions.forEach((sq, index) => {
+      const container = document.createElement("div");
+      container.className = "case-subquestion-container";
 
-    function createLueckentext(q) {
-      const options = document.getElementById("options");
-      const questionLabel = document.createElement("div");
-      questionLabel.style.fontWeight = "bold";
-      questionLabel.style.marginBottom = "5px";
-      questionLabel.innerText = q.Frage || "Lückentext-Frage?";
-      options.appendChild(questionLabel);
+      const sqText = document.createElement("div");
+      sqText.className = "case-subquestion-text";
+      sqText.innerText = sq.text || `Teilfrage ${index + 1}`;
+      container.appendChild(sqText);
 
-      const input = document.createElement("input");
-      input.type = "text";
-      input.placeholder = "Fehlendes Wort...";
-      options.appendChild(input);
+      const btnRow = document.createElement("div");
+      btnRow.className = "case-subquestion-buttons";
 
-      const btnL = document.createElement("button");
-      btnL.innerText = "Antwort prüfen";
-      btnL.onclick = () => { checkAnswer(input.value.trim(), q, false, "lueckentext"); };
-      options.appendChild(btnL);
-    }
+      const rBtn = document.createElement("button");
+      rBtn.innerText = "Richtig";
+      rBtn.onclick = () => { userAnswers[index] = "Richtig"; };
 
-    function createOpenQuestion(q) {
-      const options = document.getElementById("options");
-      const txt = document.createElement("textarea");
-      txt.classList.add("open-question-textarea");
-      txt.placeholder = "Gebe hier deine Antwort ein...";
-      options.appendChild(txt);
+      const fBtn = document.createElement("button");
+      fBtn.innerText = "Falsch";
+      fBtn.onclick = () => { userAnswers[index] = "Falsch"; };
 
-      const checkBtn = document.createElement("button");
-      checkBtn.innerText = "Antwort überprüfen";
-      checkBtn.onclick = () => { checkAnswer(txt.value.trim(), q, true, "open_question"); };
-      options.appendChild(checkBtn);
+      btnRow.appendChild(rBtn);
+      btnRow.appendChild(fBtn);
+      container.appendChild(btnRow);
+      options.appendChild(container);
+    });
 
-      txt.addEventListener("keydown", (ev) => {
-        if ((ev.ctrlKey || ev.metaKey) && ev.key === "Enter") {
-          ev.preventDefault();
-          checkBtn.click();
-        }
-      });
-    }
-
-    function shuffleArray(array) {
-      for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-      }
-    }
-
-    // checkAnswer-Funktion
-    function checkAnswer(userAnswer, question, userCanSelfAccept, type) {
-      const explanationContainer = document.getElementById("explanationContainer");
-      const explanationText = document.getElementById("explanationText");
-      const approveBtn = document.getElementById("approveBtn");
-      const rejectBtn = document.getElementById("rejectBtn");
-      const nextBtn = document.getElementById("nextBtn");
-
-      if (explanationContainer.style.display === "block") {
+    const checkBtn = document.createElement("button");
+    checkBtn.innerText = "Antwort prüfen";
+    checkBtn.onclick = () => {
+      const allAnswered = userAnswers.every(a => a !== null);
+      if (!allAnswered) {
+        alert("Bitte alle Teilfragen beantworten!");
         return;
       }
-
-      explanationContainer.style.display = "block";
-      explanationText.innerHTML = "";
-
-      if (type === "open_question") {
-        nextBtn.style.display = "none";
-        approveBtn.style.display = "inline-block";
-        rejectBtn.style.display = "inline-block";
-
-        const correctAnswer = question["Richtige Antwort"] || "";
-        let msg = `
-          <strong>Eingegebene Antwort:</strong><br>${userAnswer || "(leer)"}<br><br>
-          <strong>Richtige Antwort:</strong><br>${correctAnswer}<br><br>
-        `;
-        let erk = "";
-        if (question["Begründung"]) {
-          erk = question["Begründung"];
-        } else if (question["Erklärtext"]) {
-          erk = question["Erklärtext"];
+      let isAllCorrect = true;
+      for (let i = 0; i < subQuestions.length; i++) {
+        if (subQuestions[i].correctAnswer && userAnswers[i] !== subQuestions[i].correctAnswer) {
+          isAllCorrect = false;
+          break;
         }
-        if (erk.trim() !== "") {
-          msg += `<strong>Erklärung:</strong><br>${erk}`;
-        }
-        explanationText.innerHTML = msg;
-      } else {
-        nextBtn.style.display = "block";
-        approveBtn.style.display = "none";
-        rejectBtn.style.display = "none";
+      }
+      checkAnswer(isAllCorrect ? "Richtig" : "Falsch", q, false, "case");
+    };
+    options.appendChild(checkBtn);
+  }
 
-        let msg = "";
-        const correctAnswer = question["Richtige Antwort"] || "";
-        let isCorrect = false;
-
-        if (correctAnswer) {
-          isCorrect = (userAnswer.toLowerCase().trim() === correctAnswer.toLowerCase().trim());
-        }
-
-        if (type === "multiple_choice") {
-          msg = isCorrect ? `✅ <strong>Richtig!</strong><br><br>` : `❌ <strong>Falsch!</strong><br><br>`;
-        } else {
-          msg = isCorrect ? `✅ <strong>Richtig!</strong><br>` : `❌ <strong>Falsch!</strong><br>`;
-        }
-
-        if (!isCorrect && type === "lueckentext") {
-          msg += `Eingegebene Antwort:<br>${userAnswer}<br><br>`;
-          msg += `Richtige Antwort:<br>${correctAnswer}<br><br>`;
-        }
-
-        let erk = "";
-        if (question["Begründung"]) {
-          erk = question["Begründung"];
-        } else if (question["Erklärtext"]) {
-          erk = question["Erklärtext"];
-        }
-        if (erk.trim() !== "") {
-          msg += (type === "multiple_choice") 
-            ? `<strong>Erklärung:</strong><br>${erk}`
-            : `Erklärung:<br>${erk}`;
-        }
-        explanationText.innerHTML = msg;
-
-        const qId = question.id != null ? question.id : currentIndex;
-        const wasAlreadyAnswered = alreadyAnsweredQuestionIds.includes(qId);
-
-        if (!wasAlreadyAnswered) {
-          if (isCorrect) {
-            roundCoins++;
-            totalCoins++;
-            showCoinChange(+1, document.getElementById("totalCoins").parentElement);
-            showCoinChange(+1, document.getElementById("roundCoins").parentElement);
-
-            xp += 10;
-            answeredCorrectly[currentIndex] = true;
-            document.getElementById("xpValue").innerText = xp;
-            showXPChange(10);
-          } else {
-            if (roundCoins > 0) {
-              roundCoins--;
-              showCoinChange(-1, document.getElementById("roundCoins").parentElement);
-            }
-            if (totalCoins > 0) {
-              totalCoins--;
-              showCoinChange(-1, document.getElementById("totalCoins").parentElement);
-            }
+  function createStandardQuestion(q, type) {
+    const options = document.getElementById("options");
+    switch (type) {
+      case "multiple_choice":
+        ["Antwort A", "Antwort B", "Antwort C", "Antwort D"].forEach(key => {
+          if (q[key] && q[key].trim() !== "") {
+            const btn = document.createElement("button");
+            btn.innerText = q[key];
+            btn.onclick = () => { checkAnswer(q[key], q, false, "multiple_choice"); };
+            options.appendChild(btn);
           }
-          alreadyAnsweredQuestionIds.push(qId);
-          markQuestionAsAnsweredInSupabase(getWixUserId(), qId);
-          updateUserStatsInSupabase(getWixUserId(), xp, totalCoins, streak);
-        }
-        document.getElementById("roundCoins").innerText = roundCoins;
-        document.getElementById("totalCoins").innerText = totalCoins;
+        });
+        break;
+      case "drag_drop": {
+        createDragDropQuestion(q);
+        break;
       }
     }
+  }
 
-    document.getElementById("approveBtn").onclick = () => {
-      handleOpenQuestionResult(true);
-    };
-    document.getElementById("rejectBtn").onclick = () => {
-      handleOpenQuestionResult(false);
-    };
-    function handleOpenQuestionResult(isApproved) {
-      const q = questions[currentIndex];
-      const qId = q.id != null ? q.id : currentIndex;
+  function createLueckentext(q) {
+    const options = document.getElementById("options");
+    const questionLabel = document.createElement("div");
+    questionLabel.style.fontWeight = "bold";
+    questionLabel.style.marginBottom = "5px";
+    questionLabel.innerText = q.Frage || "Lückentext-Frage?";
+    options.appendChild(questionLabel);
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.placeholder = "Fehlendes Wort...";
+    options.appendChild(input);
+
+    const btnL = document.createElement("button");
+    btnL.innerText = "Antwort prüfen";
+    btnL.onclick = () => { checkAnswer(input.value.trim(), q, false, "lueckentext"); };
+    options.appendChild(btnL);
+  }
+
+  function createOpenQuestion(q) {
+    const options = document.getElementById("options");
+    const txt = document.createElement("textarea");
+    txt.classList.add("open-question-textarea");
+    txt.placeholder = "Gebe hier deine Antwort ein...";
+    options.appendChild(txt);
+
+    const checkBtn = document.createElement("button");
+    checkBtn.innerText = "Antwort überprüfen";
+    checkBtn.onclick = () => { checkAnswer(txt.value.trim(), q, true, "open_question"); };
+    options.appendChild(checkBtn);
+
+    txt.addEventListener("keydown", (ev) => {
+      if ((ev.ctrlKey || ev.metaKey) && ev.key === "Enter") {
+        ev.preventDefault();
+        checkBtn.click();
+      }
+    });
+  }
+
+  function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+  }
+
+  // checkAnswer-Funktion
+  function checkAnswer(userAnswer, question, userCanSelfAccept, type) {
+    const explanationContainer = document.getElementById("explanationContainer");
+    const explanationText = document.getElementById("explanationText");
+    const approveBtn = document.getElementById("approveBtn");
+    const rejectBtn = document.getElementById("rejectBtn");
+    const nextBtn = document.getElementById("nextBtn");
+
+    if (explanationContainer.style.display === "block") {
+      return;
+    }
+
+    explanationContainer.style.display = "block";
+    explanationText.innerHTML = "";
+
+    if (type === "open_question") {
+      nextBtn.style.display = "none";
+      approveBtn.style.display = "inline-block";
+      rejectBtn.style.display = "inline-block";
+
+      const correctAnswer = question["Richtige Antwort"] || "";
+      let msg = `
+        <strong>Eingegebene Antwort:</strong><br>${userAnswer || "(leer)"}<br><br>
+        <strong>Richtige Antwort:</strong><br>${correctAnswer}<br><br>
+      `;
+      let erk = "";
+      if (question["Begründung"]) {
+        erk = question["Begründung"];
+      } else if (question["Erklärtext"]) {
+        erk = question["Erklärtext"];
+      }
+      if (erk.trim() !== "") {
+        msg += `<strong>Erklärung:</strong><br>${erk}`;
+      }
+      explanationText.innerHTML = msg;
+    } else {
+      nextBtn.style.display = "block";
+      approveBtn.style.display = "none";
+      rejectBtn.style.display = "none";
+
+      let msg = "";
+      const correctAnswer = question["Richtige Antwort"] || "";
+      let isCorrect = false;
+
+      if (correctAnswer) {
+        isCorrect = (userAnswer.toLowerCase().trim() === correctAnswer.toLowerCase().trim());
+      }
+
+      if (type === "multiple_choice") {
+        msg = isCorrect ? `✅ <strong>Richtig!</strong><br><br>` : `❌ <strong>Falsch!</strong><br><br>`;
+      } else {
+        msg = isCorrect ? `✅ <strong>Richtig!</strong><br>` : `❌ <strong>Falsch!</strong><br>`;
+      }
+
+      if (!isCorrect && type === "lueckentext") {
+        msg += `Eingegebene Antwort:<br>${userAnswer}<br><br>`;
+        msg += `Richtige Antwort:<br>${correctAnswer}<br><br>`;
+      }
+
+      let erk = "";
+      if (question["Begründung"]) {
+        erk = question["Begründung"];
+      } else if (question["Erklärtext"]) {
+        erk = question["Erklärtext"];
+      }
+      if (erk.trim() !== "") {
+        msg += (type === "multiple_choice") 
+          ? `<strong>Erklärung:</strong><br>${erk}`
+          : `Erklärung:<br>${erk}`;
+      }
+      explanationText.innerHTML = msg;
+
+      const qId = question.id != null ? question.id : currentIndex;
       const wasAlreadyAnswered = alreadyAnsweredQuestionIds.includes(qId);
 
       if (!wasAlreadyAnswered) {
-        if (isApproved) {
+        if (isCorrect) {
+          roundCoins++;
+          totalCoins++;
+          showCoinChange(+1, document.getElementById("totalCoins").parentElement);
+          showCoinChange(+1, document.getElementById("roundCoins").parentElement);
+
           xp += 10;
           answeredCorrectly[currentIndex] = true;
           document.getElementById("xpValue").innerText = xp;
           showXPChange(10);
-
-          roundCoins++;
-          totalCoins++;
-          document.getElementById("roundCoins").innerText = roundCoins;
-          document.getElementById("totalCoins").innerText = totalCoins;
-          showCoinChange(+1, document.getElementById("totalCoins").parentElement);
-          showCoinChange(+1, document.getElementById("roundCoins").parentElement);
         } else {
           if (roundCoins > 0) {
             roundCoins--;
@@ -1168,151 +1311,192 @@
             totalCoins--;
             showCoinChange(-1, document.getElementById("totalCoins").parentElement);
           }
-          document.getElementById("roundCoins").innerText = roundCoins;
-          document.getElementById("totalCoins").innerText = totalCoins;
         }
         alreadyAnsweredQuestionIds.push(qId);
         markQuestionAsAnsweredInSupabase(getWixUserId(), qId);
         updateUserStatsInSupabase(getWixUserId(), xp, totalCoins, streak);
       }
-      setTimeout(() => {
-        nextQuestion();
-      }, 800);
-    }
-
-    document.getElementById("nextBtn").onclick = () => {
-      nextQuestion();
-    };
-    function nextQuestion() {
-      currentIndex++;
-      showQuestion();
-    }
-
-    document.getElementById("repeatBtn").onclick = () => {
-      resetQuiz();
-    };
-    document.getElementById("continueBtn").onclick = () => {
-      resetQuiz();
-    };
-
-    function resetQuiz() {
-      currentIndex = 0;
-      roundCoins = 0;
-      totalCoins = 100;
-      xp = 0;
-      answeredCorrectly = new Array(questions.length).fill(false);
-      alreadyAnsweredQuestionIds = [];
       document.getElementById("roundCoins").innerText = roundCoins;
       document.getElementById("totalCoins").innerText = totalCoins;
-      document.getElementById("xpValue").innerText = xp;
-      document.getElementById("repeatBtn").style.display = "none";
-      document.getElementById("endScreen").style.display = "none";
-      showQuestion();
     }
+  }
 
-    function updateProgressBar() {
-      const total = questions.length;
-      const pb = document.getElementById("progress-bar");
-      const progressInfo = document.getElementById("progressInfo");
-      if (total === 0) {
-        pb.style.width = "0%";
-        progressInfo.innerText = "Frage 0 von 0";
-        return;
-      }
-      const percent = ((currentIndex + 1) / total) * 100;
-      pb.style.width = percent + "%";
-      progressInfo.innerText = `Frage ${currentIndex + 1} von ${total}`;
-    }
+  document.getElementById("approveBtn").onclick = () => {
+    handleOpenQuestionResult(true);
+  };
+  document.getElementById("rejectBtn").onclick = () => {
+    handleOpenQuestionResult(false);
+  };
+  function handleOpenQuestionResult(isApproved) {
+    const q = questions[currentIndex];
+    const qId = q.id != null ? q.id : currentIndex;
+    const wasAlreadyAnswered = alreadyAnsweredQuestionIds.includes(qId);
 
-    function showCoinChange(amount, element) {
-      const coinChange = document.createElement("div");
-      coinChange.classList.add("coin-change");
-      if (amount < 0) {
-        coinChange.classList.add("negative");
-        coinChange.innerText = amount;
+    if (!wasAlreadyAnswered) {
+      if (isApproved) {
+        xp += 10;
+        answeredCorrectly[currentIndex] = true;
+        document.getElementById("xpValue").innerText = xp;
+        showXPChange(10);
+
+        roundCoins++;
+        totalCoins++;
+        document.getElementById("roundCoins").innerText = roundCoins;
+        document.getElementById("totalCoins").innerText = totalCoins;
+        showCoinChange(+1, document.getElementById("totalCoins").parentElement);
+        showCoinChange(+1, document.getElementById("roundCoins").parentElement);
       } else {
-        coinChange.classList.add("positive");
-        coinChange.innerText = `+${amount}`;
-      }
-      element.appendChild(coinChange);
-      setTimeout(() => {
-        element.removeChild(coinChange);
-      }, 2000);
-    }
-
-    function showXPChange(amount) {
-      const xpBox = document.getElementById("xpBox");
-      const xpChange = document.createElement("div");
-      xpChange.classList.add("xp-change");
-      xpChange.textContent = `+${amount}`;
-      xpBox.appendChild(xpChange);
-      setTimeout(() => {
-        xpBox.removeChild(xpChange);
-      }, 2000);
-    }
-
-    function updateEndScreen() {
-      const endScreen = document.getElementById("endScreen");
-      const circleBar = document.getElementById("circleBar");
-      const xpText = document.getElementById("xpText");
-      const coinBalance = document.getElementById("coinBalance");
-      const medalInfo = document.getElementById("medalInfo");
-
-      let netCoins = totalCoins - 100;
-      let coinMsg = "";
-      if (netCoins > 0) {
-        coinMsg = `Münzen-Bilanz: +${netCoins} 🪙`;
-      } else if (netCoins < 0) {
-        coinMsg = `Münzen-Bilanz: ${netCoins} 🪙`;
-      } else {
-        coinMsg = `Münzen-Bilanz: 0 🪙`;
-      }
-      coinBalance.textContent = coinMsg;
-
-      xpText.textContent = `${xp} / ${xpGoal} XP`;
-
-      circleBar.setAttribute("stroke-dasharray", `0, ${halfCircleCircumference}`);
-      const finalProgress = (xp / xpGoal) * halfCircleCircumference;
-      let current = 0;
-      const steps = 50;
-      const stepValue = finalProgress / steps;
-      let stepCount = 0;
-
-      const animate = setInterval(() => {
-        stepCount++;
-        current += stepValue;
-        if (stepCount >= steps) {
-          current = finalProgress;
-          clearInterval(animate);
+        if (roundCoins > 0) {
+          roundCoins--;
+          showCoinChange(-1, document.getElementById("roundCoins").parentElement);
         }
-        circleBar.setAttribute("stroke-dasharray", `${current}, ${halfCircleCircumference}`);
-      }, 20);
-
-      document.getElementById("repeatBtn").style.display = "none";
-      document.getElementById("continueBtn").style.display = "inline-block";
-
-      let correctCount = answeredCorrectly.filter(Boolean).length;
-      let totalCount = questions.length;
-      let percent = (correctCount / totalCount) * 100;
-      let medal = "";
-      if (percent === 100) {
-        medal = "Gold";
-      } else if (percent >= 75) {
-        medal = "Silber";
-      } else if (percent >= 50) {
-        medal = "Bronze";
-      } else {
-        medal = "Keine Medaille";
+        if (totalCoins > 0) {
+          totalCoins--;
+          showCoinChange(-1, document.getElementById("totalCoins").parentElement);
+        }
+        document.getElementById("roundCoins").innerText = roundCoins;
+        document.getElementById("totalCoins").innerText = totalCoins;
       }
-      if (medal !== "Keine Medaille") {
-        medalInfo.textContent = `Herzlichen Glückwunsch! Du hast eine ${medal}-Medaille verdient (${Math.round(percent)}%).`;
-      } else {
-        medalInfo.textContent = `Du hast ${Math.round(percent)}% richtig – keine Medaille diesmal.`;
-      }
-      handleStreak(getWixUserId(), correctCount);
+      alreadyAnsweredQuestionIds.push(qId);
+      markQuestionAsAnsweredInSupabase(getWixUserId(), qId);
+      updateUserStatsInSupabase(getWixUserId(), xp, totalCoins, streak);
     }
+    setTimeout(() => {
+      nextQuestion();
+    }, 800);
+  }
 
-  })();
+  document.getElementById("nextBtn").onclick = () => {
+    nextQuestion();
+  };
+  function nextQuestion() {
+    currentIndex++;
+    showQuestion();
+  }
+
+  document.getElementById("repeatBtn").onclick = () => {
+    resetQuiz();
+  };
+  document.getElementById("continueBtn").onclick = () => {
+    resetQuiz();
+  };
+
+  function resetQuiz() {
+    currentIndex = 0;
+    roundCoins = 0;
+    totalCoins = 100;
+    xp = 0;
+    answeredCorrectly = new Array(questions.length).fill(false);
+    alreadyAnsweredQuestionIds = [];
+    document.getElementById("roundCoins").innerText = roundCoins;
+    document.getElementById("totalCoins").innerText = totalCoins;
+    document.getElementById("xpValue").innerText = xp;
+    document.getElementById("repeatBtn").style.display = "none";
+    document.getElementById("endScreen").style.display = "none";
+    showQuestion();
+  }
+
+  function updateProgressBar() {
+    const total = questions.length;
+    const pb = document.getElementById("progress-bar");
+    const progressInfo = document.getElementById("progressInfo");
+    if (total === 0) {
+      pb.style.width = "0%";
+      progressInfo.innerText = "Frage 0 von 0";
+      return;
+    }
+    const percent = ((currentIndex + 1) / total) * 100;
+    pb.style.width = percent + "%";
+    progressInfo.innerText = `Frage ${currentIndex + 1} von ${total}`;
+  }
+
+  function showCoinChange(amount, element) {
+    const coinChange = document.createElement("div");
+    coinChange.classList.add("coin-change");
+    if (amount < 0) {
+      coinChange.classList.add("negative");
+      coinChange.innerText = amount;
+    } else {
+      coinChange.classList.add("positive");
+      coinChange.innerText = `+${amount}`;
+    }
+    element.appendChild(coinChange);
+    setTimeout(() => {
+      element.removeChild(coinChange);
+    }, 2000);
+  }
+
+  function showXPChange(amount) {
+    const xpBox = document.getElementById("xpBox");
+    const xpChange = document.createElement("div");
+    xpChange.classList.add("xp-change");
+    xpChange.textContent = `+${amount}`;
+    xpBox.appendChild(xpChange);
+    setTimeout(() => {
+      xpBox.removeChild(xpChange);
+    }, 2000);
+  }
+
+  function updateEndScreen() {
+    const endScreen = document.getElementById("endScreen");
+    const circleBar = document.getElementById("circleBar");
+    const xpText = document.getElementById("xpText");
+    const coinBalance = document.getElementById("coinBalance");
+    const medalInfo = document.getElementById("medalInfo");
+
+    let netCoins = totalCoins - 100;
+    let coinMsg = "";
+    if (netCoins > 0) {
+      coinMsg = `Münzen-Bilanz: +${netCoins} 🪙`;
+    } else if (netCoins < 0) {
+      coinMsg = `Münzen-Bilanz: ${netCoins} 🪙`;
+    } else {
+      coinMsg = `Münzen-Bilanz: 0 🪙`;
+    }
+    coinBalance.textContent = coinMsg;
+
+    xpText.textContent = `${xp} / ${xpGoal} XP`;
+
+    circleBar.setAttribute("stroke-dasharray", `0, ${halfCircleCircumference}`);
+    const finalProgress = (xp / xpGoal) * halfCircleCircumference;
+    let current = 0;
+    const steps = 50;
+    const stepValue = finalProgress / steps;
+    let stepCount = 0;
+
+    const animate = setInterval(() => {
+      stepCount++;
+      current += stepValue;
+      if (stepCount >= steps) {
+        current = finalProgress;
+        clearInterval(animate);
+      }
+      circleBar.setAttribute("stroke-dasharray", `${current}, ${halfCircleCircumference}`);
+    }, 20);
+
+    document.getElementById("repeatBtn").style.display = "none";
+    document.getElementById("continueBtn").style.display = "inline-block";
+
+    let correctCount = answeredCorrectly.filter(Boolean).length;
+    let totalCount = questions.length;
+    let percent = (correctCount / totalCount) * 100;
+    let medal = "";
+    if (percent === 100) {
+      medal = "Gold";
+    } else if (percent >= 75) {
+      medal = "Silber";
+    } else if (percent >= 50) {
+      medal = "Bronze";
+    } else {
+      medal = "Keine Medaille";
+    }
+    if (medal !== "Keine Medaille") {
+      medalInfo.textContent = `Herzlichen Glückwunsch! Du hast eine ${medal}-Medaille verdient (${Math.round(percent)}%).`;
+    } else {
+      medalInfo.textContent = `Du hast ${Math.round(percent)}% richtig – keine Medaille diesmal.`;
+    }
+    handleStreak(getWixUserId(), correctCount);
+  }
 </script>
 </body>
 </html>
