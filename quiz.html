@@ -7,6 +7,12 @@
   <!-- Supabase JavaScript Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <style>
+    /* Einheitliche Schriftart überall: Cambria */
+    * {
+      font-family: Cambria, serif;
+      box-sizing: border-box;
+    }
+
     /***********************************
      *   Gesamt-Container mit Rand     *
      ***********************************/
@@ -19,8 +25,6 @@
       display: flex;
       flex-direction: column;
       background-color: #fff;
-      box-sizing: border-box;
-      font-family: Cambria, sans-serif;
     }
     /********************************************
      *  Frageauswahl (oben, horizontal, LINKS)  *
@@ -49,8 +53,8 @@
       justify-content: center;
       cursor: pointer;
       font-size: 0.9rem;
-      transition: background-color 0.3s;
       border: none;
+      transition: background-color 0.3s;
     }
     .question-select-item:hover {
       background-color: #333;
@@ -73,7 +77,6 @@
       display: flex;
       flex-direction: column;
       padding: 20px;
-      box-sizing: border-box;
     }
     .question-header {
       display: flex;
@@ -127,14 +130,262 @@
       display: flex;
       flex-direction: column;
       padding: 20px;
-      box-sizing: border-box;
-      position: relative;
     }
-    .answer-top-row {
+    #options {
+      background-color: #fff;
+      border-radius: 5px;
+      min-height: 60px;
+      margin-bottom: 20px;
+      text-align: left;
+      padding: 10px;
+      flex: 1;
+    }
+    button {
+      background: #fff;
+      color: #000;
+      border: 2px solid #000;
+      border-radius: 5px;
+      padding: 10px;
+      margin: 5px 0;
+      width: 100%;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    button:hover {
+      background-color: #333;
+      color: #fff;
+    }
+    #approveBtn,
+    #rejectBtn,
+    #nextBtn {
+      display: none;
+    }
+    #nextBtn {
+      margin-top: 10px;
+      border-color: green;
+      background-color: green;
+      color: #fff;
+    }
+    #nextBtn:hover {
+      background-color: #006600;
+      color: #fff;
+    }
+    #repeatBtn {
+      display: none;
+    }
+    .open-approve {
+      background-color: green !important;
+      color: #fff !important;
+      border-color: green !important;
+    }
+    .open-approve:hover {
+      background-color: #006600 !important;
+      color: #fff !important;
+    }
+    .open-reject {
+      background-color: red !important;
+      color: #fff !important;
+      border-color: red !important;
+    }
+    .open-reject:hover {
+      background-color: #990000 !important;
+      color: #fff !important;
+    }
+    /***************************
+     *   End-Screen
+     ***************************/
+    #endScreen {
+      display: none;
+      text-align: center;
+      margin-top: 20px;
+    }
+    /* Waage/Hut etwas größer und Halbkreis näher dran */
+    .justice-icon {
+      width: 350px;
+      height: 350px;
+      fill: #000;
+      margin-bottom: 5px;
+    }
+    .circular-progress {
+      width: 300px;
+      height: 150px;
+      margin: 0 auto 10px auto; /* näher an die Waage */
+      position: relative;
+      overflow: visible;
+    }
+    .circular-progress svg {
+      width: 100%;
+      height: 100%;
+    }
+    .circle-bg {
+      fill: none;
+      stroke: #444;
+      stroke-width: 2.8;
+    }
+    .circle {
+      fill: none;
+      stroke: #ffd700;
+      stroke-width: 2.8;
+      stroke-linecap: round;
+      transition: stroke-dasharray 1s ease;
+    }
+    .percentage {
+      font-size: 0.25em; 
+      fill: #000;
+    }
+    #endTitle {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+    #endMessage {
+      margin: 5px 0 5px 0;
+    }
+    #coinBalance {
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    #continueBtn {
+      background: #000; 
+      color: #fff;
+      border: 2px solid #000;
+      border-radius: 5px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s, color 0.3s;
+      display: inline-block;
+      width: auto;
+    }
+    #continueBtn:hover {
+      background-color: #333;
+      color: #fff;
+    }
+    #medalInfo {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    .medal-image {
+      width: 60px;
+      height: 60px;
+      display: block;
+      margin: 10px auto;
+    }
+    .horizontal-buttons {
       display: flex;
-      justify-content: space-between;
+      gap: 10px;
+    }
+    .subquestions {
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+    .open-question-textarea {
+      background: #f9f9f9;
+      border: 2px solid #ccc;
+      border-radius: 5px;
+      padding: 10px;
+      resize: vertical;
+      min-height: 80px; 
+      width: 100%;
+    }
+    .case-subquestion-container {
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      padding: 10px;
+      border-radius: 5px;
+      background-color: #f1f1f1;
+    }
+    .case-subquestion-text {
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    .case-subquestion-buttons {
+      display: flex;
+      gap: 10px;
+    }
+    /********************************************
+     *   Auth-Container
+     ********************************************/
+    #authContainer {
+      margin: 20px auto;
+      max-width: 600px;
+      padding: 20px;
+      border: 2px solid #000;
+      border-radius: 5px;
+      background-color: #f7f7f7;
+    }
+    #authContainer h2 {
+      margin-top: 0;
+      text-align: center;
+    }
+    #authMessage {
+      color: red;
+      font-weight: bold;
+      text-align: center;
+    }
+    .auth-boxes {
+      display: flex;
+      flex-direction: row;
+      gap: 20px;
+      justify-content: space-around;
+      margin-top: 10px;
+    }
+    .auth-box {
+      flex: 1;
+      border: 1px solid #000;
+      border-radius: 5px;
+      padding: 10px;
+      background-color: #fff;
+    }
+    .auth-box h3 {
+      margin-top: 0;
+      text-align: center;
+    }
+    .auth-box input,
+    .auth-box select,
+    .auth-box button {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 8px;
+      font-size: 14px;
+    }
+    @media (max-width: 768px) {
+      .auth-boxes {
+        flex-direction: column;
+      }
+      .auth-box {
+        width: 100%;
+      }
+    }
+    /********************************************
+     *   Header-Bar (Username + XP + Coins)
+     ********************************************/
+    #headerBar {
+      display: flex;
       align-items: center;
-      margin-bottom: 15px;
+      justify-content: flex-start;
+      padding: 10px;
+      border-bottom: 2px solid black;
+      background-color: #f0f0f0;
+      width: 100%;
+      gap: 10px;
+    }
+    #profilePic {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #ccc;
+      flex-shrink: 0;
+    }
+    #usernameDisplay {
+      font-weight: bold;
+      color: #000;
+      margin-right: auto;
+    }
+    .header-stats-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
     .xp-box {
       display: flex;
@@ -201,183 +452,57 @@
       0% { opacity: 1; transform: translateY(0); }
       100% { opacity: 0; transform: translateY(50px); }
     }
-    #options {
-      background-color: #fff;
-      border-radius: 5px;
-      min-height: 60px;
+
+    /* Größere Container für Drag & Drop */
+    .dragdrop-container {
+      display: flex;
+      gap: 60px; 
+      justify-content: space-around;
       margin-bottom: 20px;
-      text-align: left;
-      padding: 10px;
-      box-sizing: border-box;
-      flex: 1;
+      min-height: 400px; /* mehr Platz */
     }
-    button {
-      background: #fff;
-      color: #000;
-      border: 2px solid #000;
+    .drag-column, .drop-column {
+      width: 45%;
+      border: 2px solid #ccc;
       border-radius: 5px;
-      padding: 10px;
-      margin: 5px 0;
-      width: 100%;
-      font-size: 16px;
-      cursor: pointer;
-      transition: background-color 0.3s, color 0.3s;
-      font-family: Cambria, sans-serif;
-    }
-    button:hover {
-      background-color: #333;
-      color: #fff;
-    }
-    #approveBtn,
-    #rejectBtn,
-    #nextBtn {
-      display: none;
-    }
-    #nextBtn {
-      margin-top: 10px;
-      border-color: green;
-      background-color: green;
-      color: #fff;
-    }
-    #nextBtn:hover {
-      background-color: #006600;
-      color: #fff;
-    }
-    #repeatBtn {
-      display: none;
-    }
-    .open-approve {
-      background-color: green !important;
-      color: #fff !important;
-      border-color: green !important;
-    }
-    .open-approve:hover {
-      background-color: #006600 !important;
-      color: #fff !important;
-    }
-    .open-reject {
-      background-color: red !important;
-      color: #fff !important;
-      border-color: red !important;
-    }
-    .open-reject:hover {
-      background-color: #990000 !important;
-      color: #fff !important;
-    }
-    .assignment-container {
+      padding: 20px; /* größerer Innenabstand */
+      min-height: 300px; /* mehr Platz */
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 15px; /* mehr Abstand zwischen Items */
     }
-    .assignment-pair {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
+    .drag-column h3, .drop-column h3 {
+      margin-top: 0;
+      text-align: center;
+      font-size: 1.1rem;
     }
     .draggable-item {
-      display: inline-block;
       background: #333;
       color: #fff;
       padding: 8px 10px;
       border-radius: 5px;
-      margin: 5px;
+      margin: 10px 0; /* mehr Abstand zwischen Items */
       cursor: move;
-    }
-    .draggable-item:active {
-      opacity: 0.7;
-    }
-    .target-zone {
-      border: 2px dashed #888;
-      padding: 15px;
-      border-radius: 5px;
-      background-color: #fff;
       text-align: center;
-      position: relative;
-      min-height: 40px;
-      width: 45%;
     }
-    .target-zone.hover {
+    .drop-target {
+      background-color: #fff;
+      border: 2px dashed #888;
+      border-radius: 5px;
+      padding: 8px 10px;
+      margin: 10px 0;
+      min-height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .drop-target.hover {
       background-color: #eee;
     }
-    #endScreen {
-      display: none;
-      text-align: center;
-      margin-top: 20px;
-    }
-    .justice-icon {
-      width: 300px;
-      height: 300px;
-      fill: #000;
-      margin-bottom: -30px;
-    }
-    .circular-progress {
-      width: 300px;
-      height: 150px;
-      margin: 10px auto;
-      position: relative;
-      overflow: visible;
-    }
-    .circular-progress svg {
-      width: 100%;
-      height: 100%;
-    }
-    .circle-bg {
-      fill: none;
-      stroke: #444;
-      stroke-width: 2.8;
-    }
-    .circle {
-      fill: none;
-      stroke: #ffd700;
-      stroke-width: 2.8;
-      stroke-linecap: round;
-      transition: stroke-dasharray 1s ease;
-    }
-    .percentage {
-      font-size: 0.25em; 
-      fill: #000;
-    }
-    #endTitle {
-      margin: 0;
-      font-size: 1.5rem;
-    }
-    #endMessage {
-      margin: 10px 0 10px 0;
-    }
-    #coinBalance {
-      margin-bottom: 10px;
-      font-weight: bold;
-    }
-    #continueBtn {
-      background: #000; 
-      color: #fff;
-      border: 2px solid #000;
-      border-radius: 5px;
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      font-family: Cambria, sans-serif;
-      transition: background-color 0.3s, color 0.3s;
-      display: inline-block;
-      width: auto;
-    }
-    #continueBtn:hover {
-      background-color: #333;
-      color: #fff;
-    }
-    #medalInfo {
-      margin-top: 10px;
-      font-weight: bold;
-    }
+
     @media (max-width: 768px) {
       .content-row {
         flex-direction: column; 
-      }
-      .answer-top-row {
-        order: -1; 
-        width: 100%;
-        margin-top: 10px;
       }
       .question-panel {
         width: 100%;
@@ -432,93 +557,13 @@
       .percentage {
         fill: #fff;
       }
-    }
-    .horizontal-buttons {
-      display: flex;
-      gap: 10px;
-    }
-    .subquestions {
-      margin-bottom: 10px;
-      font-weight: bold;
-    }
-    .open-question-textarea {
-      background: #f9f9f9;
-      border: 2px solid #ccc;
-      border-radius: 5px;
-      padding: 10px;
-      font-family: inherit;
-      resize: vertical;
-      min-height: 80px; 
-      width: 100%;
-      box-sizing: border-box;
-    }
-    .case-subquestion-container {
-      margin-bottom: 10px;
-      border: 1px solid #ccc;
-      padding: 10px;
-      border-radius: 5px;
-      background-color: #f1f1f1;
-    }
-    .case-subquestion-text {
-      margin-bottom: 5px;
-      font-weight: bold;
-    }
-    .case-subquestion-buttons {
-      display: flex;
-      gap: 10px;
-    }
-
-    /* ========== Neue Styles für den Authentifizierungsbereich ========== */
-    #authContainer {
-      margin: 20px auto;
-      max-width: 600px;
-      padding: 20px;
-      border: 2px solid #000;
-      border-radius: 5px;
-      background-color: #f7f7f7;
-      font-family: Cambria;
-    }
-    #authContainer h2 {
-      margin-top: 0;
-      text-align: center;
-      font-family: Cambria;
-    }
-    #authMessage {
-      color: red;
-      font-weight: bold;
-      text-align: center;
-      font-family: Cambria;
-    }
-    .auth-boxes {
-      display: flex;
-      flex-direction: row;
-      gap: 20px;
-      justify-content: space-around;
-      margin-top: 10px;
-      font-family: Cambria;
-    }
-    .auth-box {
-      flex: 1;
-      border: 1px solid #000;
-      border-radius: 5px;
-      padding: 10px;
-      background-color: #fff;
-      font-family: Cambria;
-    }
-    .auth-box h3 {
-      margin-top: 0;
-      text-align: center;
-      font-family: Cambria;
-    }
-    .auth-box input,
-    .auth-box select,
-    .auth-box button {
-      width: 100%;
-      margin-bottom: 10px;
-      padding: 8px;
-      box-sizing: border-box;
-      font-size: 14px;
-      font-family: Cambria;
+      #usernameDisplay {
+        color: #fff;
+      }
+      #headerBar {
+        background-color: #444;
+        border-bottom: 2px solid #999;
+      }
     }
   </style>
 </head>
@@ -537,58 +582,12 @@
     <!-- Registrierungsbox -->
     <div class="auth-box" id="registerBox">
       <h3>Registrieren</h3>
-      <input type="text" id="regUsernameInput" placeholder="Benutzername (Pflicht)">
-      <input type="email" id="regEmailInput" placeholder="E-Mail (Pflicht)">
-      <input type="password" id="regPasswordInput" placeholder="Passwort (Pflicht)">
+      <input type="text" id="regUsernameInput" placeholder="Benutzername">
+      <input type="email" id="regEmailInput" placeholder="E-Mail">
+      <input type="password" id="regPasswordInput" placeholder="Passwort">
       <select id="regUniversitySelect">
-        <option value="">Hochschule auswählen (Pflicht)</option>
-        <option value="Universität Augsburg">Universität Augsburg</option>
-        <option value="Universität Bayreuth">Universität Bayreuth</option>
-        <option value="Freie Universität Berlin">Freie Universität Berlin</option>
-        <option value="Humboldt-Universität zu Berlin">Humboldt-Universität zu Berlin</option>
-        <option value="Ruhr-Universität Bochum">Ruhr-Universität Bochum</option>
-        <option value="Rheinische Friedrich-Wilhelms-Universität Bonn">Rheinische Friedrich-Wilhelms-Universität Bonn</option>
-        <option value="Universität Bremen">Universität Bremen</option>
-        <option value="Heinrich-Heine-Universität Düsseldorf">Heinrich-Heine-Universität Düsseldorf</option>
-        <option value="Friedrich-Alexander-Universität Erlangen-Nürnberg">Friedrich-Alexander-Universität Erlangen-Nürnberg</option>
-        <option value="Johann-Wolfgang-Goethe-Universität Frankfurt am Main">Johann-Wolfgang-Goethe-Universität Frankfurt am Main</option>
-        <option value="Europa-Universität Viadrina Frankfurt (Oder)">Europa-Universität Viadrina Frankfurt (Oder)</option>
-        <option value="Albert-Ludwigs-Universität Freiburg">Albert-Ludwigs-Universität Freiburg</option>
-        <option value="Justus-Liebig-Universität Gießen">Justus-Liebig-Universität Gießen</option>
-        <option value="Georg-August-Universität Göttingen">Georg-August-Universität Göttingen</option>
-        <option value="Universität Greifswald">Universität Greifswald</option>
-        <option value="FernUniversität in Hagen">FernUniversität in Hagen</option>
-        <option value="Martin-Luther-Universität Halle-Wittenberg">Martin-Luther-Universität Halle-Wittenberg</option>
-        <option value="Universität Hamburg">Universität Hamburg</option>
-        <option value="Bucerius Law School (Privatuniversität)">Bucerius Law School (Privatuniversität)</option>
-        <option value="Gottfried Wilhelm Leibniz Universität Hannover">Gottfried Wilhelm Leibniz Universität Hannover</option>
-        <option value="Ruprecht-Karls-Universität Heidelberg">Ruprecht-Karls-Universität Heidelberg</option>
-        <option value="Friedrich-Schiller-Universität Jena">Friedrich-Schiller-Universität Jena</option>
-        <option value="Christian-Albrechts-Universität zu Kiel">Christian-Albrechts-Universität zu Kiel</option>
-        <option value="Universität Leipzig">Universität Leipzig</option>
-        <option value="Universität zu Köln">Universität zu Köln</option>
-        <option value="Universität Konstanz">Universität Konstanz</option>
-        <option value="Universität Mannheim">Universität Mannheim</option>
-        <option value="Westfälische Wilhelms-Universität Münster">Westfälische Wilhelms-Universität Münster</option>
-        <option value="Ludwig-Maximilians-Universität München">Ludwig-Maximilians-Universität München</option>
-        <option value="Universität Passau">Universität Passau</option>
-        <option value="Universität Potsdam">Universität Potsdam</option>
-        <option value="Universität des Saarlandes">Universität des Saarlandes</option>
-        <option value="Eberhard Karls Universität Tübingen">Eberhard Karls Universität Tübingen</option>
-        <option value="Universität Würzburg">Universität Würzburg</option>
-        <option value="Johannes Gutenberg-Universität Mainz">Johannes Gutenberg-Universität Mainz</option>
-        <option value="Philipps-Universität Marburg">Philipps-Universität Marburg</option>
-        <option value="Leuphana Universität Lüneburg">Leuphana Universität Lüneburg</option>
-        <option value="Carl von Ossietzky Universität Oldenburg">Carl von Ossietzky Universität Oldenburg</option>
-        <option value="Technische Universität Berlin">Technische Universität Berlin</option>
-        <option value="Technische Universität Braunschweig">Technische Universität Braunschweig</option>
-        <option value="Technische Universität Dortmund">Technische Universität Dortmund</option>
-        <option value="Technische Universität Dresden">Technische Universität Dresden</option>
-        <option value="Technische Universität Kaiserslautern">Technische Universität Kaiserslautern</option>
-        <option value="Technische Universität München">Technische Universität München</option>
-        <option value="Karlsruher Institut für Technologie (KIT)">Karlsruher Institut für Technologie (KIT)</option>
-        <option value="Hochschule für Wirtschaft und Recht (Privatuniversität)">Hochschule für Wirtschaft und Recht (Privatuniversität)</option>
-        <option value="Andere / Sonstige">Andere / Sonstige</option>
+        <option value="">Hochschule auswählen</option>
+        <!-- (Liste der Unis gekürzt, wie gehabt) -->
       </select>
       <button id="registerBtn">Registrieren</button>
     </div>
@@ -596,8 +595,8 @@
     <!-- Loginbox -->
     <div class="auth-box" id="loginBox">
       <h3>Anmelden</h3>
-      <input type="email" id="loginEmailInput" placeholder="E-Mail (Pflicht)">
-      <input type="password" id="loginPasswordInput" placeholder="Passwort (Pflicht)">
+      <input type="email" id="loginEmailInput" placeholder="E-Mail">
+      <input type="password" id="loginPasswordInput" placeholder="Passwort">
       <button id="loginBtn">Anmelden</button>
     </div>
   </div>
@@ -607,7 +606,25 @@
 
 <!-- =================== Quiz-Bereich =================== -->
 <div id="quizContainer" style="display:none;">
+  <!-- Neuer Header (Username + XP + Coins) -->
   <div id="quiz-container">
+    <div id="headerBar">
+      <div id="profilePic"></div>
+      <div id="usernameDisplay">Benutzername</div>
+      <div class="header-stats-row">
+        <div class="xp-box" id="xpBox">
+          <span id="xpValue">0</span>
+          <svg class="xp-icon" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2l2.92 5.92L21 9.24l-4.58 4.47L17.84 21 12 17.77 6.16 21l1.42-7.29L3 9.24l6.08-1.32L12 2z"/>
+          </svg>
+        </div>
+        <div class="coin-row">
+          <div class="coin-box">Gesamt: <span id="totalCoins">100</span> 🪙</div>
+          <div class="coin-box">Runde: <span id="roundCoins">0</span> 🪙</div>
+        </div>
+      </div>
+    </div>
+
     <div class="question-selection-row">
       <div class="question-selection" id="questionSelection"></div>
     </div>
@@ -628,18 +645,6 @@
         </div>
       </div>
       <div class="answer-panel">
-        <div class="answer-top-row">
-          <div class="xp-box" id="xpBox">
-            <span id="xpValue">0</span>
-            <svg class="xp-icon" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2l2.92 5.92L21 9.24l-4.58 4.47L17.84 21 12 17.77 6.16 21l1.42-7.29L3 9.24l6.08-1.32L12 2z"/>
-            </svg>
-          </div>
-          <div class="coin-row">
-            <div class="coin-box">Gesamt: <span id="totalCoins">100</span> 🪙</div>
-            <div class="coin-box">Runde: <span id="roundCoins">0</span> 🪙</div>
-          </div>
-        </div>
         <div id="options"></div>
         <button id="repeatBtn">🔄 Wiederholen</button>
         <div id="endScreen">
@@ -663,16 +668,56 @@
 </div>
 
 <script>
+  // Kleine Hilfsfunktion zum Mischen eines Arrays (Fisher-Yates)
+  function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  }
+
   /*********************************************************
-   *   Supabase-Konfiguration
+   *   Supabase-Konfiguration (mit persistSession)
    *********************************************************/
   const SUPABASE_URL = 'https://lqoulygftdjbnfxkrihy.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxxb3VseWdmdGRqYm5meGtyaWh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk0NzUzMDAsImV4cCI6MjA1NTA1MTMwMH0.VInK_7i6zY_f5zjHSR0U93Ut0L7ku_Q0C9xS-u4Lols';
-  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true
+    }
+  });
 
   const authContainer = document.getElementById("authContainer");
   const quizContainer = document.getElementById("quizContainer");
   const authMessage = document.getElementById("authMessage");
+  const usernameDisplay = document.getElementById("usernameDisplay");
+
+  // Soundeffekte
+  const correctSound = new Audio("https://lqoulygftdjbnfxkrihy.supabase.co/storage/v1/object/public/quiz-assets//correct.mp3");
+  const wrongSound = new Audio("https://lqoulygftdjbnfxkrihy.supabase.co/storage/v1/object/public/quiz-assets//wrong.mp3");
+
+  // Variablen für Quiz und Stats
+  let questions = [];
+  let currentIndex = 0;
+
+  // Der Benutzer hat in der DB (user_stats) bereits XP und Coins
+  let totalCoins = 100;
+  let xp = 0;
+
+  // Dies hier sind "nur" für diese Quiz-Runde
+  let roundCoins = 0;
+  let quizXp = 0; // neu: XP in dieser Quiz-Session
+  let xpGoal = 0;
+
+  let streak = 0;
+  let answeredCorrectly = [];
+  let alreadyAnsweredQuestionIds = [];
+  const halfCircleCircumference = 50.265;
+
+  // Supabase User-ID
+  let supabaseUserId = null;
 
   // Registrieren
   document.getElementById("registerBtn").addEventListener("click", async () => {
@@ -681,7 +726,6 @@
     const password = document.getElementById("regPasswordInput").value.trim();
     const university = document.getElementById("regUniversitySelect").value;
 
-    // Pflichtfelder prüfen
     if (!username) {
       authMessage.innerText = "Bitte einen Benutzernamen eingeben!";
       return;
@@ -745,45 +789,60 @@
   }
 
   // Quiz starten => Auth-Bereich ausblenden
-  function startQuiz(userId) {
-    console.log("Starte Quiz für User:", userId);
+  async function startQuiz(userId) {
+    supabaseUserId = userId; 
     authContainer.style.display = "none";
     quizContainer.style.display = "block";
+
+    // Hole den Benutzernamen aus "profiles"
+    const { data: profileData } = await supabaseClient
+      .from('profiles')
+      .select('username')
+      .eq('id', supabaseUserId)
+      .single();
+
+    // Falls in "profiles" nichts steht, fallback auf user.email
+    const { data: userData } = await supabaseClient.auth.getUser();
+
+    if (profileData && profileData.username && profileData.username.trim() !== "") {
+      usernameDisplay.textContent = profileData.username;
+    } else {
+      if (userData?.user?.email) {
+        usernameDisplay.textContent = userData.user.email;
+      }
+    }
+
     initQuizWithSupabaseUser(userId);
   }
 
   // -------------- Quiz-Code --------------
-  let questions = [];
-  let currentIndex = 0;
-  let totalCoins = 100;
-  let roundCoins = 0;
-  let xp = 0;
-  let xpGoal = 0;
-  let streak = 0;
-  let answeredCorrectly = [];
-  let alreadyAnsweredQuestionIds = [];
-  const halfCircleCircumference = 50.265;
-
-  // Wir speichern hier die Supabase User-ID
-  let supabaseUserId = null;
-
-  // Ersetzt getWixUserId durch supabaseUserId
-  function getWixUserId() {
-    return supabaseUserId;
-  }
-
   async function initQuizWithSupabaseUser(userId) {
-    supabaseUserId = userId; 
-    await ensureUserInSupabase(supabaseUserId);
-    const userStats = await fetchSupabaseData("user_stats");
-    if (userStats.length > 0) {
-      const user = userStats[0];
-      xp = user.total_xp || 0;
-      totalCoins = user.total_coins || 0;
-      streak = user.streak || 0;
+    await ensureUserInSupabase(userId);
+
+    // User-Stats abrufen
+    const { data: statsData } = await supabaseClient
+      .from('user_stats')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+
+    if (statsData) {
+      xp = statsData.total_xp || 0;
+      totalCoins = statsData.total_coins || 0;
+      streak = statsData.streak || 0;
     }
     document.getElementById("xpValue").innerText = xp;
     document.getElementById("totalCoins").innerText = totalCoins;
+
+    // Already answered questions abrufen
+    const answeredRes = await supabaseClient
+      .from('answered_questions')
+      .select('question_id')
+      .eq('user_id', userId);
+
+    if (answeredRes.data) {
+      alreadyAnsweredQuestionIds = answeredRes.data.map(item => item.question_id);
+    }
 
     // Lese chapterId aus der URL (Standard "1", falls nicht gesetzt)
     const urlParams = new URLSearchParams(window.location.search);
@@ -796,24 +855,33 @@
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (session) {
       // User hat noch eine gültige Session
-      console.log("Bestehende Session gefunden:", session);
       authContainer.style.display = "none";
       quizContainer.style.display = "block";
+      supabaseUserId = session.user.id;
+
+      // Hole den Benutzernamen aus "profiles"
+      const { data: profileData } = await supabaseClient
+        .from('profiles')
+        .select('username')
+        .eq('id', supabaseUserId)
+        .single();
+
+      const { data: userData } = await supabaseClient.auth.getUser();
+
+      if (profileData && profileData.username && profileData.username.trim() !== "") {
+        usernameDisplay.textContent = profileData.username;
+      } else {
+        if (userData?.user?.email) {
+          usernameDisplay.textContent = userData.user.email;
+        }
+      }
+
       initQuizWithSupabaseUser(session.user.id);
     } else {
       // Keine Session => Zeige Auth-Bereich
       authContainer.style.display = "block";
     }
   });
-
-  async function fetchSupabaseData(table) {
-    const { data, error } = await supabaseClient.from(table).select('*');
-    if (error) {
-      console.error('Fehler beim Abrufen der Daten:', error);
-      return [];
-    }
-    return data;
-  }
 
   async function ensureUserInSupabase(userId) {
     const { data, error } = await supabaseClient.from('user_stats')
@@ -854,28 +922,17 @@
     }
   }
 
-  async function fetchAlreadyAnsweredQuestions(userId) {
-    const { data, error } = await supabaseClient.from('answered_questions')
-      .select('question_id')
-      .eq('user_id', userId);
-    if (error) {
-      console.error('Fehler beim Abrufen der beantworteten Fragen:', error);
-      return [];
-    }
-    return data.map(d => d.question_id);
-  }
-
   async function handleStreak(userId, totalCorrect) {
     if (totalCorrect > 0) {
       streak++;
-      console.log("Streak erhöht auf", streak);
       await updateUserStatsInSupabase(userId, xp, totalCoins, streak);
     }
   }
 
   async function loadQuestions(chapterId) {
     try {
-      const url = `${SUPABASE_URL}/rest/v1/questions?chapter_id=eq.${chapterId}`;
+      // Hier: 'select=*' hinzufügen, um alle Spalten abzurufen
+      const url = `${SUPABASE_URL}/rest/v1/questions?select=*&chapter_id=eq.${chapterId}`;
       const response = await fetch(url, {
         method: 'GET',
         headers: {
@@ -890,6 +947,10 @@
       if (Array.isArray(data) && data.length > 0) {
         questions = data;
         xpGoal = data.length * 10;
+        answeredCorrectly = new Array(questions.length).fill(false);
+        quizXp = 0;
+        roundCoins = 0;
+        currentIndex = 0;
         createQuestionSelection();
         showQuestion();
       } else {
@@ -1016,93 +1077,6 @@
       return;
     }
 
-    async function createDragDropQuestion(q) {
-      const options = document.getElementById("options");
-      options.innerHTML = "";
-
-      let { data, error } = await supabaseClient
-        .from('dragdrop_pairs')
-        .select('*')
-        .eq('group_id', q.id);
-
-      if (error) {
-        console.error("Fehler beim Laden der Drag & Drop Daten:", error);
-        options.innerHTML = "<p>Fehler beim Laden der Drag-&-Drop-Daten!</p>";
-        return;
-      }
-      if (!data || data.length === 0) {
-        options.innerHTML = "<p>Keine Drag & Drop-Daten vorhanden!</p>";
-        return;
-      }
-
-      const assignment = document.createElement("div");
-      assignment.className = "assignment-container";
-
-      data.forEach((itemObj, index) => {
-        const pair = document.createElement("div");
-        pair.className = "assignment-pair";
-
-        const item = document.createElement("div");
-        item.className = "draggable-item";
-        item.innerText = itemObj.drag_text;
-        item.id = `draggable-${itemObj.id}`;
-        item.draggable = true;
-        item.addEventListener("dragstart", ev => {
-          ev.dataTransfer.setData("text", item.id);
-          ev.dataTransfer.effectAllowed = "move";
-        });
-
-        const target = document.createElement("div");
-        target.className = "target-zone";
-        target.dataset.correct = itemObj.correct_match;
-
-        target.addEventListener("dragover", ev => {
-          ev.preventDefault();
-          target.classList.add("hover");
-          ev.dataTransfer.dropEffect = "move";
-        });
-        target.addEventListener("dragleave", () => {
-          target.classList.remove("hover");
-        });
-        target.addEventListener("drop", ev => {
-          ev.preventDefault();
-          target.classList.remove("hover");
-          const sourceId = ev.dataTransfer.getData("text");
-          const source = document.getElementById(sourceId);
-          if (source) {
-            target.innerText = source.innerText;
-            if (source.innerText === target.dataset.correct) {
-              target.style.backgroundColor = "#a4f9a4";
-            } else {
-              target.style.backgroundColor = "#f9a4a4";
-            }
-            source.style.visibility = "hidden";
-          }
-        });
-
-        pair.appendChild(item);
-        pair.appendChild(target);
-        assignment.appendChild(pair);
-      });
-
-      options.appendChild(assignment);
-
-      const checkBtn = document.createElement("button");
-      checkBtn.innerText = "Antwort prüfen";
-      checkBtn.onclick = () => {
-        const targetZones = Array.from(assignment.querySelectorAll(".target-zone"));
-        let correctCount = 0;
-        targetZones.forEach(tz => {
-          if (tz.innerText === tz.dataset.correct) {
-            correctCount++;
-          }
-        });
-        const isCorrect = (correctCount === targetZones.length);
-        checkAnswer(isCorrect ? "Richtig" : "Falsch", q, false, "drag_drop");
-      };
-      options.appendChild(checkBtn);
-    }
-
     const userAnswers = new Array(subQuestions.length).fill(null);
     subQuestions.forEach((sq, index) => {
       const container = document.createElement("div");
@@ -1151,9 +1125,9 @@
   }
 
   function createStandardQuestion(q, type) {
-    const options = document.getElementById("options");
     switch (type) {
-      case "multiple_choice":
+      case "multiple_choice": {
+        const options = document.getElementById("options");
         ["Antwort A", "Antwort B", "Antwort C", "Antwort D"].forEach(key => {
           if (q[key] && q[key].trim() !== "") {
             const btn = document.createElement("button");
@@ -1163,11 +1137,140 @@
           }
         });
         break;
+      }
       case "drag_drop": {
         createDragDropQuestion(q);
         break;
       }
     }
+  }
+
+  // Drag & Drop in 2-Spalten-Layout
+  async function createDragDropQuestion(q) {
+    const options = document.getElementById("options");
+    options.innerHTML = "";
+
+    // Gruppe holen
+    let { data: groupData, error: groupError } = await supabaseClient
+      .from('dragdrop_groups')
+      .select('*')
+      .eq('question_id', q.id)
+      .single();
+
+    if (groupError || !groupData) {
+      console.error("Fehler beim Laden der Drag & Drop Gruppe:", groupError);
+      options.innerHTML = "<p>Fehler beim Laden der Drag-&-Drop-Daten!</p>";
+      return;
+    }
+
+    const groupId = groupData.id;
+    let { data: pairsData, error: pairsError } = await supabaseClient
+      .from('dragdrop_pairs')
+      .select('*')
+      .eq('group_id', groupId);
+
+    if (pairsError) {
+      console.error("Fehler beim Laden der Drag & Drop Paare:", pairsError);
+      options.innerHTML = "<p>Fehler beim Laden der Drag-&-Drop-Daten!</p>";
+      return;
+    }
+    if (!pairsData || pairsData.length === 0) {
+      options.innerHTML = "<p>Keine Drag & Drop-Daten vorhanden!</p>";
+      return;
+    }
+
+    console.log("groupData:", groupData);
+    console.log("pairsData:", pairsData);
+
+    // Kopien erstellen, um die Listen unabhängig zu mischen
+    const draggedList = [...pairsData];
+    const targetList = [...pairsData];
+    shuffleArray(draggedList); // Mische links
+    shuffleArray(targetList);  // Mische rechts
+
+    // Container
+    const container = document.createElement("div");
+    container.className = "dragdrop-container";
+
+    // Linke Spalte (Ziehen)
+    const dragCol = document.createElement("div");
+    dragCol.className = "drag-column";
+    const dragHeader = document.createElement("h3");
+    dragHeader.textContent = "Ziehen";
+    dragCol.appendChild(dragHeader);
+
+    // Rechte Spalte (Ablegen)
+    const dropCol = document.createElement("div");
+    dropCol.className = "drop-column";
+    const dropHeader = document.createElement("h3");
+    dropHeader.textContent = "Ablegen";
+    dropCol.appendChild(dropHeader);
+
+    // Draggable Items (links)
+    draggedList.forEach(itemObj => {
+      const dragItem = document.createElement("div");
+      dragItem.className = "draggable-item";
+      dragItem.textContent = itemObj.drag_text;  // z.B. "§ 854 BGB"
+      dragItem.dataset.pairId = itemObj.id;       // die ID
+
+      dragItem.draggable = true;
+      dragItem.addEventListener("dragstart", e => {
+        e.dataTransfer.setData("pairId", itemObj.id);
+        e.dataTransfer.effectAllowed = "move";
+      });
+
+      dragCol.appendChild(dragItem);
+    });
+
+    // Drop-Zonen (rechts)
+    targetList.forEach(itemObj => {
+      const dropTarget = document.createElement("div");
+      dropTarget.className = "drop-target";
+      dropTarget.textContent = itemObj.correct_match; // z.B. "Besitz"
+      dropTarget.dataset.pairId = itemObj.id;         // dieselbe ID
+
+      dropTarget.addEventListener("dragover", e => {
+        e.preventDefault();
+        dropTarget.classList.add("hover");
+      });
+      dropTarget.addEventListener("dragleave", () => {
+        dropTarget.classList.remove("hover");
+      });
+      dropTarget.addEventListener("drop", e => {
+        e.preventDefault();
+        dropTarget.classList.remove("hover");
+        const sourcePairId = e.dataTransfer.getData("pairId");
+        // Prüfung: wenn IDs matchen => matched = "true", sonst "false"
+        if (String(sourcePairId) === String(dropTarget.dataset.pairId)) {
+          dropTarget.style.backgroundColor = "#a4f9a4"; 
+          dropTarget.dataset.matched = "true";   // Datenflag setzen
+        } else {
+          dropTarget.style.backgroundColor = "#f9a4a4";
+          dropTarget.dataset.matched = "false";  // Datenflag setzen
+        }
+      });
+
+      dropCol.appendChild(dropTarget);
+    });
+
+    container.appendChild(dragCol);
+    container.appendChild(dropCol);
+    options.appendChild(container);
+
+    // Button "Antwort prüfen"
+    const checkBtn = document.createElement("button");
+    checkBtn.innerText = "Antwort prüfen";
+    checkBtn.onclick = () => {
+  const dropTargets = dropCol.querySelectorAll(".drop-target");
+  let correctCount = 0;
+  dropTargets.forEach(t => {
+    if (t.dataset.matched === "true") correctCount++;
+  });
+  const allCorrect = (correctCount === dropTargets.length);
+  // “Richtig” oder “Falsch” übergeben
+  checkAnswer(allCorrect ? "Richtig" : "Falsch", q, false, "drag_drop");
+};
+    options.appendChild(checkBtn);
   }
 
   function createLueckentext(q) {
@@ -1209,11 +1312,18 @@
     });
   }
 
-  function shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
+  function updateProgressBar() {
+    const total = questions.length;
+    const pb = document.getElementById("progress-bar");
+    const progressInfo = document.getElementById("progressInfo");
+    if (total === 0) {
+      pb.style.width = "0%";
+      progressInfo.innerText = "Frage 0 von 0";
+      return;
     }
+    const percent = ((currentIndex + 1) / total) * 100;
+    pb.style.width = percent + "%";
+    progressInfo.innerText = `Frage ${currentIndex + 1} von ${total}`;
   }
 
   // checkAnswer-Funktion
@@ -1231,6 +1341,9 @@
     explanationContainer.style.display = "block";
     explanationText.innerHTML = "";
 
+    const qId = question.id != null ? question.id : currentIndex;
+    const wasAlreadyAnswered = alreadyAnsweredQuestionIds.includes(qId);
+
     if (type === "open_question") {
       nextBtn.style.display = "none";
       approveBtn.style.display = "inline-block";
@@ -1241,12 +1354,7 @@
         <strong>Eingegebene Antwort:</strong><br>${userAnswer || "(leer)"}<br><br>
         <strong>Richtige Antwort:</strong><br>${correctAnswer}<br><br>
       `;
-      let erk = "";
-      if (question["Begründung"]) {
-        erk = question["Begründung"];
-      } else if (question["Erklärtext"]) {
-        erk = question["Erklärtext"];
-      }
+      let erk = question["Begründung"] || question["Erklärtext"] || "";
       if (erk.trim() !== "") {
         msg += `<strong>Erklärung:</strong><br>${erk}`;
       }
@@ -1260,49 +1368,53 @@
       const correctAnswer = question["Richtige Antwort"] || "";
       let isCorrect = false;
 
+      if (type === "drag_drop") {
+          // Wir haben userAnswer = "Richtig" oder "Falsch"
+          isCorrect = (userAnswer === "Richtig");
+        } else {
+          // Normaler Vergleich gegen question["Richtige Antwort"]
+          const correctAnswer = question["Richtige Antwort"] || "";
+          if (correctAnswer && userAnswer.toLowerCase().trim() === correctAnswer.toLowerCase().trim()) {
+            isCorrect = true;
+          }
+        }
+
       if (correctAnswer) {
         isCorrect = (userAnswer.toLowerCase().trim() === correctAnswer.toLowerCase().trim());
       }
 
-      if (type === "multiple_choice") {
+      if (type === "multiple_choice" || type === "drag_drop" || type === "true_false" || type === "case") {
         msg = isCorrect ? `✅ <strong>Richtig!</strong><br><br>` : `❌ <strong>Falsch!</strong><br><br>`;
-      } else {
-        msg = isCorrect ? `✅ <strong>Richtig!</strong><br>` : `❌ <strong>Falsch!</strong><br>`;
       }
-
       if (!isCorrect && type === "lueckentext") {
+        msg = `❌ <strong>Falsch!</strong><br><br>`;
         msg += `Eingegebene Antwort:<br>${userAnswer}<br><br>`;
         msg += `Richtige Antwort:<br>${correctAnswer}<br><br>`;
       }
 
-      let erk = "";
-      if (question["Begründung"]) {
-        erk = question["Begründung"];
-      } else if (question["Erklärtext"]) {
-        erk = question["Erklärtext"];
-      }
+      let erk = question["Begründung"] || question["Erklärtext"] || "";
       if (erk.trim() !== "") {
-        msg += (type === "multiple_choice") 
-          ? `<strong>Erklärung:</strong><br>${erk}`
-          : `Erklärung:<br>${erk}`;
+        msg += `<strong>Erklärung:</strong><br>${erk}`;
       }
       explanationText.innerHTML = msg;
 
-      const qId = question.id != null ? question.id : currentIndex;
-      const wasAlreadyAnswered = alreadyAnsweredQuestionIds.includes(qId);
-
+      // Sound abspielen, XP/Coins nur vergeben, wenn Frage NICHT bereits beantwortet
       if (!wasAlreadyAnswered) {
         if (isCorrect) {
+          correctSound.play();
           roundCoins++;
           totalCoins++;
-          showCoinChange(+1, document.getElementById("totalCoins").parentElement);
-          showCoinChange(+1, document.getElementById("roundCoins").parentElement);
+          quizXp += 10; 
+          xp += 10;     
 
-          xp += 10;
           answeredCorrectly[currentIndex] = true;
           document.getElementById("xpValue").innerText = xp;
           showXPChange(10);
+
+          showCoinChange(+1, document.getElementById("totalCoins").parentElement);
+          showCoinChange(+1, document.getElementById("roundCoins").parentElement);
         } else {
+          wrongSound.play();
           if (roundCoins > 0) {
             roundCoins--;
             showCoinChange(-1, document.getElementById("roundCoins").parentElement);
@@ -1313,8 +1425,8 @@
           }
         }
         alreadyAnsweredQuestionIds.push(qId);
-        markQuestionAsAnsweredInSupabase(getWixUserId(), qId);
-        updateUserStatsInSupabase(getWixUserId(), xp, totalCoins, streak);
+        markQuestionAsAnsweredInSupabase(supabaseUserId, qId);
+        updateUserStatsInSupabase(supabaseUserId, xp, totalCoins, streak);
       }
       document.getElementById("roundCoins").innerText = roundCoins;
       document.getElementById("totalCoins").innerText = totalCoins;
@@ -1327,6 +1439,7 @@
   document.getElementById("rejectBtn").onclick = () => {
     handleOpenQuestionResult(false);
   };
+
   function handleOpenQuestionResult(isApproved) {
     const q = questions[currentIndex];
     const qId = q.id != null ? q.id : currentIndex;
@@ -1334,18 +1447,22 @@
 
     if (!wasAlreadyAnswered) {
       if (isApproved) {
+        correctSound.play();
+        roundCoins++;
+        totalCoins++;
+        quizXp += 10;
         xp += 10;
+
         answeredCorrectly[currentIndex] = true;
         document.getElementById("xpValue").innerText = xp;
         showXPChange(10);
 
-        roundCoins++;
-        totalCoins++;
         document.getElementById("roundCoins").innerText = roundCoins;
         document.getElementById("totalCoins").innerText = totalCoins;
         showCoinChange(+1, document.getElementById("totalCoins").parentElement);
         showCoinChange(+1, document.getElementById("roundCoins").parentElement);
       } else {
+        wrongSound.play();
         if (roundCoins > 0) {
           roundCoins--;
           showCoinChange(-1, document.getElementById("roundCoins").parentElement);
@@ -1358,8 +1475,8 @@
         document.getElementById("totalCoins").innerText = totalCoins;
       }
       alreadyAnsweredQuestionIds.push(qId);
-      markQuestionAsAnsweredInSupabase(getWixUserId(), qId);
-      updateUserStatsInSupabase(getWixUserId(), xp, totalCoins, streak);
+      markQuestionAsAnsweredInSupabase(supabaseUserId, qId);
+      updateUserStatsInSupabase(supabaseUserId, xp, totalCoins, streak);
     }
     setTimeout(() => {
       nextQuestion();
@@ -1369,6 +1486,7 @@
   document.getElementById("nextBtn").onclick = () => {
     nextQuestion();
   };
+
   function nextQuestion() {
     currentIndex++;
     showQuestion();
@@ -1383,31 +1501,13 @@
 
   function resetQuiz() {
     currentIndex = 0;
-    roundCoins = 0;
-    totalCoins = 100;
-    xp = 0;
     answeredCorrectly = new Array(questions.length).fill(false);
-    alreadyAnsweredQuestionIds = [];
+    quizXp = 0;
+    roundCoins = 0;
     document.getElementById("roundCoins").innerText = roundCoins;
-    document.getElementById("totalCoins").innerText = totalCoins;
-    document.getElementById("xpValue").innerText = xp;
     document.getElementById("repeatBtn").style.display = "none";
     document.getElementById("endScreen").style.display = "none";
     showQuestion();
-  }
-
-  function updateProgressBar() {
-    const total = questions.length;
-    const pb = document.getElementById("progress-bar");
-    const progressInfo = document.getElementById("progressInfo");
-    if (total === 0) {
-      pb.style.width = "0%";
-      progressInfo.innerText = "Frage 0 von 0";
-      return;
-    }
-    const percent = ((currentIndex + 1) / total) * 100;
-    pb.style.width = percent + "%";
-    progressInfo.innerText = `Frage ${currentIndex + 1} von ${total}`;
   }
 
   function showCoinChange(amount, element) {
@@ -1444,7 +1544,8 @@
     const coinBalance = document.getElementById("coinBalance");
     const medalInfo = document.getElementById("medalInfo");
 
-    let netCoins = totalCoins - 100;
+    // Zeige die Coin-Bilanz (nur für dieses Quiz)
+    let netCoins = roundCoins;
     let coinMsg = "";
     if (netCoins > 0) {
       coinMsg = `Münzen-Bilanz: +${netCoins} 🪙`;
@@ -1455,10 +1556,12 @@
     }
     coinBalance.textContent = coinMsg;
 
-    xpText.textContent = `${xp} / ${xpGoal} XP`;
+    // xpText: Nur XP aus diesem Quiz: quizXp / xpGoal
+    xpText.textContent = `${quizXp} / ${xpGoal} XP`;
 
+    // Halbkreis animieren
     circleBar.setAttribute("stroke-dasharray", `0, ${halfCircleCircumference}`);
-    const finalProgress = (xp / xpGoal) * halfCircleCircumference;
+    const finalProgress = (quizXp / xpGoal) * halfCircleCircumference;
     let current = 0;
     const steps = 50;
     const stepValue = finalProgress / steps;
@@ -1490,12 +1593,28 @@
     } else {
       medal = "Keine Medaille";
     }
+
+    medalInfo.innerHTML = ""; // Leeren, um Neues anzuzeigen
+
     if (medal !== "Keine Medaille") {
-      medalInfo.textContent = `Herzlichen Glückwunsch! Du hast eine ${medal}-Medaille verdient (${Math.round(percent)}%).`;
+      medalInfo.textContent = `Du hast ${Math.round(percent)}% richtig – ${medal}-Medaille!`;
+
+      const medalImg = document.createElement("img");
+      medalImg.className = "medal-image";
+
+      if (medal === "Gold") {
+        medalImg.src = "https://lqoulygftdjbnfxkrihy.supabase.co/storage/v1/object/public/quiz-medals//Goldmedaille.svg";
+      } else if (medal === "Silber") {
+        medalImg.src = "https://lqoulygftdjbnfxkrihy.supabase.co/storage/v1/object/public/quiz-medals//Silbermedaille.svg";
+      } else if (medal === "Bronze") {
+        medalImg.src = "https://lqoulygftdjbnfxkrihy.supabase.co/storage/v1/object/public/quiz-medals//Bronzemedaille.svg";
+      }
+      medalInfo.appendChild(medalImg);
     } else {
       medalInfo.textContent = `Du hast ${Math.round(percent)}% richtig – keine Medaille diesmal.`;
     }
-    handleStreak(getWixUserId(), correctCount);
+
+    handleStreak(supabaseUserId, correctCount);
   }
 </script>
 </body>
