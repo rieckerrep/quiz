@@ -12,6 +12,7 @@
       font-family: Cambria, serif;
       box-sizing: border-box;
     }
+
     /***********************************
      *   Gesamt-Container mit Rand     
      ***********************************/
@@ -192,25 +193,26 @@
       color: #fff !important;
     }
     /***************************
-     *   End-Screen
+     *   End-Screen (komprimiert)
      ***************************/
     #endScreen {
       display: none;
       text-align: center;
       margin: 20px auto;
-      max-width: 400px; /* Feste maximale Breite */
+      max-width: 400px; /* Feste max-Breite */
       padding: 10px;
       box-sizing: border-box;
+      font-size: 0.9rem; /* Schrift etwas kleiner */
     }
     .justice-icon {
       width: 100%;
-      max-width: 150px;
+      max-width: 120px;
       height: auto;
-      margin-bottom: 10px;
+      margin-bottom: 5px;
     }
     .circular-progress {
       width: 100%;
-      max-width: 150px;
+      max-width: 120px;
       height: auto;
       margin: 0 auto 10px auto;
       position: relative;
@@ -238,7 +240,7 @@
     }
     #endTitle {
       margin: 0;
-      font-size: 1.5rem;
+      font-size: 1.2rem;
     }
     #endMessage {
       margin: 5px 0 5px 0;
@@ -252,8 +254,8 @@
       color: #fff;
       border: 2px solid #000;
       border-radius: 5px;
-      padding: 10px 20px;
-      font-size: 16px;
+      padding: 8px 16px;
+      font-size: 14px;
       cursor: pointer;
       transition: background-color 0.3s, color 0.3s;
       display: inline-block;
@@ -268,8 +270,8 @@
       font-weight: bold;
     }
     .medal-image {
-      width: 60px;
-      height: 60px;
+      width: 50px;
+      height: 50px;
       display: block;
       margin: 10px auto;
     }
@@ -360,12 +362,11 @@
       }
     }
     /********************************************
-     *   Header-Bar (Username + XP + Coins)
+     *   Header-Bar (Username + XP + Coins + Logout)
      ********************************************/
     #headerBar {
       display: flex;
       align-items: center;
-      justify-content: flex-start;
       padding: 10px;
       border-bottom: 2px solid black;
       background-color: #f0f0f0;
@@ -378,16 +379,18 @@
       border-radius: 50%;
       background-color: #ccc;
       flex-shrink: 0;
+      background-size: cover;       /* Avatar-Bild füllt Kreis aus */
+      background-position: center;
     }
     #usernameDisplay {
       font-weight: bold;
       color: #000;
-      margin-right: auto;
     }
     .header-stats-row {
       display: flex;
       align-items: center;
       gap: 10px;
+      margin-left: auto; /* nach rechts schieben */
     }
     .xp-box {
       display: flex;
@@ -454,119 +457,15 @@
       0% { opacity: 1; transform: translateY(0); }
       100% { opacity: 0; transform: translateY(50px); }
     }
-    
-    /* Größere Container für Drag & Drop */
-    .dragdrop-container {
-      display: flex;
-      gap: 60px;
-      justify-content: space-around;
-      margin-bottom: 20px;
-      min-height: 400px;
+    #logoutContainer {
+      cursor: pointer;
+      padding: 5px;
     }
-    .drag-column, .drop-column {
-      width: 45%;
-      border: 2px solid #ccc;
-      border-radius: 5px;
-      padding: 20px;
-      min-height: 300px;
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
+    .logout-icon {
+      width: 30px;
+      height: 30px;
     }
-    .drag-column h3, .drop-column h3 {
-      margin-top: 0;
-      text-align: center;
-      font-size: 1.1rem;
-    }
-    .draggable-item {
-      background: #333;
-      color: #fff;
-      padding: 8px 10px;
-      border-radius: 5px;
-      margin: 10px 0;
-      cursor: move;
-      text-align: center;
-    }
-    .drop-target {
-      background-color: #fff;
-      border: 2px dashed #888;
-      border-radius: 5px;
-      padding: 8px 10px;
-      margin: 10px 0;
-      min-height: 50px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .drop-target.hover {
-      background-color: #eee;
-    }
-    
-    @media (max-width: 768px) {
-      .content-row {
-        flex-direction: column;
-      }
-      .question-panel {
-        width: 100%;
-        order: 1;
-      }
-      .answer-panel {
-        width: 100%;
-        order: 2;
-      }
-      #explanationContainer {
-        order: 3;
-        margin-top: 10px;
-      }
-    }
-    @media (prefers-color-scheme: dark) {
-      body {
-        background-color: #222;
-        color: #fff;
-      }
-      #quiz-container {
-        border: 2px solid #999;
-        background-color: #333;
-      }
-      .question-panel {
-        background-color: #111;
-      }
-      .answer-panel {
-        background-color: transparent;
-        color: #fff;
-      }
-      button {
-        border: 1px solid #999;
-      }
-      button:hover {
-        background-color: rgba(255,255,255,0.8);
-        color: #000;
-      }
-      .question-select-item {
-        background-color: rgba(255,255,255,1);
-        color: #000;
-      }
-      .question-select-item:hover {
-        background-color: rgba(255,255,255,0.8);
-      }
-      .coin-box {
-        color: #000;
-        background: gold;
-      }
-      .circle-bg {
-        stroke: #bbb;
-      }
-      .percentage {
-        fill: #fff;
-      }
-      #usernameDisplay {
-        color: #fff;
-      }
-      #headerBar {
-        background-color: #444;
-        border-bottom: 2px solid #999;
-      }
-    }
+    /* Ende Header-Bar */
   </style>
 </head>
 <body>
@@ -590,6 +489,7 @@
       <input type="password" id="regPasswordInput" placeholder="Passwort">
       <select id="regUniversitySelect">
         <option value="">Hochschule auswählen</option>
+        <!-- Hochschulliste -->
         <option value="Universität Augsburg">Universität Augsburg</option>
         <option value="Universität Bayreuth">Universität Bayreuth</option>
         <option value="Freie Universität Berlin">Freie Universität Berlin</option>
@@ -664,9 +564,11 @@
             <path d="M12 2l2.92 5.92L21 9.24l-4.58 4.47L17.84 21 12 17.77 6.16 21l1.42-7.29L3 9.24l6.08-1.32L12 2z"/>
           </svg>
         </div>
-        <div class="coin-row">
-          <div class="coin-box">Gesamt: <span id="totalCoins">100</span> 🪙</div>
-          <div class="coin-box">Runde: <span id="roundCoins">0</span> 🪙</div>
+        <div class="coin-box">Gesamt: <span id="totalCoins">100</span> 🪙</div>
+        <div class="coin-box">Runde: <span id="roundCoins">0</span> 🪙</div>
+        <div id="logoutContainer">
+          <img src="https://lqoulygftdjbnfxkrihy.supabase.co/storage/v1/object/public/quiz-assets//abmelden.svg"
+               alt="Abmelden" class="logout-icon">
         </div>
       </div>
     </div>
@@ -714,7 +616,7 @@
 </div>
 
 <script>
-  // Kleine Hilfsfunktion zum Mischen eines Arrays (Fisher-Yates)
+  // Array mischen (Fisher-Yates)
   function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -723,34 +625,24 @@
     return array;
   }
 
-  /*********************************************************
-   *   Supabase-Konfiguration (mit persistSession)
-   *********************************************************/
   const SUPABASE_URL = 'https://lqoulygftdjbnfxkrihy.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxxb3VseWdmdGRqYm5meGtyaWh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk0NzUzMDAsImV4cCI6MjA1NTA1MTMwMH0.VInK_7i6zY_f5zjHSR0U93Ut0L7ku_Q0C9xS-u4Lols';
   const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true
-    }
+    auth: { persistSession: true, autoRefreshToken: true }
   });
 
   const authContainer = document.getElementById("authContainer");
   const quizContainer = document.getElementById("quizContainer");
   const authMessage = document.getElementById("authMessage");
   const usernameDisplay = document.getElementById("usernameDisplay");
+  const profilePic = document.getElementById("profilePic");
 
-  // Soundeffekte
-  const correctSound = new Audio("https://lqoulygftdjbnfxkrihy.supabase.co/storage/v1/object/public/quiz-assets//correct.mp3");
-  const wrongSound = new Audio("https://lqoulygftdjbnfxkrihy.supabase.co/storage/v1/object/public/quiz-assets//wrong.mp3");
-
-  // Variablen für Quiz und Stats
   let questions = [];
   let currentIndex = 0;
   let totalCoins = 100;
   let xp = 0;
   let roundCoins = 0;
-  let quizXp = 0; // XP in dieser Quiz-Session
+  let quizXp = 0;
   let xpGoal = 0;
   let streak = 0;
   let answeredCorrectly = [];
@@ -764,6 +656,7 @@
     const email = document.getElementById("regEmailInput").value.trim();
     const password = document.getElementById("regPasswordInput").value.trim();
     const university = document.getElementById("regUniversitySelect").value;
+
     if (!username) {
       authMessage.innerText = "Bitte einen Benutzernamen eingeben!";
       return;
@@ -780,14 +673,24 @@
       authMessage.innerText = "Bitte eine Hochschule auswählen!";
       return;
     }
-    const { data, error } = await supabaseClient.auth.signUp({ email, password });
-    if (error) {
-      authMessage.innerText = "Registrierung fehlgeschlagen: " + error.message;
-      console.error("Registrierungs-Error:", error);
-    } else {
-      authMessage.innerText = "Registrierung erfolgreich!";
-      await saveUserProfile(data.user.id, username, university);
-      startQuiz(data.user.id);
+
+    try {
+      const { data, error } = await supabaseClient.auth.signUp({ email, password });
+      if (error) {
+        // Supabase gibt z. B. "User already registered" aus, wenn E-Mail doppelt ist
+        authMessage.innerText = "Registrierung fehlgeschlagen: " + error.message;
+        console.error("Registrierungs-Error:", error);
+      } else {
+        // Registrierungs-Erfolg
+        authMessage.innerText = "Registrierung erfolgreich!";
+        // Speichere username und university in "profiles"
+        // avatar_url kann optional gesetzt werden (z. B. Standard-Avatar)
+        await saveUserProfile(data.user.id, username, university);
+        startQuiz(data.user.id);
+      }
+    } catch (err) {
+      console.error("Unerwarteter Fehler bei Registrierung:", err);
+      authMessage.innerText = "Registrierung fehlgeschlagen. Bitte erneut versuchen.";
     }
   });
 
@@ -799,22 +702,29 @@
       authMessage.innerText = "Bitte E-Mail und Passwort eingeben!";
       return;
     }
-    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-    if (error) {
-      authMessage.innerText = "Login fehlgeschlagen: " + error.message;
-      console.error("Login-Error:", error);
-    } else {
-      authMessage.innerText = "Login erfolgreich!";
-      startQuiz(data.user.id);
+    try {
+      const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      if (error) {
+        authMessage.innerText = "Login fehlgeschlagen: " + error.message;
+        console.error("Login-Error:", error);
+      } else {
+        authMessage.innerText = "Login erfolgreich!";
+        startQuiz(data.user.id);
+      }
+    } catch (err) {
+      console.error("Unerwarteter Fehler bei Login:", err);
+      authMessage.innerText = "Login fehlgeschlagen. Bitte erneut versuchen.";
     }
   });
 
-  // Speichert Benutzernamen und Uni in "profiles"
+  // Speichert username und university in "profiles"
   async function saveUserProfile(userId, username, university) {
     if (!userId) return;
+    // Du könntest hier auch einen default avatar_url setzen, falls gewünscht
+    const defaultAvatar = "https://via.placeholder.com/80/cccccc/000000?text=Avatar";
     const { data, error } = await supabaseClient
       .from('profiles')
-      .insert([{ id: userId, username: username, university: university }]);
+      .insert([{ id: userId, username: username, university: university, avatar_url: defaultAvatar }]);
     if (error) {
       console.error("Fehler beim Speichern des Profils:", error);
     } else {
@@ -827,21 +737,44 @@
     supabaseUserId = userId;
     authContainer.style.display = "none";
     quizContainer.style.display = "block";
+
+    // Profil aus der DB holen
     const { data: profileData } = await supabaseClient
       .from('profiles')
-      .select('username')
+      .select('*')
       .eq('id', supabaseUserId)
       .single();
+
+    // Falls in "profiles" kein username/avatar_url steht, fallback
     const { data: userData } = await supabaseClient.auth.getUser();
+
     if (profileData && profileData.username && profileData.username.trim() !== "") {
       usernameDisplay.textContent = profileData.username;
-    } else {
-      if (userData?.user?.email) {
-        usernameDisplay.textContent = userData.user.email;
-      }
+    } else if (userData?.user?.email) {
+      usernameDisplay.textContent = userData.user.email;
     }
+
+    // Avatar
+    if (profileData && profileData.avatar_url) {
+      profilePic.style.backgroundImage = `url('${profileData.avatar_url}')`;
+    }
+
     initQuizWithSupabaseUser(userId);
   }
+
+  // Logout
+  document.getElementById("logoutContainer").addEventListener("click", function() {
+    if (confirm("Möchten Sie sich wirklich abmelden?")) {
+      supabaseClient.auth.signOut().then(() => {
+        // Nach erfolgreichem Abmelden: Auth-Bereich wieder anzeigen
+        authContainer.style.display = "block";
+        quizContainer.style.display = "none";
+        location.reload();
+      }).catch(err => {
+        console.error("Fehler beim Abmelden:", err);
+      });
+    }
+  });
 
   // -------------- Quiz-Code --------------
   async function initQuizWithSupabaseUser(userId) {
@@ -876,19 +809,24 @@
       authContainer.style.display = "none";
       quizContainer.style.display = "block";
       supabaseUserId = session.user.id;
+
+      // Profil laden
       const { data: profileData } = await supabaseClient
         .from('profiles')
-        .select('username')
+        .select('*')
         .eq('id', supabaseUserId)
         .single();
       const { data: userData } = await supabaseClient.auth.getUser();
+
       if (profileData && profileData.username && profileData.username.trim() !== "") {
         usernameDisplay.textContent = profileData.username;
-      } else {
-        if (userData?.user?.email) {
-          usernameDisplay.textContent = userData.user.email;
-        }
+      } else if (userData?.user?.email) {
+        usernameDisplay.textContent = userData.user.email;
       }
+      if (profileData && profileData.avatar_url) {
+        profilePic.style.backgroundImage = `url('${profileData.avatar_url}')`;
+      }
+
       initQuizWithSupabaseUser(session.user.id);
     } else {
       authContainer.style.display = "block";
@@ -1166,8 +1104,6 @@
       options.innerHTML = "<p>Keine Drag & Drop-Daten vorhanden!</p>";
       return;
     }
-    console.log("groupData:", groupData);
-    console.log("pairsData:", pairsData);
     const draggedList = [...pairsData];
     const targetList = [...pairsData];
     shuffleArray(draggedList);
@@ -1184,6 +1120,7 @@
     const dropHeader = document.createElement("h3");
     dropHeader.textContent = "Ablegen";
     dropCol.appendChild(dropHeader);
+
     draggedList.forEach(itemObj => {
       const dragItem = document.createElement("div");
       dragItem.className = "draggable-item";
@@ -1196,6 +1133,7 @@
       });
       dragCol.appendChild(dragItem);
     });
+
     targetList.forEach(itemObj => {
       const dropTarget = document.createElement("div");
       dropTarget.className = "drop-target";
@@ -1222,9 +1160,11 @@
       });
       dropCol.appendChild(dropTarget);
     });
+
     container.appendChild(dragCol);
     container.appendChild(dropCol);
     options.appendChild(container);
+
     const checkBtn = document.createElement("button");
     checkBtn.innerText = "Antwort prüfen";
     checkBtn.onclick = () => {
@@ -1301,6 +1241,7 @@
     explanationText.innerHTML = "";
     const qId = question.id != null ? question.id : currentIndex;
     const wasAlreadyAnswered = alreadyAnsweredQuestionIds.includes(qId);
+
     if (type === "open_question") {
       nextBtn.style.display = "none";
       approveBtn.style.display = "inline-block";
@@ -1322,16 +1263,15 @@
       let msg = "";
       const correctAnswer = question["Richtige Antwort"] || "";
       let isCorrect = false;
+
       if (type === "drag_drop") {
-          isCorrect = (userAnswer === "Richtig");
-        } else {
-          if (correctAnswer && userAnswer.toLowerCase().trim() === correctAnswer.toLowerCase().trim()) {
-            isCorrect = true;
-          }
+        isCorrect = (userAnswer === "Richtig");
+      } else {
+        if (correctAnswer && userAnswer.toLowerCase().trim() === correctAnswer.toLowerCase().trim()) {
+          isCorrect = true;
         }
-      if (correctAnswer) {
-        isCorrect = (userAnswer.toLowerCase().trim() === correctAnswer.toLowerCase().trim());
       }
+
       if (type === "multiple_choice" || type === "drag_drop" || type === "true_false" || type === "case") {
         msg = isCorrect ? `✅ <strong>Richtig!</strong><br><br>` : `❌ <strong>Falsch!</strong><br><br>`;
       }
@@ -1345,6 +1285,7 @@
         msg += `<strong>Erklärung:</strong><br>${erk}`;
       }
       explanationText.innerHTML = msg;
+
       if (!wasAlreadyAnswered) {
         if (isCorrect) {
           correctSound.play();
