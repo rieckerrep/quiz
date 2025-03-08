@@ -65,7 +65,10 @@
       left: 50%; top: 0; transform: translateX(-50%);
       animation: xp-float-up 2s ease-out forwards;
     }
-    @keyframes xp-float-up { 0% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -40px); } }
+    @keyframes xp-float-up {
+      0% { opacity: 1; transform: translate(-50%, 0); }
+      100% { opacity: 0; transform: translate(-50%, -40px); }
+    }
     .coin-box {
       background: gold; padding: 5px 10px; border-radius: 10px;
       color: #000; position: relative; font-weight: bold;
@@ -76,8 +79,14 @@
     }
     .coin-change.positive { color: green; animation: float-up 2s ease-out forwards; }
     .coin-change.negative { color: red; animation: float-down 2s ease-out forwards; }
-    @keyframes float-up { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-50px); } }
-    @keyframes float-down { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(50px); } }
+    @keyframes float-up {
+      0% { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(-50px); }
+    }
+    @keyframes float-down {
+      0% { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(50px); }
+    }
     #logoutContainer { cursor: pointer; padding: 5px; }
     .logout-icon { width: 30px; height: 30px; }
     /* ---------- Question Selection ---------- */
@@ -151,7 +160,9 @@
     }
     button:hover { background-color: #333; color: #fff; }
     #approveBtn, #rejectBtn, #nextBtn { display: none; }
-    #nextBtn { margin-top: 10px; border-color: green; background-color: green; color: #fff; }
+    #nextBtn {
+      margin-top: 10px; border-color: green; background-color: green; color: #fff;
+    }
     #nextBtn:hover { background-color: #006600; color: #fff; }
     #repeatBtn { display: none; }
     .open-approve { background-color: green !important; color: #fff !important; border-color: green !important; }
@@ -434,7 +445,14 @@
     let supabaseUserId = null;
     const halfCircleCircumference = 50.265;
 
-    // Für Cases: Statt nur IDs wird ein Array von Objekten geführt, z. B. {id, isCorrect}
+    // Joker-Flags (XP-Booster, Streak-Boost, 50:50)
+    let isXPBoosterActive = false;
+    let xpBoosterRemaining = 0;
+    let isStreakBoostActive = false;
+    let streakBoostRemaining = 0;
+    let is5050Active = false;
+
+    // CASES (Neuer Fragetyp)
     let answeredCaseSubquestions = [];
     let caseSubquestions = [];
     let caseStatementIndex = 0;
@@ -448,83 +466,15 @@
       return array;
     }
 
-    // Markiert die Oberfrage als beantwortet – bei Cases erst, wenn alle Subquestions beantwortet wurden.
+    // Markiert eine Oberfrage als beantwortet (z. B. bei Cases erst, wenn alle Teilfragen durch sind)
     function markQuestionAsAnswered(questionId) {
       if (!alreadyAnsweredQuestionIds.includes(questionId)) {
         alreadyAnsweredQuestionIds.push(questionId);
         markQuestionAsAnsweredInSupabase(supabaseUserId, questionId);
         const selItems = document.querySelectorAll(".question-select-item");
-        if (selItems[currentIndex]) { selItems[currentIndex].classList.add("answered"); }
-      }
-    }
-
-    /* ===== UPDATE STREAK (24h-Logik) ===== */
-    async function updateStreak(userId) {
-      try {
-        const { data, error } = await supabaseClient
-          .from('user_stats')
-          .select('*')
-          .eq('user_id', userId)
-          .single();
-        if (error) {
-          console.error("Fehler beim Lesen user_stats:", error);
-          return;
+        if (selItems[currentIndex]) {
+          selItems[currentIndex].classList.add("answered");
         }
-        let lastPlayed = data.last_played ? new Date(data.last_played) : null;
-        let now = new Date();
-        let newStreak = data.streak || 0;
-        if (!lastPlayed || (now - lastPlayed) > 24 * 3600000) {
-          newStreak = 1;
-        } else {
-          newStreak++;
-        }
-        const { data: updated, error: upErr } = await supabaseClient
-          .from('user_stats')
-          .update({
-            streak: newStreak,
-            last_played: now.toISOString()
-          })
-          .eq('user_id', userId);
-        if (upErr) {
-          console.error("Fehler beim Update der Streak:", upErr);
-        } else {
-          console.log("Streak aktualisiert:", updated);
-        }
-      } catch (err) {
-        console.error("updateStreak - Unerwarteter Fehler:", err);
-      }
-    }
-
-    /* ===== UPDATE MEDALS (GETRENNT: Gold, Silber, Bronze) ===== */
-    async function updateMedalsInSupabase(userId, medalType) {
-      try {
-        const { data: statsData, error: statsErr } = await supabaseClient
-          .from('user_stats')
-          .select('*')
-          .eq('user_id', userId)
-          .single();
-        if (statsErr) {
-          console.error("Fehler beim Lesen user_stats:", statsErr);
-          return;
-        }
-        let gold = statsData.gold_medals || 0;
-        let silver = statsData.silver_medals || 0;
-        let bronze = statsData.bronze_medals || 0;
-        if (medalType === "Gold") gold++;
-        else if (medalType === "Silber") silver++;
-        else if (medalType === "Bronze") bronze++;
-        const { data: updated, error: updErr } = await supabaseClient
-          .from('user_stats')
-          .update({
-            gold_medals: gold,
-            silver_medals: silver,
-            bronze_medals: bronze
-          })
-          .eq('user_id', userId);
-        if (updErr) console.error("Fehler beim Update der Medaillen:", updErr);
-        else console.log("Medaillen aktualisiert:", updated);
-      } catch (err) {
-        console.error("updateMedalsInSupabase - Fehler:", err);
       }
     }
 
@@ -539,6 +489,7 @@
         return;
       }
       try {
+        // Check, ob der Benutzername schon vergeben ist
         const { data: existingUser } = await supabaseClient
           .from('profiles')
           .select('username')
@@ -552,6 +503,7 @@
         authMessage.innerText = "Fehler bei der Registrierung.";
         return;
       }
+
       try {
         const { data, error } = await supabaseClient.auth.signUp({ email, password });
         if (error) {
@@ -600,6 +552,7 @@
       else console.log("Profil gespeichert:", data);
     }
 
+    /* ===== QUIZ STARTEN ===== */
     async function startQuiz(userId) {
       supabaseUserId = userId;
       authContainer.style.display = "none";
@@ -610,19 +563,26 @@
         .eq('id', supabaseUserId)
         .single();
       const { data: userData } = await supabaseClient.auth.getUser();
+
+      // Username oder E-Mail anzeigen
       if (profileData && profileData.username) {
         usernameDisplay.textContent = profileData.username;
       } else if (userData?.user?.email) {
         usernameDisplay.textContent = userData.user.email;
       }
+
+      // Avatar anzeigen (falls vorhanden)
       if (profileData && profileData.avatar_url) {
         profilePic.style.backgroundImage = `url('${profileData.avatar_url}')`;
       }
+
       startQuizForUser(userId);
     }
 
     async function startQuizForUser(userId) {
       await ensureUserInSupabase(userId);
+
+      // Aktuelle Stats laden
       const { data: statsData } = await supabaseClient
         .from('user_stats')
         .select('*')
@@ -635,6 +595,8 @@
       }
       xpValueEl.innerText = xp;
       totalCoinsEl.innerText = totalCoins;
+
+      // Bereits beantwortete Fragen laden
       const answeredRes = await supabaseClient
         .from('answered_questions')
         .select('question_id')
@@ -642,19 +604,17 @@
       if (answeredRes.data) {
         alreadyAnsweredQuestionIds = answeredRes.data.map(item => item.question_id);
       }
+
+      // Kapitel-ID aus URL
       const urlParams = new URLSearchParams(window.location.search);
       const chapterId = urlParams.get('chapterId') || "1";
-      // Trenne normale Fragen und Cases:
-      const normalQuestions = [];
-      const caseQuestions = [];
-      questions = await loadQuestions(chapterId); // lädt 'questions' und zeigt sie an
-      questions.forEach(q => {
-        if(q.type === "cases") {
-          caseQuestions.push(q);
-        } else {
-          normalQuestions.push(q);
-        }
-      });
+
+      // Fragen aus DB laden
+      questions = await loadQuestions(chapterId);
+
+      // xpGoal berechnen
+      const normalQuestions = questions.filter(q => q.type !== "cases");
+      const caseQuestions = questions.filter(q => q.type === "cases");
       xpGoal = normalQuestions.length * 10 + caseQuestions.reduce((sum, q) => {
         return sum + ((q.subquestions_count || 0) * 10);
       }, 0);
@@ -673,6 +633,7 @@
       }
     });
 
+    /* ===== Joker kaufen (XP-Booster, Streak-Boost, 50:50) ===== */
     xpBoosterBtn.addEventListener("click", () => buyJoker("xpBooster"));
     streakBoostBtn.addEventListener("click", () => buyJoker("streakBoost"));
     joker5050Btn.addEventListener("click", () => buyJoker("5050"));
@@ -693,6 +654,7 @@
       showCoinChange(-cost, totalCoinsEl.parentElement);
       totalCoinsEl.innerText = totalCoins;
       cashierSound.play();
+
       switch (type) {
         case "xpBooster":
           alert("XP-Booster aktiviert – 3 Fragen lang doppelte XP!");
@@ -711,12 +673,15 @@
       }
     }
 
+    /* ===== Session aus Supabase prüfen (User eingeloggt?) ===== */
     document.addEventListener("DOMContentLoaded", async () => {
       const { data: { session } } = await supabaseClient.auth.getSession();
       if (session) {
         authContainer.style.display = "none";
         quizContainer.style.display = "block";
         supabaseUserId = session.user.id;
+
+        // Profil laden
         const { data: profileData } = await supabaseClient
           .from('profiles')
           .select('*')
@@ -731,12 +696,14 @@
         if (profileData && profileData.avatar_url) {
           profilePic.style.backgroundImage = `url('${profileData.avatar_url}')`;
         }
+
         startQuizForUser(session.user.id);
       } else {
         authContainer.style.display = "block";
       }
     });
 
+    /* ===== ensureUserInSupabase: Falls user_stats noch nicht existiert ===== */
     async function ensureUserInSupabase(userId) {
       const { data, error } = await supabaseClient
         .from('user_stats')
@@ -762,6 +729,7 @@
       }
     }
 
+    /* ===== Fragen laden ===== */
     async function loadQuestions(chapterId) {
       try {
         const url = `${SUPABASE_URL}/rest/v1/questions?select=*&chapter_id=eq.${chapterId}&order=id.asc`;
@@ -776,9 +744,7 @@
         let data = await response.json();
         if (Array.isArray(data) && data.length > 0) {
           questions = data;
-          xpGoal = questions.reduce((acc, q) => {
-            return acc + (q.type === "cases" ? (q.subquestions_count ? q.subquestions_count * 10 : 10) : 10);
-          }, 0);
+          // xpGoal (optional neu berechnen)
           answeredCorrectly = new Array(questions.length).fill(false);
           quizXp = 0;
           roundCoins = 0;
@@ -795,6 +761,7 @@
       }
     }
 
+    /* ===== Frageauswahl (oben die kleinen Boxen) ===== */
     function createQuestionSelection() {
       questionSelectionEl.innerHTML = "";
       for (let i = 0; i < questions.length; i++) {
@@ -805,13 +772,18 @@
         if (alreadyAnsweredQuestionIds.includes(qId)) {
           item.classList.add("answered");
         }
-        item.onclick = () => { currentIndex = i; showQuestion(); };
+        item.onclick = () => {
+          currentIndex = i;
+          showQuestion();
+        };
         questionSelectionEl.appendChild(item);
       }
     }
 
+    /* ===== Hauptanzeige der Fragen ===== */
     function showQuestion() {
       if (currentIndex >= questions.length) {
+        // Ende des Quiz
         questionTextEl.innerText = "Fertig!";
         optionsEl.style.display = "none";
         explanationContainer.style.display = "none";
@@ -821,6 +793,8 @@
         updateEndScreen();
         return;
       }
+
+      // Reset
       document.getElementById("jokerContainer").style.display = "flex";
       optionsEl.style.display = "block";
       endScreenEl.style.display = "none";
@@ -830,18 +804,27 @@
       nextBtn.style.display = "none";
       approveBtn.style.display = "none";
       rejectBtn.style.display = "none";
+
+      // Frage anzeigen
       const q = questions[currentIndex];
       questionTextEl.style.fontStyle = (q.type === "cases") ? "italic" : "normal";
       questionTextEl.innerText = q.Frage || "Frage fehlt";
       optionsEl.innerHTML = "";
       updateProgressBar();
-      // 50/50-Joker anzeigen, wenn Fragetyp "multiple_choice", "multiple_choice_multi" oder "question"
+
+      // Joker-Logik: 50/50 nur bei "multiple_choice", "multiple_choice_multi" oder "question"
       if (q.type === "multiple_choice" || q.type === "multiple_choice_multi" || q.type === "question") {
         joker5050Btn.style.display = "block";
       } else {
         joker5050Btn.style.display = "none";
       }
+
+      // Switch-Case: Welcher Fragetyp?
       switch (q.type || "multiple_choice") {
+        case "question":
+          // Neuer Fragetyp "question" (Single Choice mit 4 Buttons)
+          createStandardQuestion(q, "question");
+          break;
         case "multiple_choice":
           createMultipleChoice(q);
           break;
@@ -867,11 +850,13 @@
           createOpenQuestion(q);
           break;
         default:
+          // Standard: multiple_choice
           createStandardQuestion(q, "multiple_choice");
           break;
       }
     }
 
+    /* ===== Fortschrittsanzeige ===== */
     function updateProgressBar() {
       const total = questions.length;
       if (total === 0) {
@@ -884,7 +869,9 @@
       progressInfoEl.innerText = `Frage ${currentIndex + 1} von ${total}`;
     }
 
-    /* ===== CASES: Neuer Fragetyp mit Teil-Statements ===== */
+    /* ========================
+       CASES (Neuer Fragetyp)
+    ========================= */
     async function loadCaseSubquestions(question) {
       try {
         const url = `${SUPABASE_URL}/rest/v1/cases_subquestions?question_id=eq.${question.id}&order=id.asc`;
@@ -898,7 +885,7 @@
         if (!response.ok) throw new Error("Fehler beim Laden der Teil-Statements");
         caseSubquestions = await response.json();
         caseStatementIndex = 0;
-        answeredCaseSubquestions = []; // Array von Objekten {id, isCorrect}
+        answeredCaseSubquestions = [];
         showCaseStatements(question);
       } catch (err) {
         console.error(err);
@@ -906,14 +893,12 @@
       }
     }
 
-    // Hier wird ein scrollbarer Container um die Subquestions gelegt.
     function showCaseStatements(question) {
-      // Lege zunächst einen Container an:
       const container = document.createElement("div");
       container.className = "cases-container";
-      // Falls alle Subquestions beantwortet sind, zeigen wir ALLE Subquestions und dann einen "Weiter" Button:
+
+      // Wenn alle Subquestions beantwortet: zeige alle + Weiter-Button
       if (caseStatementIndex >= caseSubquestions.length) {
-        // Alle Subquestions anzeigen:
         caseSubquestions.forEach(s => {
           const statementDiv = document.createElement("div");
           statementDiv.classList.add("case-statement");
@@ -921,12 +906,13 @@
           textDiv.className = "case-statement-title";
           textDiv.innerText = s.statement_text;
           statementDiv.appendChild(textDiv);
-          // Falls bereits beantwortet: zeige Symbol und Erklärung
+
           const answerData = answeredCaseSubquestions.find(item => item.id === s.id);
           if (answerData) {
             const symbol = document.createElement("div");
             symbol.innerText = answerData.isCorrect ? "✅ Das war die richtige Antwort." : "❌ Das war die falsche Antwort.";
             statementDiv.appendChild(symbol);
+
             if (s.explanation && s.explanation.trim() !== "") {
               const expl = document.createElement("div");
               expl.className = "case-statement-explanation";
@@ -936,32 +922,38 @@
           }
           container.appendChild(statementDiv);
         });
-        // Gesamtfrage als beantwortet markieren:
+
+        // Markiere Oberfrage als beantwortet
         markQuestionAsAnswered(question.id);
-        // "Weiter" Button anhängen:
+
+        // Weiter-Button
         const weiterBtn = document.createElement("button");
         weiterBtn.innerText = "Weiter →";
         weiterBtn.onclick = () => { nextQuestion(); };
         container.appendChild(weiterBtn);
+
         optionsEl.innerHTML = "";
         optionsEl.appendChild(container);
         return;
       }
-      // Sonst: Zeige alle Subquestions bis caseStatementIndex:
+
+      // Ansonsten: Zeige Subquestions bis caseStatementIndex
       for (let i = 0; i <= caseStatementIndex; i++) {
         const s = caseSubquestions[i];
         const statementDiv = document.createElement("div");
         statementDiv.classList.add("case-statement");
+
         const textDiv = document.createElement("div");
         textDiv.className = "case-statement-title";
         textDiv.innerText = s.statement_text;
         statementDiv.appendChild(textDiv);
-        // Falls diese Subquestion bereits beantwortet wurde, zeige Symbol und Erklärung:
+
         const answerData = answeredCaseSubquestions.find(item => item.id === s.id);
         if (answerData) {
           const symbol = document.createElement("div");
           symbol.innerText = answerData.isCorrect ? "✅ Das war die richtige Antwort." : "❌ Das war die falsche Antwort.";
           statementDiv.appendChild(symbol);
+
           if (s.explanation && s.explanation.trim() !== "") {
             const expl = document.createElement("div");
             expl.className = "case-statement-explanation";
@@ -969,7 +961,7 @@
             statementDiv.appendChild(expl);
           }
         } else if (i === caseStatementIndex) {
-          // Noch nicht beantwortete Subquestion: zeige Buttons
+          // Noch nicht beantwortet: Buttons
           const buttonRow = document.createElement("div");
           buttonRow.className = "case-statement-buttons";
           const btnR = document.createElement("button");
@@ -982,9 +974,10 @@
           buttonRow.appendChild(btnF);
           statementDiv.appendChild(buttonRow);
         }
+
         container.appendChild(statementDiv);
       }
-      // Container in options einfügen:
+
       optionsEl.innerHTML = "";
       optionsEl.appendChild(container);
     }
@@ -992,15 +985,15 @@
     async function handleCaseStatementAnswer(question, statement, userAnswer) {
       const correctAnswer = (statement.correct_answer || "").trim().toLowerCase();
       const isCorrect = (userAnswer.toLowerCase() === correctAnswer);
-      // Nur, wenn diese Subquestion noch nicht beantwortet wurde:
+
       if (!answeredCaseSubquestions.find(item => item.id === statement.id)) {
-        // NUR Sound abspielen, KEINE XP/Coins vergeben:
+        // Nur Sound abspielen, KEINE XP/Coins
         if (isCorrect) {
           correctSound.play();
         } else {
           wrongSound.play();
         }
-        answeredCaseSubquestions.push({ id: statement.id, isCorrect: isCorrect });
+        answeredCaseSubquestions.push({ id: statement.id, isCorrect });
         await markCaseSubquestionAsAnsweredInSupabase(supabaseUserId, statement.id, isCorrect);
       }
       caseStatementIndex++;
@@ -1027,35 +1020,45 @@
         console.error("markCaseSubquestionAsAnsweredInSupabase - Fehler:", err);
       }
     }
+
     /* ===== ENDE CASES ===== */
 
-    // Beim Lückentext: Zeige richtige Lösung, dann Leerzeile und dann Erklärung
+    /* ===== Lückentext ===== */
     function createLueckentext(q) {
       const questionLabel = document.createElement("div");
       questionLabel.style.fontWeight = "bold";
       questionLabel.style.marginBottom = "5px";
       questionLabel.innerText = q.Frage || "Lückentext-Frage?";
       optionsEl.appendChild(questionLabel);
+
       const input = document.createElement("input");
       input.type = "text";
       input.placeholder = "Fehlendes Wort...";
       input.style.marginTop = "0";
       optionsEl.appendChild(input);
+
       const btnL = document.createElement("button");
       btnL.innerText = "Antwort prüfen";
-      btnL.onclick = () => { checkAnswer(input.value.trim(), q, false, "lueckentext"); };
+      btnL.onclick = () => {
+        checkAnswer(input.value.trim(), q, false, "lueckentext");
+      };
       optionsEl.appendChild(btnL);
     }
 
+    /* ===== Offene Frage (Freitext) ===== */
     function createOpenQuestion(q) {
       const txt = document.createElement("textarea");
       txt.classList.add("open-question-textarea");
       txt.placeholder = "Gebe hier deine Antwort ein...";
       optionsEl.appendChild(txt);
+
       const checkBtn = document.createElement("button");
       checkBtn.innerText = "Antwort überprüfen";
-      checkBtn.onclick = () => { checkAnswer(txt.value.trim(), q, true, "open_question"); };
+      checkBtn.onclick = () => {
+        checkAnswer(txt.value.trim(), q, true, "open_question");
+      };
       optionsEl.appendChild(checkBtn);
+
       txt.addEventListener("keydown", (ev) => {
         if ((ev.ctrlKey || ev.metaKey) && ev.key === "Enter") {
           ev.preventDefault();
@@ -1064,365 +1067,56 @@
       });
     }
 
-    function checkAnswer(userAnswer, question, userCanSelfAccept, type) {
-      if (explanationContainer.style.display === "block") return;
-      explanationContainer.style.display = "block";
-      explanationText.innerHTML = "";
-      nextBtn.style.display = "none";
-      approveBtn.style.display = "none";
-      rejectBtn.style.display = "none";
-      const qId = question.id ?? currentIndex;
-      const wasAlreadyAnswered = alreadyAnsweredQuestionIds.includes(qId);
-      // Speziell für Lückentext: Zeige korrekte Lösung + Leerzeile + Erklärung
-      if (type === "lueckentext") {
-        const correctAnswer = question["Richtige Antwort"] || "";
-        let msg = `<strong>Richtige Antwort:</strong><br>${correctAnswer}<br><br>`;
-        let erk = question["Begründung"] || question["Erklärtext"] || "";
-        if (erk.trim() !== "") msg += `<strong>Erklärung:</strong><br>${erk}`;
-        explanationText.innerHTML = msg;
-        nextBtn.style.display = "block";
-        // Bei Lückentext erfolgt keine weitere XP-/Coin-Vergabe (oder nach Wunsch ähnlich wie bei Multiple-Choice)
-        if (!wasAlreadyAnswered) {
-          alreadyAnsweredQuestionIds.push(qId);
-          markQuestionAsAnsweredInSupabase(supabaseUserId, qId);
-          const selItems = document.querySelectorAll(".question-select-item");
-          if (selItems[currentIndex]) { selItems[currentIndex].classList.add("answered"); }
-          updateUserStatsInSupabase(supabaseUserId, xp, totalCoins, streak);
-        }
-        return;
-      }
-      // Für offene Fragen (selbstkorrigierend)
-      if (type === "open_question") {
-        const correctAnswer = question["Richtige Antwort"] || "";
-        let msg = `<strong>Eingegebene Antwort:</strong><br>${userAnswer || "(leer)"}<br>
-<strong>Richtige Antwort:</strong><br>${correctAnswer}<br>`;
-        let erk = question["Begründung"] || question["Erklärtext"] || "";
-        if (erk.trim() !== "") msg += `<strong>Erklärung:</strong><br>${erk}`;
-        explanationText.innerHTML = msg;
-        approveBtn.style.display = "inline-block";
-        rejectBtn.style.display = "inline-block";
-        return;
-      }
-      // Standard-Multiple-Choice, True/False, Drag&Drop, Case
-      let isCorrect = false;
-      let correctAns = question["Richtige Antwort"] || "";
-      if (type === "drag_drop") {
-        isCorrect = (userAnswer === "Richtig");
-      } else if (["multiple_choice", "multiple_choice_multi", "true_false", "case"].includes(type)) {
-        if (correctAns && userAnswer.toLowerCase().trim() === correctAns.toLowerCase().trim()) {
-          isCorrect = true;
-        }
-        if (type === "multiple_choice_multi") {
-          isCorrect = (userAnswer === "Richtig");
-        }
-      }
-      let msg = isCorrect ? `✅ <strong>Richtig!</strong>` : `❌ <strong>Falsch!</strong>`;
-      let erk = question["Begründung"] || question["Erklärtext"] || "";
-      if (erk.trim() !== "") msg += `<br><br>${erk}`;
-      explanationText.innerHTML = msg;
-      nextBtn.style.display = "block";
-      if (!wasAlreadyAnswered) {
-        if (isCorrect) {
-          correctSound.play();
-          let xpGain = 10;
-          let coinGain = 1;
-          if (isXPBoosterActive && xpBoosterRemaining > 0) {
-            xpGain *= 2;
-            xpBoosterRemaining--;
-            if (xpBoosterRemaining <= 0) isXPBoosterActive = false;
-          }
-          roundCoins += coinGain;
-          totalCoins += coinGain;
-          quizXp += xpGain;
-          xp += xpGain;
-          answeredCorrectly[currentIndex] = true;
-          xpValueEl.innerText = xp;
-          showXPChange(xpGain);
-          showCoinChange(coinGain, totalCoinsEl.parentElement);
-          showCoinChange(coinGain, roundCoinsEl.parentElement);
-        } else {
-          wrongSound.play();
-          if (roundCoins > 0) { roundCoins--; showCoinChange(-1, roundCoinsEl.parentElement); }
-          if (totalCoins > 0) {
-            totalCoins--;
-            if (totalCoins < 0) totalCoins = 0;
-            showCoinChange(-1, totalCoinsEl.parentElement);
-          }
-        }
-        alreadyAnsweredQuestionIds.push(qId);
-        markQuestionAsAnsweredInSupabase(supabaseUserId, qId);
-        const selItems = document.querySelectorAll(".question-select-item");
-        if (selItems[currentIndex]) { selItems[currentIndex].classList.add("answered"); }
-        updateUserStatsInSupabase(supabaseUserId, xp, totalCoins, streak);
-      }
-      roundCoinsEl.innerText = roundCoins;
-      totalCoinsEl.innerText = totalCoins;
-    }
-
-    approveBtn.onclick = () => { handleOpenQuestionResult(true); };
-    rejectBtn.onclick = () => { handleOpenQuestionResult(false); };
-
-    function handleOpenQuestionResult(isApproved) {
-      const q = questions[currentIndex];
-      const qId = q.id ?? currentIndex;
-      const wasAlreadyAnswered = alreadyAnsweredQuestionIds.includes(qId);
-      if (!wasAlreadyAnswered) {
-        if (isApproved) {
-          correctSound.play();
-          let xpGain = 10;
-          let coinGain = 1;
-          if (isXPBoosterActive && xpBoosterRemaining > 0) {
-            xpGain *= 2;
-            xpBoosterRemaining--;
-            if (xpBoosterRemaining <= 0) isXPBoosterActive = false;
-          }
-          roundCoins += coinGain;
-          totalCoins += coinGain;
-          quizXp += xpGain;
-          xp += xpGain;
-          xpValueEl.innerText = xp;
-          showXPChange(xpGain);
-          showCoinChange(coinGain, totalCoinsEl.parentElement);
-          showCoinChange(coinGain, roundCoinsEl.parentElement);
-        } else {
-          wrongSound.play();
-          if (roundCoins > 0) { roundCoins--; showCoinChange(-1, roundCoinsEl.parentElement); }
-          if (totalCoins > 0) {
-            totalCoins--;
-            if (totalCoins < 0) totalCoins = 0;
-            showCoinChange(-1, totalCoinsEl.parentElement);
-          }
-          roundCoinsEl.innerText = roundCoins;
-          totalCoinsEl.innerText = totalCoins;
-        }
-        alreadyAnsweredQuestionIds.push(qId);
-        markQuestionAsAnsweredInSupabase(supabaseUserId, qId);
-        const selItems = document.querySelectorAll(".question-select-item");
-        if (selItems[currentIndex]) { selItems[currentIndex].classList.add("answered"); }
-        updateUserStatsInSupabase(supabaseUserId, xp, totalCoins, streak);
-      }
-      setTimeout(() => { nextQuestion(); }, 800);
-    }
-
-    nextBtn.onclick = () => { nextQuestion(); };
-
-    function nextQuestion() {
-      currentIndex++;
-      showQuestion();
-    }
-
-    repeatBtn.onclick = () => { resetQuiz(); };
-    continueBtn.onclick = () => { resetQuiz(); };
-
-    function resetQuiz() {
-      currentIndex = 0;
-      answeredCorrectly = new Array(questions.length).fill(false);
-      quizXp = 0;
-      roundCoins = 0;
-      roundCoinsEl.innerText = roundCoins;
-      repeatBtn.style.display = "none";
-      endScreenEl.style.display = "none";
-      document.getElementById("jokerContainer").style.display = "flex";
-      showQuestion();
-    }
-
-    function showCoinChange(amount, element) {
-      const coinChange = document.createElement("div");
-      coinChange.classList.add("coin-change");
-      if (amount < 0) { coinChange.classList.add("negative"); coinChange.innerText = amount; }
-      else { coinChange.classList.add("positive"); coinChange.innerText = `+${amount}`; }
-      element.appendChild(coinChange);
-      setTimeout(() => { element.removeChild(coinChange); }, 2000);
-    }
-
-    function showXPChange(amount) {
-      const xpChange = document.createElement("div");
-      xpChange.classList.add("xp-change");
-      xpChange.textContent = `+${amount}`;
-      xpBox.appendChild(xpChange);
-      setTimeout(() => { xpBox.removeChild(xpChange); }, 2000);
-    }
-
-    async function markQuestionAsAnsweredInSupabase(userId, questionId) {
-      try {
-        const { data: existing } = await supabaseClient
-          .from('answered_questions')
-          .select('id')
-          .eq('user_id', userId)
-          .eq('question_id', questionId);
-        if (existing && existing.length > 0) {
-          console.log("Frage bereits beantwortet, kein Insert.");
-          return;
-        }
-        const { data, error } = await supabaseClient
-          .from('answered_questions')
-          .insert([{ user_id: userId, question_id: questionId, is_correct: true }]);
-        if (error) console.error('Fehler beim Insert in answered_questions:', error);
-        else console.log('Frage als beantwortet markiert:', data);
-      } catch (err) {
-        console.error("markQuestionAsAnsweredInSupabase - Fehler:", err);
-      }
-    }
-
-    async function updateUserStatsInSupabase(userId, newXP, newCoins, newStreak) {
-      try {
-        const { data, error } = await supabaseClient
-          .from('user_stats')
-          .update({
-            total_xp: newXP,
-            total_coins: newCoins,
-            streak: newStreak,
-            last_played: new Date().toISOString()
-          })
-          .eq('user_id', userId);
-        if (error) console.error('Fehler beim Update user_stats:', error);
-        else console.log('user_stats aktualisiert:', data);
-      } catch (err) {
-        console.error("updateUserStatsInSupabase - Fehler:", err);
-      }
-    }
-
-    async function updateMedalsInSupabase(userId, medalType) {
-      try {
-        const { data: statsData, error: statsErr } = await supabaseClient
-          .from('user_stats')
-          .select('*')
-          .eq('user_id', userId)
-          .single();
-        if (statsErr) {
-          console.error("Fehler beim Lesen user_stats:", statsErr);
-          return;
-        }
-        let gold = statsData.gold_medals || 0;
-        let silver = statsData.silver_medals || 0;
-        let bronze = statsData.bronze_medals || 0;
-        if (medalType === "Gold") gold++;
-        else if (medalType === "Silber") silver++;
-        else if (medalType === "Bronze") bronze++;
-        const { data: updated, error: updErr } = await supabaseClient
-          .from('user_stats')
-          .update({
-            gold_medals: gold,
-            silver_medals: silver,
-            bronze_medals: bronze
-          })
-          .eq('user_id', userId);
-        if (updErr) console.error("Fehler beim Update der Medaillen:", updErr);
-        else console.log("Medaillen aktualisiert:", updated);
-      } catch (err) {
-        console.error("updateMedalsInSupabase - Fehler:", err);
-      }
-    }
-
-    async function updateEndScreen() {
-      endScreenEl.style.display = "block";
-      repeatBtn.style.display = "none";
-      continueBtn.style.display = "inline-block";
-      let netCoins = roundCoins;
-      let coinMsg = (netCoins > 0)
-        ? `Münzen-Bilanz: +${netCoins} 🪙`
-        : (netCoins < 0)
-          ? `Münzen-Bilanz: ${netCoins} 🪙`
-          : `Münzen-Bilanz: 0 🪙`;
-      coinBalanceEl.textContent = coinMsg;
-      xpTextEl.textContent = `${quizXp} / ${xpGoal} XP`;
-      circleBarEl.setAttribute("stroke-dasharray", `0, ${halfCircleCircumference}`);
-      const finalProgress = (quizXp / xpGoal) * halfCircleCircumference;
-      let current = 0;
-      const steps = 50;
-      const stepValue = finalProgress / steps;
-      let stepCount = 0;
-      const animate = setInterval(() => {
-        stepCount++;
-        current += stepValue;
-        if (stepCount >= steps) { current = finalProgress; clearInterval(animate); }
-        circleBarEl.setAttribute("stroke-dasharray", `${current}, ${halfCircleCircumference}`);
-      }, 20);
-      let percent = (quizXp / xpGoal) * 100;
-      let medalType = "Keine Medaille";
-      if (percent === 100) medalType = "Gold";
-      else if (percent >= 75) medalType = "Silber";
-      else if (percent >= 50) medalType = "Bronze";
-      medalInfoEl.innerHTML = "";
-      if (medalType !== "Keine Medaille") {
-        medalInfoEl.textContent = `Du hast ${Math.round(percent)}% erreicht – ${medalType}-Medaille!`;
-        const medalImg = document.createElement("img");
-        medalImg.className = "medal-image";
-        if (medalType === "Gold") {
-          medalImg.src = "https://lqoulygftdjbnfxkrihy.supabase.co/storage/v1/object/public/quiz-medals//Goldmedaille.svg";
-        } else if (medalType === "Silber") {
-          medalImg.src = "https://lqoulygftdjbnfxkrihy.supabase.co/storage/v1/object/public/quiz-medals//Silbermedaille.svg";
-        } else if (medalType === "Bronze") {
-          medalImg.src = "https://lqoulygftdjbnfxkrihy.supabase.co/storage/v1/object/public/quiz-medals//Bronzemedaille.svg";
-        }
-        medalInfoEl.appendChild(medalImg);
-        await updateMedalsInSupabase(supabaseUserId, medalType);
-      } else {
-        medalInfoEl.textContent = `Du hast ${Math.round(percent)}% erreicht – keine Medaille diesmal.`;
-      }
-      if (quizXp > 0) {
-        await updateStreak(supabaseUserId);
-      }
-    }
-
-    async function markQuestionAsAnsweredInSupabase(userId, questionId) {
-      try {
-        const { data: existing } = await supabaseClient
-          .from('answered_questions')
-          .select('id')
-          .eq('user_id', userId)
-          .eq('question_id', questionId);
-        if (existing && existing.length > 0) {
-          console.log("Frage bereits beantwortet, kein Insert.");
-          return;
-        }
-        const { data, error } = await supabaseClient
-          .from('answered_questions')
-          .insert([{ user_id: userId, question_id: questionId, is_correct: true }]);
-        if (error) console.error('Fehler beim Insert in answered_questions:', error);
-        else console.log('Frage als beantwortet markiert:', data);
-      } catch (err) {
-        console.error("markQuestionAsAnsweredInSupabase - Fehler:", err);
-      }
-    }
-
-    /* ===== ENDE CASES: Neuer Fragetyp mit Teil-Statements ===== */
-
-    // Bei Cases: Falls alle Subquestions beantwortet sind, wird die Frage erst dann als beantwortet markiert.
-    function createCaseSimple(q) {
-      const options = document.getElementById("options");
-      let subQuestions = q.subQuestions || [];
-      if (!Array.isArray(subQuestions) || subQuestions.length === 0) {
-        const row = document.createElement("div");
-        row.className = "horizontal-buttons";
-        const btnR = document.createElement("button");
-        btnR.innerText = "Richtig";
-        btnR.onclick = () => { checkAnswer("Richtig", q, false, "case"); };
-        const btnF = document.createElement("button");
-        btnF.innerText = "Falsch";
-        btnF.onclick = () => { checkAnswer("Falsch", q, false, "case"); };
-        row.appendChild(btnR);
-        row.appendChild(btnF);
-        options.appendChild(row);
-        return;
-      }
-      // Hier kann ggf. weitere Logik für Cases ergänzt werden.
-    }
-
+    /* ===== True/False ===== */
     function createTrueFalse(q) {
       const row = document.createElement("div");
       row.className = "horizontal-buttons";
+
       const btnR = document.createElement("button");
       btnR.innerText = "Richtig";
-      btnR.onclick = () => { checkAnswer("Richtig", q, false, "true_false"); };
+      btnR.onclick = () => {
+        checkAnswer("Richtig", q, false, "true_false");
+      };
+
       const btnF = document.createElement("button");
       btnF.innerText = "Falsch";
-      btnF.onclick = () => { checkAnswer("Falsch", q, false, "true_false"); };
+      btnF.onclick = () => {
+        checkAnswer("Falsch", q, false, "true_false");
+      };
+
       row.appendChild(btnR);
       row.appendChild(btnF);
       optionsEl.appendChild(row);
     }
 
+    /* ===== Single-Choice-Frage "question" vs. multiple_choice ===== */
+    function createStandardQuestion(q, type) {
+      if (type === "drag_drop") {
+        createDragDropQuestion(q);
+        return;
+      }
+
+      // Falls "question" oder "multiple_choice" -> 4 Buttons
+      ["Antwort A", "Antwort B", "Antwort C", "Antwort D"].forEach(key => {
+        if (q[key] && q[key].trim() !== "") {
+          const btn = document.createElement("button");
+          btn.innerText = q[key];
+          btn.onclick = () => {
+            // 50:50 Joker?
+            if (is5050Active) {
+              hideTwoWrongAnswers(q, btn.innerText);
+              is5050Active = false;
+            } else {
+              // Der Parameter "multiple_choice" oder "question" steuern wir hier:
+              checkAnswer(q[key], q, false, type);
+            }
+          };
+          optionsEl.appendChild(btn);
+        }
+      });
+    }
+
+    /* ===== multiple_choice_multi (mehrere richtige Häkchen) ===== */
     async function createMultipleChoice(q) {
       optionsEl.innerHTML = "";
       try {
@@ -1436,82 +1130,61 @@
         });
         if (!response.ok) throw new Error("Fehler beim Laden der multiple-choice-Optionen!");
         const mcOptions = await response.json();
+
         if (!mcOptions || mcOptions.length === 0) {
+          // Falls keine Einträge in multiple_choice_options -> Standard 4 Buttons
           createStandardQuestion(q, "multiple_choice");
           return;
         }
+
+        // Mehrere Häkchen
         const checkboxes = [];
         mcOptions.forEach((opt, idx) => {
           const label = document.createElement("label");
           label.classList.add("mc-option-label");
+
           const input = document.createElement("input");
           input.type = "checkbox";
           input.value = opt.id;
+
           label.appendChild(input);
           label.appendChild(document.createTextNode(opt.option_text || `Option ${idx + 1}`));
           optionsEl.appendChild(label);
+
           checkboxes.push({ input, isCorrect: opt.is_correct });
         });
+
         const checkBtn = document.createElement("button");
         checkBtn.innerText = "Antwort prüfen";
         checkBtn.onclick = () => {
           let allCorrectSelected = true;
           let anyExtraSelected = false;
+
           checkboxes.forEach(cb => {
             const checked = cb.input.checked;
-            if (cb.isCorrect && !checked) { allCorrectSelected = false; }
-            if (!cb.isCorrect && checked) { anyExtraSelected = true; }
+            if (cb.isCorrect && !checked) {
+              allCorrectSelected = false;
+            }
+            if (!cb.isCorrect && checked) {
+              anyExtraSelected = true;
+            }
           });
+
           const finalIsCorrect = (allCorrectSelected && !anyExtraSelected);
           checkAnswer(finalIsCorrect ? "Richtig" : "Falsch", q, false, "multiple_choice_multi");
         };
         optionsEl.appendChild(checkBtn);
+
       } catch (err) {
         console.error(err);
         optionsEl.innerHTML = "<p>Fehler beim Laden der multiple-choice-Optionen!</p>";
       }
     }
 
-    function createStandardQuestion(q, type) {
-      if (type === "drag_drop") {
-        createDragDropQuestion(q);
-        return;
-      }
-      ["Antwort A", "Antwort B", "Antwort C", "Antwort D"].forEach(key => {
-        if (q[key] && q[key].trim() !== "") {
-          const btn = document.createElement("button");
-          btn.innerText = q[key];
-          btn.onclick = () => {
-            if (is5050Active) {
-              hideTwoWrongAnswers(q, btn.innerText);
-              is5050Active = false;
-            } else {
-              checkAnswer(q[key], q, false, "multiple_choice");
-            }
-          };
-          optionsEl.appendChild(btn);
-        }
-      });
-    }
-
-    // 50/50 Joker: Wird angezeigt, wenn q.type ist "multiple_choice", "multiple_choice_multi" oder "question"
-    function hideTwoWrongAnswers(q, chosenText) {
-      const correctAns = (q["Richtige Antwort"] || "").trim().toLowerCase();
-      const btns = optionsEl.querySelectorAll("button");
-      let wrongBtns = [];
-      btns.forEach(b => {
-        if (b.innerText.trim().toLowerCase() !== correctAns) {
-          wrongBtns.push(b);
-        }
-      });
-      shuffleArray(wrongBtns);
-      for (let i = 0; i < 2 && i < wrongBtns.length; i++) {
-        wrongBtns[i].style.display = "none";
-      }
-    }
-
+    /* ===== Drag & Drop ===== */
     async function createDragDropQuestion(q) {
       optionsEl.innerHTML = "";
+
       let { data: groupData, error: groupError } = await supabaseClient
         .from('dragdrop_groups')
         .select('*')
@@ -1522,6 +1195,7 @@
         optionsEl.innerHTML = "<p>Fehler beim Laden der Drag-&-Drop-Daten!</p>";
         return;
       }
+
       const groupId = groupData.id;
       let { data: pairsData, error: pairsError } = await supabaseClient
         .from('dragdrop_pairs')
@@ -1532,10 +1206,12 @@
         optionsEl.innerHTML = "<p>Fehler beim Laden der Drag-&-Drop-Daten!</p>";
         return;
       }
+
       if (!pairsData || pairsData.length === 0) {
         optionsEl.innerHTML = "<p>Keine Drag & Drop-Daten vorhanden!</p>";
         return;
       }
+
       const draggedList = [...pairsData];
       const targetList = [...pairsData];
       shuffleArray(draggedList);
@@ -1562,8 +1238,12 @@
         dragItem.textContent = itemObj.drag_text;
         dragItem.dataset.pairId = itemObj.id;
         dragItem.draggable = true;
+
         dragItem.addEventListener("dragstart", e => {
-          if (dragItem.classList.contains("disabled")) { e.preventDefault(); return; }
+          if (dragItem.classList.contains("disabled")) {
+            e.preventDefault();
+            return;
+          }
           e.dataTransfer.setData("pairId", itemObj.id);
           e.dataTransfer.effectAllowed = "move";
         });
@@ -1575,8 +1255,14 @@
         dropTarget.className = "drop-target";
         dropTarget.textContent = itemObj.correct_match;
         dropTarget.dataset.pairId = itemObj.id;
-        dropTarget.addEventListener("dragover", e => { e.preventDefault(); dropTarget.classList.add("hover"); });
-        dropTarget.addEventListener("dragleave", () => { dropTarget.classList.remove("hover"); });
+
+        dropTarget.addEventListener("dragover", e => {
+          e.preventDefault();
+          dropTarget.classList.add("hover");
+        });
+        dropTarget.addEventListener("dragleave", () => {
+          dropTarget.classList.remove("hover");
+        });
         dropTarget.addEventListener("drop", e => {
           e.preventDefault();
           dropTarget.classList.remove("hover");
@@ -1585,12 +1271,16 @@
             dropTarget.style.backgroundColor = "#a4f9a4";
             dropTarget.dataset.matched = "true";
             const item = dragCol.querySelector(`[data-pair-id='${sourcePairId}']`);
-            if (item) { item.classList.add("disabled"); item.draggable = false; }
+            if (item) {
+              item.classList.add("disabled");
+              item.draggable = false;
+            }
           } else {
             dropTarget.style.backgroundColor = "#f9a4a4";
             dropTarget.dataset.matched = "false";
           }
         });
+
         dropCol.appendChild(dropTarget);
       });
 
@@ -1603,14 +1293,413 @@
       checkBtn.onclick = () => {
         const dropTargets = dropCol.querySelectorAll(".drop-target");
         let correctCount = 0;
-        dropTargets.forEach(t => { if (t.dataset.matched === "true") correctCount++; });
+        dropTargets.forEach(t => {
+          if (t.dataset.matched === "true") correctCount++;
+        });
         const allCorrect = (correctCount === dropTargets.length);
         checkAnswer(allCorrect ? "Richtig" : "Falsch", q, false, "drag_drop");
       };
       optionsEl.appendChild(checkBtn);
     }
 
-    /* ===== ENDE Drag & Drop ===== */
+    /* ===== 50:50 Joker bei single choice ===== */
+    function hideTwoWrongAnswers(q, chosenText) {
+      const correctAns = (q["Richtige Antwort"] || "").trim().toLowerCase();
+      const btns = optionsEl.querySelectorAll("button");
+      let wrongBtns = [];
+      btns.forEach(b => {
+        if (b.innerText.trim().toLowerCase() !== correctAns) {
+          wrongBtns.push(b);
+        }
+      });
+      shuffleArray(wrongBtns);
+      for (let i = 0; i < 2 && i < wrongBtns.length; i++) {
+        wrongBtns[i].style.display = "none";
+      }
+    }
+
+    /* ===== checkAnswer: zentrale Auswertung ===== */
+    function checkAnswer(userAnswer, question, userCanSelfAccept, type) {
+      // Verhindern, dass man mehrfach klickt
+      if (explanationContainer.style.display === "block") return;
+
+      explanationContainer.style.display = "block";
+      explanationText.innerHTML = "";
+      nextBtn.style.display = "none";
+      approveBtn.style.display = "none";
+      rejectBtn.style.display = "none";
+
+      const qId = question.id ?? currentIndex;
+      const wasAlreadyAnswered = alreadyAnsweredQuestionIds.includes(qId);
+
+      // Lückentext: Korrekte Lösung + Leerzeile + Erklärung
+      if (type === "lueckentext") {
+        const correctAnswer = question["Richtige Antwort"] || "";
+        let msg = `<strong>Richtige Antwort:</strong><br>${correctAnswer}<br><br>`;
+        let erk = question["Begründung"] || question["Erklärtext"] || "";
+        if (erk.trim() !== "") msg += `<strong>Erklärung:</strong><br>${erk}`;
+        explanationText.innerHTML = msg;
+        nextBtn.style.display = "block";
+
+        // Hier keine XP/Coins (oder falls gewünscht, kann man das anpassen)
+        if (!wasAlreadyAnswered) {
+          alreadyAnsweredQuestionIds.push(qId);
+          markQuestionAsAnsweredInSupabase(supabaseUserId, qId);
+          const selItems = document.querySelectorAll(".question-select-item");
+          if (selItems[currentIndex]) selItems[currentIndex].classList.add("answered");
+          updateUserStatsInSupabase(supabaseUserId, xp, totalCoins, streak);
+        }
+        return;
+      }
+
+      // Offene Frage (Freitext), man kann sich selbst "approve" oder "reject" geben
+      if (type === "open_question") {
+        const correctAnswer = question["Richtige Antwort"] || "";
+        let msg = `
+          <strong>Eingegebene Antwort:</strong><br>${userAnswer || "(leer)"}<br>
+          <strong>Richtige Antwort:</strong><br>${correctAnswer}<br>
+        `;
+        let erk = question["Begründung"] || question["Erklärtext"] || "";
+        if (erk.trim() !== "") msg += `<strong>Erklärung:</strong><br>${erk}`;
+        explanationText.innerHTML = msg;
+
+        // Buttons zum Selbst-Bewerten
+        approveBtn.style.display = "inline-block";
+        rejectBtn.style.display = "inline-block";
+        return;
+      }
+
+      // Für single choice (question), multiple_choice, multiple_choice_multi, true_false, case, drag_drop
+      let isCorrect = false;
+      let correctAns = question["Richtige Antwort"] || "";
+
+      if (type === "drag_drop") {
+        isCorrect = (userAnswer === "Richtig");
+      } else if (["multiple_choice", "multiple_choice_multi", "true_false", "case", "question"].includes(type)) {
+        // Achtung: "multiple_choice_multi" -> userAnswer === "Richtig" / "Falsch"
+        // "question" (Single Choice) -> userAnswer === "Ein Text"
+        if (type === "multiple_choice_multi" || type === "question") {
+          if (userAnswer.toLowerCase().trim() === correctAns.toLowerCase().trim()) {
+            isCorrect = true;
+          } else {
+            isCorrect = (userAnswer === "Richtig"); // Falls du es so halten möchtest
+          }
+        } else {
+          // Normaler single-check
+          if (correctAns && userAnswer.toLowerCase().trim() === correctAns.toLowerCase().trim()) {
+            isCorrect = true;
+          }
+        }
+      }
+
+      // Anzeige
+      let msg = isCorrect ? `✅ <strong>Richtig!</strong>` : `❌ <strong>Falsch!</strong>`;
+      let erk = question["Begründung"] || question["Erklärtext"] || "";
+      if (erk.trim() !== "") msg += `<br><br>${erk}`;
+      explanationText.innerHTML = msg;
+
+      nextBtn.style.display = "block";
+
+      if (!wasAlreadyAnswered) {
+        if (isCorrect) {
+          correctSound.play();
+          let xpGain = 10;
+          let coinGain = 1;
+
+          // XP-Booster aktiv?
+          if (isXPBoosterActive && xpBoosterRemaining > 0) {
+            xpGain *= 2;
+            xpBoosterRemaining--;
+            if (xpBoosterRemaining <= 0) isXPBoosterActive = false;
+          }
+          roundCoins += coinGain;
+          totalCoins += coinGain;
+          quizXp += xpGain;
+          xp += xpGain;
+          answeredCorrectly[currentIndex] = true;
+
+          xpValueEl.innerText = xp;
+          showXPChange(xpGain);
+          showCoinChange(coinGain, totalCoinsEl.parentElement);
+          showCoinChange(coinGain, roundCoinsEl.parentElement);
+
+        } else {
+          wrongSound.play();
+          if (roundCoins > 0) {
+            roundCoins--;
+            showCoinChange(-1, roundCoinsEl.parentElement);
+          }
+          if (totalCoins > 0) {
+            totalCoins--;
+            if (totalCoins < 0) totalCoins = 0;
+            showCoinChange(-1, totalCoinsEl.parentElement);
+          }
+        }
+        // Frage als beantwortet in DB
+        alreadyAnsweredQuestionIds.push(qId);
+        markQuestionAsAnsweredInSupabase(supabaseUserId, qId);
+
+        // In der Auswahlleiste grau machen
+        const selItems = document.querySelectorAll(".question-select-item");
+        if (selItems[currentIndex]) selItems[currentIndex].classList.add("answered");
+
+        // Stats updaten
+        updateUserStatsInSupabase(supabaseUserId, xp, totalCoins, streak);
+      }
+
+      roundCoinsEl.innerText = roundCoins;
+      totalCoinsEl.innerText = totalCoins;
+    }
+
+    /* ===== Offene Fragen: Approve/Reject-Buttons ===== */
+    approveBtn.onclick = () => { handleOpenQuestionResult(true); };
+    rejectBtn.onclick = () => { handleOpenQuestionResult(false); };
+
+    function handleOpenQuestionResult(isApproved) {
+      const q = questions[currentIndex];
+      const qId = q.id ?? currentIndex;
+      const wasAlreadyAnswered = alreadyAnsweredQuestionIds.includes(qId);
+
+      if (!wasAlreadyAnswered) {
+        if (isApproved) {
+          correctSound.play();
+          let xpGain = 10;
+          let coinGain = 1;
+
+          if (isXPBoosterActive && xpBoosterRemaining > 0) {
+            xpGain *= 2;
+            xpBoosterRemaining--;
+            if (xpBoosterRemaining <= 0) isXPBoosterActive = false;
+          }
+          roundCoins += coinGain;
+          totalCoins += coinGain;
+          quizXp += xpGain;
+          xp += xpGain;
+          xpValueEl.innerText = xp;
+          showXPChange(xpGain);
+          showCoinChange(coinGain, totalCoinsEl.parentElement);
+          showCoinChange(coinGain, roundCoinsEl.parentElement);
+
+        } else {
+          wrongSound.play();
+          if (roundCoins > 0) {
+            roundCoins--;
+            showCoinChange(-1, roundCoinsEl.parentElement);
+          }
+          if (totalCoins > 0) {
+            totalCoins--;
+            if (totalCoins < 0) totalCoins = 0;
+            showCoinChange(-1, totalCoinsEl.parentElement);
+          }
+          roundCoinsEl.innerText = roundCoins;
+          totalCoinsEl.innerText = totalCoins;
+        }
+
+        alreadyAnsweredQuestionIds.push(qId);
+        markQuestionAsAnsweredInSupabase(supabaseUserId, qId);
+
+        const selItems = document.querySelectorAll(".question-select-item");
+        if (selItems[currentIndex]) selItems[currentIndex].classList.add("answered");
+
+        updateUserStatsInSupabase(supabaseUserId, xp, totalCoins, streak);
+      }
+      setTimeout(() => { nextQuestion(); }, 800);
+    }
+
+    /* ===== Nächste Frage ===== */
+    nextBtn.onclick = () => { nextQuestion(); };
+
+    function nextQuestion() {
+      currentIndex++;
+      showQuestion();
+    }
+
+    /* ===== Wiederholen ===== */
+    repeatBtn.onclick = () => { resetQuiz(); };
+    continueBtn.onclick = () => { resetQuiz(); };
+
+    function resetQuiz() {
+      currentIndex = 0;
+      answeredCorrectly = new Array(questions.length).fill(false);
+      quizXp = 0;
+      roundCoins = 0;
+      roundCoinsEl.innerText = roundCoins;
+      repeatBtn.style.display = "none";
+      endScreenEl.style.display = "none";
+      document.getElementById("jokerContainer").style.display = "flex";
+      showQuestion();
+    }
+
+    /* ===== Coin & XP Animationen ===== */
+    function showCoinChange(amount, element) {
+      const coinChange = document.createElement("div");
+      coinChange.classList.add("coin-change");
+      if (amount < 0) {
+        coinChange.classList.add("negative");
+        coinChange.innerText = amount;
+      } else {
+        coinChange.classList.add("positive");
+        coinChange.innerText = `+${amount}`;
+      }
+      element.appendChild(coinChange);
+      setTimeout(() => {
+        element.removeChild(coinChange);
+      }, 2000);
+    }
+
+    function showXPChange(amount) {
+      const xpChange = document.createElement("div");
+      xpChange.classList.add("xp-change");
+      xpChange.textContent = `+${amount}`;
+      xpBox.appendChild(xpChange);
+      setTimeout(() => {
+        xpBox.removeChild(xpChange);
+      }, 2000);
+    }
+
+    /* ===== Frage als beantwortet markieren (DB) ===== */
+    async function markQuestionAsAnsweredInSupabase(userId, questionId) {
+      try {
+        const { data: existing } = await supabaseClient
+          .from('answered_questions')
+          .select('id')
+          .eq('user_id', userId)
+          .eq('question_id', questionId);
+        if (existing && existing.length > 0) {
+          console.log("Frage bereits beantwortet, kein Insert.");
+          return;
+        }
+        const { data, error } = await supabaseClient
+          .from('answered_questions')
+          .insert([{ user_id: userId, question_id: questionId, is_correct: true }]);
+        if (error) console.error('Fehler beim Insert in answered_questions:', error);
+        else console.log('Frage als beantwortet markiert:', data);
+      } catch (err) {
+        console.error("markQuestionAsAnsweredInSupabase - Fehler:", err);
+      }
+    }
+
+    /* ===== Stats updaten ===== */
+    async function updateUserStatsInSupabase(userId, newXP, newCoins, newStreak) {
+      try {
+        const { data, error } = await supabaseClient
+          .from('user_stats')
+          .update({
+            total_xp: newXP,
+            total_coins: newCoins,
+            streak: newStreak,
+            last_played: new Date().toISOString()
+          })
+          .eq('user_id', userId);
+        if (error) console.error('Fehler beim Update user_stats:', error);
+        else console.log('user_stats aktualisiert:', data);
+      } catch (err) {
+        console.error("updateUserStatsInSupabase - Fehler:", err);
+      }
+    }
+
+    /* ===== Medaillen updaten (Gold, Silber, Bronze) ===== */
+    async function updateMedalsInSupabase(userId, medalType) {
+      try {
+        const { data: statsData, error: statsErr } = await supabaseClient
+          .from('user_stats')
+          .select('*')
+          .eq('user_id', userId)
+          .single();
+        if (statsErr) {
+          console.error("Fehler beim Lesen user_stats:", statsErr);
+          return;
+        }
+        let gold = statsData.gold_medals || 0;
+        let silver = statsData.silver_medals || 0;
+        let bronze = statsData.bronze_medals || 0;
+
+        if (medalType === "Gold") gold++;
+        else if (medalType === "Silber") silver++;
+        else if (medalType === "Bronze") bronze++;
+
+        const { data: updated, error: updErr } = await supabaseClient
+          .from('user_stats')
+          .update({
+            gold_medals: gold,
+            silver_medals: silver,
+            bronze_medals: bronze
+          })
+          .eq('user_id', userId);
+        if (updErr) console.error("Fehler beim Update der Medaillen:", updErr);
+        else console.log("Medaillen aktualisiert:", updated);
+      } catch (err) {
+        console.error("updateMedalsInSupabase - Fehler:", err);
+      }
+    }
+
+    /* ===== End Screen ===== */
+    async function updateEndScreen() {
+      endScreenEl.style.display = "block";
+      repeatBtn.style.display = "none";
+      continueBtn.style.display = "inline-block";
+
+      let netCoins = roundCoins;
+      let coinMsg = (netCoins > 0)
+        ? `Münzen-Bilanz: +${netCoins} 🪙`
+        : (netCoins < 0)
+          ? `Münzen-Bilanz: ${netCoins} 🪙`
+          : `Münzen-Bilanz: 0 🪙`;
+      coinBalanceEl.textContent = coinMsg;
+
+      xpTextEl.textContent = `${quizXp} / ${xpGoal} XP`;
+      circleBarEl.setAttribute("stroke-dasharray", `0, ${halfCircleCircumference}`);
+
+      const finalProgress = (quizXp / xpGoal) * halfCircleCircumference;
+      let current = 0;
+      const steps = 50;
+      const stepValue = finalProgress / steps;
+      let stepCount = 0;
+
+      const animate = setInterval(() => {
+        stepCount++;
+        current += stepValue;
+        if (stepCount >= steps) {
+          current = finalProgress;
+          clearInterval(animate);
+        }
+        circleBarEl.setAttribute("stroke-dasharray", `${current}, ${halfCircleCircumference}`);
+      }, 20);
+
+      let percent = (quizXp / xpGoal) * 100;
+      let medalType = "Keine Medaille";
+      if (percent === 100) {
+        medalType = "Gold";
+      } else if (percent >= 75) {
+        medalType = "Silber";
+      } else if (percent >= 50) {
+        medalType = "Bronze";
+      }
+
+      medalInfoEl.innerHTML = "";
+      if (medalType !== "Keine Medaille") {
+        medalInfoEl.textContent = `Du hast ${Math.round(percent)}% erreicht – ${medalType}-Medaille!`;
+        const medalImg = document.createElement("img");
+        medalImg.className = "medal-image";
+        if (medalType === "Gold") {
+          medalImg.src = "https://lqoulygftdjbnfxkrihy.supabase.co/storage/v1/object/public/quiz-medals//Goldmedaille.svg";
+        } else if (medalType === "Silber") {
+          medalImg.src = "https://lqoulygftdjbnfxkrihy.supabase.co/storage/v1/object/public/quiz-medals//Silbermedaille.svg";
+        } else if (medalType === "Bronze") {
+          medalImg.src = "https://lqoulygftdjbnfxkrihy.supabase.co/storage/v1/object/public/quiz-medals//Bronzemedaille.svg";
+        }
+        medalInfoEl.appendChild(medalImg);
+
+        await updateMedalsInSupabase(supabaseUserId, medalType);
+      } else {
+        medalInfoEl.textContent = `Du hast ${Math.round(percent)}% erreicht – keine Medaille diesmal.`;
+      }
+
+      // Streak-Update, falls XP > 0
+      if (quizXp > 0) {
+        await updateStreak(supabaseUserId);
+      }
+    }
   </script>
 </body>
 </html>
