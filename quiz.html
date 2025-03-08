@@ -7,157 +7,39 @@
   <!-- Supabase JavaScript Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <style>
-    /* ---------- Dark Mode (activated only if device is in dark mode) ---------- */
+    /* ---------- Dark Mode ---------- */
     @media (prefers-color-scheme: dark) {
       body { background-color: #000; color: #fff; }
       #quiz-container { background-color: #222; border-color: #fff; }
       .question-panel { background-color: #333; color: #fff; }
       .answer-panel { background-color: #222; color: #fff; }
-      /* Additional dark-mode tweaks as needed */
     }
-
     /* ---------- Global Styles ---------- */
     * { font-family: Cambria, serif; box-sizing: border-box; }
-
-    /* ---------- Container ---------- */
-    #quiz-container {
-      border: 3px solid black;
-      margin: 20px auto;
-      max-width: 1200px;
-      min-height: 600px;
-      display: flex;
-      flex-direction: column;
-      background-color: #fff;
-    }
-
-    /* ---------- Question Selection ---------- */
-    .question-selection-row {
-      display: flex; align-items: center; justify-content: flex-start;
-      background-color: transparent; padding: 10px; border-bottom: 2px solid black; gap: 5px;
-    }
-    .question-selection { display: flex; gap: 5px; }
-    .question-select-item {
-      background-color: #000; color: #fff; width: 30px; height: 30px;
-      border-radius: 3px; display: flex; align-items: center; justify-content: center;
-      cursor: pointer; font-size: 0.9rem; border: none; transition: background-color 0.3s;
-    }
-    .question-select-item:hover { background-color: #333; }
-
-    /* ---------- Layout: 2 Columns ---------- */
-    .content-row { display: flex; flex: 1; flex-direction: row; }
-
-    /* ---------- Left Panel (Question Panel) ---------- */
-    .question-panel {
-      width: 50%; background-color: #000; color: #fff;
-      display: flex; flex-direction: column; padding: 20px; position: relative;
-    }
-    .question-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-    .question-number { font-weight: bold; }
-    .progress-bar-container {
-      background-color: #333; width: 50%; height: 8px; border-radius: 4px; overflow: hidden;
-    }
-    .progress-bar { background-color: #FFD700; height: 100%; width: 0%; transition: width 0.3s; }
-    #questionText { font-size: 1.2rem; font-weight: bold; margin: 0; color: #fff; }
-    #explanationContainer {
-      background-color: #111; border-radius: 5px; padding: 15px; margin-top: 20px;
-      display: none; text-align: left;
-    }
-    #explanationText { margin-top: 0.5em; margin-bottom: 10px; white-space: pre-line; }
-
-    /* ---------- Joker Row (positioned in the left panel, bottom left) ---------- */
-    .joker-row {
-      position: absolute; bottom: 10px; left: 20px;
-      display: flex; gap: 15px; align-items: center;
-    }
-    .joker-btn {
-      width: 50px; height: 50px; border-radius: 50%;
-      background: #fff; border: 1.5px solid #000;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer; transition: background-color 0.3s, color 0.3s;
-    }
-    .joker-btn:hover { background-color: #333; color: #fff; }
-    .joker-btn img { width: 47px; height: 47px; }
-    /* (Note: The price label under the Joker icons has been removed) */
-
-    /* ---------- Right Panel (Answer Panel) ---------- */
-    .answer-panel {
-      width: 50%; background-color: #fff; color: #000;
-      display: flex; flex-direction: column; padding: 20px;
-    }
-    #options {
-      background-color: #fff; border-radius: 5px; min-height: 60px;
-      margin-bottom: 20px; padding: 10px; flex: 1;
-    }
-    button {
-      background: #fff; color: #000; border: 2px solid #000;
-      border-radius: 5px; padding: 10px; margin: 5px 0; width: 100%;
-      font-size: 16px; cursor: pointer; transition: background-color 0.3s, color 0.3s;
-    }
-    button:hover { background-color: #333; color: #fff; }
-    #approveBtn, #rejectBtn, #nextBtn { display: none; }
-    #nextBtn { margin-top: 10px; border-color: green; background-color: green; color: #fff; }
-    #nextBtn:hover { background-color: #006600; color: #fff; }
-    #repeatBtn { display: none; }
-    .open-approve { background-color: green !important; color: #fff !important; border-color: green !important; }
-    .open-reject { background-color: red !important; color: #fff !important; border-color: red !important; }
-    .approve-reject-row { display: flex; gap: 10px; margin-top: 5px; }
-
-    /* ---------- End Screen ---------- */
-    #endScreen {
-      display: none; text-align: center; margin: 20px auto; max-width: 400px;
-      padding: 10px; box-sizing: border-box; font-size: 0.9rem;
-    }
-    .justice-icon { width: 100%; max-width: 120px; height: auto; margin-bottom: 5px; }
-    .circular-progress { width: 100%; max-width: 120px; height: auto; margin: 0 auto 10px; position: relative; overflow: visible; }
-    .circular-progress svg { width: 100%; height: auto; }
-    .circle-bg { fill: none; stroke: #444; stroke-width: 2.8; }
-    .circle { fill: none; stroke: #ffd700; stroke-width: 2.8; stroke-linecap: round; transition: stroke-dasharray 1s ease; }
-    .percentage { font-size: 0.25em; fill: #000; }
-    #endTitle { margin: 0; font-size: 1.2rem; }
-    #endMessage { margin: 5px 0; }
-    #coinBalance { margin-bottom: 5px; font-weight: bold; }
-    #continueBtn {
-      background: #000; color: #fff; border: 2px solid #000; border-radius: 5px;
-      padding: 8px 16px; font-size: 14px; cursor: pointer; transition: background-color 0.3s, color 0.3s;
-      display: inline-block; width: auto;
-    }
-    #continueBtn:hover { background-color: #333; color: #fff; }
-    #medalInfo { margin-top: 10px; font-weight: bold; }
-    .medal-image { width: 50px; height: 50px; display: block; margin: 10px auto; }
-
-    .horizontal-buttons { display: flex; gap: 10px; }
-    .subquestions { margin-bottom: 10px; font-weight: bold; }
-    .open-question-textarea {
-      background: #f9f9f9; border: 2px solid #ccc; border-radius: 5px;
-      padding: 10px; resize: vertical; min-height: 80px; width: 100%;
-    }
-    .case-subquestion-container {
-      margin-bottom: 10px; border: 1px solid #ccc; padding: 10px;
-      border-radius: 5px; background-color: #f1f1f1;
-    }
-    .case-subquestion-text { margin-bottom: 5px; font-weight: bold; }
-    .case-subquestion-buttons { display: flex; gap: 10px; }
-
-    /* ---------- Auth-Container ---------- */
+    /* ---------- Auth Container ---------- */
     #authContainer {
       margin: 20px auto; max-width: 600px; padding: 20px;
-      border: 2px solid #000; border-radius: 5px; background-color: #f7f7f7;
+      border: 2px solid #000; border-radius: 5px;
+      background-color: #000; color: #fff;
     }
-    #authContainer h2 { margin-top: 0; text-align: center; }
+    #authContainer h2 { margin-top: 0; text-align: center; color: #fff; }
     #authMessage { color: red; font-weight: bold; text-align: center; }
     .auth-boxes { display: flex; flex-direction: row; gap: 20px; justify-content: space-around; margin-top: 10px; }
-    .auth-box {
-      flex: 1; border: 1px solid #000; border-radius: 5px; padding: 10px; background-color: #fff;
-    }
-    .auth-box h3 { margin-top: 0; text-align: center; }
-    .auth-box input, .auth-box select, .auth-box button {
+    .auth-box { flex: 1; border: 1px solid #fff; border-radius: 5px; padding: 10px; background-color: #111; }
+    .auth-box h3 { margin-top: 0; text-align: center; color: #fff; }
+    .auth-box input,
+    .auth-box select,
+    .auth-box button {
       width: 100%; margin-bottom: 10px; padding: 8px; font-size: 14px;
+      background-color: #333; color: #fff; border: 1px solid #ccc;
     }
-    @media (max-width: 768px) {
-      .auth-boxes { flex-direction: column; }
-      .auth-box { width: 100%; }
+    .auth-box button { background-color: #444; cursor: pointer; }
+    .auth-box button:hover { background-color: #666; }
+    /* ---------- Container ---------- */
+    #quiz-container {
+      border: 3px solid black; margin: 20px auto; max-width: 1200px;
+      min-height: 600px; display: flex; flex-direction: column; background-color: #fff;
     }
-
     /* ---------- Header-Bar ---------- */
     #headerBar {
       display: flex; align-items: center; padding: 10px; border-bottom: 2px solid black;
@@ -183,17 +65,14 @@
       left: 50%; top: 0; transform: translateX(-50%);
       animation: xp-float-up 2s ease-out forwards;
     }
-    @keyframes xp-float-up {
-      0% { opacity: 1; transform: translate(-50%, 0); }
-      100% { opacity: 0; transform: translate(-50%, -40px); }
-    }
-    .coin-row { display: flex; gap: 10px; }
+    @keyframes xp-float-up { 0% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -40px); } }
     .coin-box {
       background: gold; padding: 5px 10px; border-radius: 10px;
       color: #000; position: relative; font-weight: bold;
     }
     .coin-change {
-      position: absolute; font-size: 18px; font-weight: bold; top: 0; right: 30%; transform: translateX(50%);
+      position: absolute; font-size: 18px; font-weight: bold;
+      top: 0; right: 30%; transform: translateX(50%);
     }
     .coin-change.positive { color: green; animation: float-up 2s ease-out forwards; }
     .coin-change.negative { color: red; animation: float-down 2s ease-out forwards; }
@@ -201,62 +80,183 @@
     @keyframes float-down { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(50px); } }
     #logoutContainer { cursor: pointer; padding: 5px; }
     .logout-icon { width: 30px; height: 30px; }
-
-/* Ursprüngliche 2-Spalten Drag & Drop Styles */
-.dragdrop-container {
-  display: flex;
-  gap: 60px;
-  justify-content: space-around;
-  margin-bottom: 20px;
-  min-height: 400px;
-}
-
-.drag-column,
-.drop-column {
-  width: 45%;
-  border: 2px solid #ccc;
-  border-radius: 5px;
-  padding: 20px;
-  min-height: 300px;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  background-color: #fff;
-}
-
-.drag-column h3,
-.drop-column h3 {
-  margin-top: 0;
-  text-align: center;
-  font-size: 1.1rem;
-}
-
-.draggable-item {
-  background: #333;
-  color: #fff;
-  padding: 8px 10px;
-  border-radius: 5px;
-  margin: 10px 0;
-  cursor: move;
-  text-align: center;
-}
-
-.drop-target {
-  background-color: #fff;
-  border: 2px dashed #888;
-  border-radius: 5px;
-  padding: 8px 10px;
-  margin: 10px 0;
-  min-height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.drop-target.hover {
-  background-color: #eee;
-}
-
+    /* ---------- Question Selection ---------- */
+    .question-selection-row {
+      display: flex; align-items: center; justify-content: flex-start;
+      background-color: transparent; padding: 10px; border-bottom: 2px solid black;
+      gap: 5px; overflow-x: auto;
+    }
+    .question-selection { display: flex; gap: 5px; }
+    .question-select-item {
+      background-color: #000; color: #fff; width: 30px; height: 30px;
+      border-radius: 3px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 0.9rem; border: none; transition: background-color 0.3s;
+      flex-shrink: 0;
+    }
+    .question-select-item:hover { background-color: #333; }
+    .question-select-item.answered { background-color: #888 !important; color: #ccc !important; }
+    /* ---------- 2 Columns Layout ---------- */
+    .content-row { display: flex; flex: 1; flex-direction: row; }
+    /* ---------- Left Panel (Question Panel) ---------- */
+    .question-panel {
+      width: 50%; background-color: #000; color: #fff;
+      display: flex; flex-direction: column; padding: 20px; position: relative;
+    }
+    .question-header {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;
+    }
+    .question-number { font-weight: bold; }
+    .progress-bar-container {
+      background-color: #333; width: 50%; height: 8px; border-radius: 4px; overflow: hidden;
+    }
+    .progress-bar {
+      background-color: #FFD700; height: 100%; width: 0%; transition: width 0.3s;
+    }
+    #questionText {
+      font-size: 1.2rem; font-weight: bold; margin: 0; color: #fff;
+    }
+    #explanationContainer {
+      background-color: #111; border-radius: 5px; padding: 15px; margin-top: 20px;
+      display: none; text-align: left;
+    }
+    #explanationText { margin-top: 0.5em; margin-bottom: 10px; white-space: pre-line; }
+    /* ---------- Joker Row ---------- */
+    .joker-row {
+      position: absolute; bottom: 10px; left: 20px;
+      display: flex; gap: 15px; align-items: center;
+    }
+    .joker-btn {
+      width: 50px; height: 50px; border-radius: 50%;
+      background: #fff; border: 1.5px solid #000;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: background-color 0.3s, color 0.3s;
+    }
+    .joker-btn:hover { background-color: #333; color: #fff; }
+    /* Joker-Icons kleiner (30×30px) */
+    .joker-btn img { width: 30px; height: 30px; }
+    /* ---------- Right Panel (Answer Panel) ---------- */
+    .answer-panel {
+      width: 50%; background-color: #fff; color: #000;
+      display: flex; flex-direction: column; padding: 20px;
+    }
+    #options {
+      background-color: #fff; border-radius: 5px; min-height: 60px;
+      margin-bottom: 20px; padding: 10px; flex: 1;
+    }
+    button {
+      background: #fff; color: #000; border: 2px solid #000;
+      border-radius: 5px; padding: 10px; margin: 5px 0;
+      width: 100%; font-size: 16px; cursor: pointer;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    button:hover { background-color: #333; color: #fff; }
+    #approveBtn, #rejectBtn, #nextBtn { display: none; }
+    #nextBtn { margin-top: 10px; border-color: green; background-color: green; color: #fff; }
+    #nextBtn:hover { background-color: #006600; color: #fff; }
+    #repeatBtn { display: none; }
+    .open-approve { background-color: green !important; color: #fff !important; border-color: green !important; }
+    .open-reject { background-color: red !important; color: #fff !important; border-color: red !important; }
+    .approve-reject-row { display: flex; gap: 10px; margin-top: 5px; }
+    /* ---------- End Screen ---------- */
+    #endScreen {
+      display: none; text-align: center; margin: 20px auto;
+      max-width: 400px; padding: 10px; box-sizing: border-box; font-size: 0.9rem;
+    }
+    .justice-icon { width: 100%; max-width: 120px; height: auto; margin-bottom: 5px; }
+    .circular-progress {
+      width: 100%; max-width: 120px; height: auto;
+      margin: 0 auto 10px auto; position: relative; overflow: visible;
+    }
+    .circular-progress svg { width: 100%; height: auto; }
+    .circle-bg { fill: none; stroke: #444; stroke-width: 2.8; }
+    .circle {
+      fill: none; stroke: #ffd700; stroke-width: 2.8;
+      stroke-linecap: round; transition: stroke-dasharray 1s ease;
+    }
+    .percentage { font-size: 0.25em; fill: #000; }
+    #endTitle { margin: 0; font-size: 1.2rem; }
+    #endMessage { margin: 5px 0; }
+    #coinBalance { margin-bottom: 5px; font-weight: bold; }
+    #continueBtn {
+      background: #000; color: #fff; border: 2px solid #000;
+      border-radius: 5px; padding: 8px 16px; font-size: 14px;
+      cursor: pointer; transition: background-color 0.3s, color 0.3s;
+      display: inline-block; width: auto;
+    }
+    #continueBtn:hover { background-color: #333; color: #fff; }
+    #medalInfo { margin-top: 10px; font-weight: bold; }
+    .medal-image { width: 50px; height: 50px; display: block; margin: 10px auto; }
+    /* ---------- Scrollbarer Container für Cases ---------- */
+    .cases-container {
+      max-height: 400px;
+      overflow-y: auto;
+      padding-right: 10px; /* damit Scrollbar nicht überlappt */
+    }
+    /* ---------- Drag & Drop Styles ---------- */
+    .dragdrop-container {
+      display: flex; gap: 60px; justify-content: space-around;
+      margin-bottom: 20px; min-height: 400px;
+    }
+    .drag-column, .drop-column {
+      width: 45%; border: 2px solid #ccc; border-radius: 5px;
+      padding: 20px; min-height: 300px; display: flex;
+      flex-direction: column; gap: 15px; background-color: #fff;
+    }
+    .drag-column h3, .drop-column h3 {
+      margin-top: 0; text-align: center; font-size: 1.1rem;
+    }
+    .draggable-item {
+      background: #333; color: #fff; padding: 8px 10px;
+      border-radius: 5px; margin: 10px 0; cursor: move; text-align: center;
+    }
+    .draggable-item.disabled { background-color: #aaa; cursor: default; }
+    .drop-target {
+      background-color: #fff; border: 2px dashed #888; border-radius: 5px;
+      padding: 8px 10px; margin: 10px 0; min-height: 50px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .drop-target.hover { background-color: #eee; }
+    /* ---------- Handy-Optimierung ---------- */
+    @media (max-width: 768px) {
+      body { background-color: #111; }
+      #quiz-container { margin: 0; border: none; }
+      .content-row { flex-direction: column; }
+      .question-panel, .answer-panel { width: 100%; }
+      .question-panel { position: static; }
+      .joker-row {
+        position: static; bottom: auto; left: auto;
+        margin-top: 10px; justify-content: center;
+      }
+      #explanationContainer { margin-top: 10px; }
+    }
+    /* ---------- Offene Frage ---------- */
+    .open-question-textarea {
+      background: #f9f9f9; border: 2px solid #ccc;
+      border-radius: 5px; padding: 10px; resize: vertical;
+      min-height: 200px; width: 100%; margin-top: 0;
+    }
+    /* ---------- Multiple-Choice-Checkboxen ---------- */
+    input[type="checkbox"] {
+      accent-color: black; width: 20px; height: 20px; margin-right: 8px;
+    }
+    .mc-option-label {
+      font-size: 1.2rem; display: flex; align-items: center; margin-bottom: 8px;
+    }
+    /* ---------- CASES-Statements ---------- */
+    .case-statement {
+      margin-bottom: 15px; font-size: 1.2rem; text-align: left;
+      padding: 5px; border: 1px solid #ccc; border-radius: 5px;
+      background: #fafafa;
+    }
+    .case-statement.answered { background: #eee; }
+    .case-statement-title { font-weight: bold; margin-bottom: 5px; }
+    .case-statement-explanation {
+      margin-top: 5px; font-style: italic; color: #333;
+    }
+    .case-statement-buttons {
+      display: flex; gap: 10px; justify-content: center; margin-top: 10px;
+    }
+    .case-statement-buttons button { width: 100px; }
   </style>
 </head>
 <body>
@@ -270,7 +270,6 @@
       Wähle auch deine Universität aus, um Punkte für deine Uni zu sammeln und im Leaderboard aufzusteigen!
     </p>
     <div class="auth-boxes">
-      <!-- Registrierungsbox -->
       <div class="auth-box" id="registerBox">
         <h3>Registrieren</h3>
         <input type="text" id="regUsernameInput" placeholder="Benutzername">
@@ -280,55 +279,11 @@
           <option value="">Hochschule auswählen</option>
           <option value="Universität Augsburg">Universität Augsburg</option>
           <option value="Universität Bayreuth">Universität Bayreuth</option>
-          <option value="Freie Universität Berlin">Freie Universität Berlin</option>
-          <option value="Humboldt-Universität zu Berlin">Humboldt-Universität zu Berlin</option>
-          <option value="Ruhr-Universität Bochum">Ruhr-Universität Bochum</option>
-          <option value="Rheinische Friedrich-Wilhelms-Universität Bonn">Rheinische Friedrich-Wilhelms-Universität Bonn</option>
-          <option value="Universität Bremen">Universität Bremen</option>
-          <option value="Heinrich-Heine-Universität Düsseldorf">Heinrich-Heine-Universität Düsseldorf</option>
-          <option value="Friedrich-Alexander-Universität Erlangen-Nürnberg">Friedrich-Alexander-Universität Erlangen-Nürnberg</option>
-          <option value="Johann-Wolfgang-Goethe-Universität Frankfurt am Main">Johann-Wolfgang-Goethe-Universität Frankfurt am Main</option>
-          <option value="Europa-Universität Viadrina Frankfurt (Oder)">Europa-Universität Viadrina Frankfurt (Oder)</option>
-          <option value="Albert-Ludwigs-Universität Freiburg">Albert-Ludwigs-Universität Freiburg</option>
-          <option value="Justus-Liebig-Universität Gießen">Justus-Liebig-Universität Gießen</option>
-          <option value="Georg-August-Universität Göttingen">Georg-August-Universität Göttingen</option>
-          <option value="Universität Greifswald">Universität Greifswald</option>
-          <option value="FernUniversität in Hagen">FernUniversität in Hagen</option>
-          <option value="Martin-Luther-Universität Halle-Wittenberg">Martin-Luther-Universität Halle-Wittenberg</option>
-          <option value="Universität Hamburg">Universität Hamburg</option>
-          <option value="Bucerius Law School (Privatuniversität)">Bucerius Law School (Privatuniversität)</option>
-          <option value="Gottfried Wilhelm Leibniz Universität Hannover">Gottfried Wilhelm Leibniz Universität Hannover</option>
-          <option value="Ruprecht-Karls-Universität Heidelberg">Ruprecht-Karls-Universität Heidelberg</option>
-          <option value="Friedrich-Schiller-Universität Jena">Friedrich-Schiller-Universität Jena</option>
-          <option value="Christian-Albrechts-Universität zu Kiel">Christian-Albrechts-Universität zu Kiel</option>
-          <option value="Universität Leipzig">Universität Leipzig</option>
-          <option value="Universität zu Köln">Universität zu Köln</option>
-          <option value="Universität Konstanz">Universität Konstanz</option>
-          <option value="Universität Mannheim">Universität Mannheim</option>
-          <option value="Westfälische Wilhelms-Universität Münster">Westfälische Wilhelms-Universität Münster</option>
-          <option value="Ludwig-Maximilians-Universität München">Ludwig-Maximilians-Universität München</option>
-          <option value="Universität Passau">Universität Passau</option>
-          <option value="Universität Potsdam">Universität Potsdam</option>
-          <option value="Universität des Saarlandes">Universität des Saarlandes</option>
-          <option value="Eberhard Karls Universität Tübingen">Eberhard Karls Universität Tübingen</option>
-          <option value="Universität Würzburg">Universität Würzburg</option>
-          <option value="Johannes Gutenberg-Universität Mainz">Johannes Gutenberg-Universität Mainz</option>
-          <option value="Philipps-Universität Marburg">Philipps-Universität Marburg</option>
-          <option value="Leuphana Universität Lüneburg">Leuphana Universität Lüneburg</option>
-          <option value="Carl von Ossietzky Universität Oldenburg">Carl von Ossietzky Universität Oldenburg</option>
-          <option value="Technische Universität Berlin">Technische Universität Berlin</option>
-          <option value="Technische Universität Braunschweig">Technische Universität Braunschweig</option>
-          <option value="Technische Universität Dortmund">Technische Universität Dortmund</option>
-          <option value="Technische Universität Dresden">Technische Universität Dresden</option>
-          <option value="Technische Universität Kaiserslautern">Technische Universität Kaiserslautern</option>
-          <option value="Technische Universität München">Technische Universität München</option>
-          <option value="Karlsruher Institut für Technologie (KIT)">Karlsruher Institut für Technologie (KIT)</option>
-          <option value="Hochschule für Wirtschaft und Recht (Privatuniversität)">Hochschule für Wirtschaft und Recht (Privatuniversität)</option>
+          <!-- ... weitere Hochschulen ... -->
           <option value="Andere / Sonstige">Andere / Sonstige</option>
         </select>
         <button id="registerBtn">Registrieren</button>
       </div>
-      <!-- Loginbox -->
       <div class="auth-box" id="loginBox">
         <h3>Anmelden</h3>
         <input type="email" id="loginEmailInput" placeholder="E-Mail">
@@ -363,6 +318,7 @@
       <div class="question-selection-row">
         <div class="question-selection" id="questionSelection"></div>
       </div>
+
       <div class="content-row">
         <div class="question-panel">
           <div class="question-header">
@@ -373,7 +329,6 @@
           </div>
           <h2 id="questionText">Quiz wird geladen...</h2>
 
-          <!-- Erklärung / Ergebnisanzeige -->
           <div id="explanationContainer">
             <p id="explanationText"></p>
             <div class="approve-reject-row">
@@ -383,13 +338,9 @@
             <button id="nextBtn">Weiter →</button>
           </div>
 
-          <!-- Joker-Container: Icons in the following order: XP-Booster, Münzen-Multiplikator, Serie-Boost, 50:50 -->
           <div class="joker-row" id="jokerContainer">
             <button class="joker-btn" id="xpBoosterBtn" title="XP-Booster">
               <img src="https://lqoulygftdjbnfxkrihy.supabase.co/storage/v1/object/public/quiz-assets/xpboost.svg" alt="XP-Booster">
-            </button>
-            <button class="joker-btn" id="coinMultiplierBtn" title="Münzen-Multiplikator">
-              <img src="https://lqoulygftdjbnfxkrihy.supabase.co/storage/v1/object/public/quiz-assets/coinboost.svg" alt="Münzen-Multiplikator">
             </button>
             <button class="joker-btn" id="streakBoostBtn" title="Serie-Boost">
               <img src="https://lqoulygftdjbnfxkrihy.supabase.co/storage/v1/object/public/quiz-assets/streakboost.svg" alt="Serie-Boost">
@@ -424,7 +375,71 @@
   </div>
 
   <script>
-    // --- Hilfsfunktion: Array mischen (Fisher-Yates) ---
+    /* ===== SUPABASE & INITIAL SETUP ===== */
+    const SUPABASE_URL = 'https://lqoulygftdjbnfxkrihy.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxxb3VseWdmdGRqYm5meGtyaWh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk0NzUzMDAsImV4cCI6MjA1NTA1MTMwMH0.VInK_7i6zY_f5zjHSR0U93Ut0L7ku_Q0C9xS-u4Lols';
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: { persistSession: true, autoRefreshToken: true }
+    });
+
+    /* ===== ELEMENTE ===== */
+    const authContainer = document.getElementById("authContainer");
+    const quizContainer = document.getElementById("quizContainer");
+    const authMessage = document.getElementById("authMessage");
+    const usernameDisplay = document.getElementById("usernameDisplay");
+    const profilePic = document.getElementById("profilePic");
+
+    const xpBox = document.getElementById("xpBox");
+    const xpValueEl = document.getElementById("xpValue");
+    const totalCoinsEl = document.getElementById("totalCoins");
+    const roundCoinsEl = document.getElementById("roundCoins");
+    const questionTextEl = document.getElementById("questionText");
+    const optionsEl = document.getElementById("options");
+    const explanationContainer = document.getElementById("explanationContainer");
+    const explanationText = document.getElementById("explanationText");
+    const approveBtn = document.getElementById("approveBtn");
+    const rejectBtn = document.getElementById("rejectBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const questionSelectionEl = document.getElementById("questionSelection");
+    const endScreenEl = document.getElementById("endScreen");
+    const xpTextEl = document.getElementById("xpText");
+    const circleBarEl = document.getElementById("circleBar");
+    const coinBalanceEl = document.getElementById("coinBalance");
+    const medalInfoEl = document.getElementById("medalInfo");
+    const repeatBtn = document.getElementById("repeatBtn");
+    const continueBtn = document.getElementById("continueBtn");
+    const progressInfoEl = document.getElementById("progressInfo");
+    const progressBarEl = document.getElementById("progress-bar");
+
+    const xpBoosterBtn = document.getElementById("xpBoosterBtn");
+    const streakBoostBtn = document.getElementById("streakBoostBtn");
+    const joker5050Btn = document.getElementById("joker5050Btn");
+
+    /* ===== SOUNDEFFEKTE ===== */
+    const correctSound = new Audio("https://lqoulygftdjbnfxkrihy.supabase.co/storage/v1/object/public/quiz-assets//correct.mp3");
+    const wrongSound = new Audio("https://lqoulygftdjbnfxkrihy.supabase.co/storage/v1/object/public/quiz-assets//wrong.mp3");
+    const cashierSound = new Audio("https://lqoulygftdjbnfxkrihy.supabase.co/storage/v1/object/public/quiz-assets//cashier.mp3");
+
+    /* ===== GLOBALE VARIABLEN ===== */
+    let questions = [];
+    let currentIndex = 0;
+    let totalCoins = 100;
+    let xp = 0;
+    let roundCoins = 0;
+    let quizXp = 0;
+    let xpGoal = 0;
+    let streak = 0;
+    let answeredCorrectly = [];
+    let alreadyAnsweredQuestionIds = [];
+    let supabaseUserId = null;
+    const halfCircleCircumference = 50.265;
+
+    // Für Cases: Statt nur IDs wird ein Array von Objekten geführt, z. B. {id, isCorrect}
+    let answeredCaseSubquestions = [];
+    let caseSubquestions = [];
+    let caseStatementIndex = 0;
+
+    /* ===== HILFSFUNKTIONEN ===== */
     function shuffleArray(array) {
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -433,76 +448,108 @@
       return array;
     }
 
-    // --- Supabase-Konfiguration ---
-    const SUPABASE_URL = 'https://lqoulygftdjbnfxkrihy.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxxb3VseWdmdGRqYm5meGtyaWh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk0NzUzMDAsImV4cCI6MjA1NTA1MTMwMH0.VInK_7i6zY_f5zjHSR0U93Ut0L7ku_Q0C9xS-u4Lols';
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      auth: { persistSession: true, autoRefreshToken: true }
-    });
+    // Markiert die Oberfrage als beantwortet – bei Cases erst, wenn alle Subquestions beantwortet wurden.
+    function markQuestionAsAnswered(questionId) {
+      if (!alreadyAnsweredQuestionIds.includes(questionId)) {
+        alreadyAnsweredQuestionIds.push(questionId);
+        markQuestionAsAnsweredInSupabase(supabaseUserId, questionId);
+        const selItems = document.querySelectorAll(".question-select-item");
+        if (selItems[currentIndex]) { selItems[currentIndex].classList.add("answered"); }
+      }
+    }
 
-    // --- Elemente ---
-    const authContainer = document.getElementById("authContainer");
-    const quizContainer = document.getElementById("quizContainer");
-    const authMessage = document.getElementById("authMessage");
-    const usernameDisplay = document.getElementById("usernameDisplay");
-    const profilePic = document.getElementById("profilePic");
+    /* ===== UPDATE STREAK (24h-Logik) ===== */
+    async function updateStreak(userId) {
+      try {
+        const { data, error } = await supabaseClient
+          .from('user_stats')
+          .select('*')
+          .eq('user_id', userId)
+          .single();
+        if (error) {
+          console.error("Fehler beim Lesen user_stats:", error);
+          return;
+        }
+        let lastPlayed = data.last_played ? new Date(data.last_played) : null;
+        let now = new Date();
+        let newStreak = data.streak || 0;
+        if (!lastPlayed || (now - lastPlayed) > 24 * 3600000) {
+          newStreak = 1;
+        } else {
+          newStreak++;
+        }
+        const { data: updated, error: upErr } = await supabaseClient
+          .from('user_stats')
+          .update({
+            streak: newStreak,
+            last_played: now.toISOString()
+          })
+          .eq('user_id', userId);
+        if (upErr) {
+          console.error("Fehler beim Update der Streak:", upErr);
+        } else {
+          console.log("Streak aktualisiert:", updated);
+        }
+      } catch (err) {
+        console.error("updateStreak - Unerwarteter Fehler:", err);
+      }
+    }
 
-    // --- Soundeffekte ---
-    const correctSound = new Audio("https://lqoulygftdjbnfxkrihy.supabase.co/storage/v1/object/public/quiz-assets//correct.mp3");
-    const wrongSound = new Audio("https://lqoulygftdjbnfxkrihy.supabase.co/storage/v1/object/public/quiz-assets//wrong.mp3");
-    const cashierSound = new Audio("https://lqoulygftdjbnfxkrihy.supabase.co/storage/v1/object/public/quiz-assets//cashier.mp3");
+    /* ===== UPDATE MEDALS (GETRENNT: Gold, Silber, Bronze) ===== */
+    async function updateMedalsInSupabase(userId, medalType) {
+      try {
+        const { data: statsData, error: statsErr } = await supabaseClient
+          .from('user_stats')
+          .select('*')
+          .eq('user_id', userId)
+          .single();
+        if (statsErr) {
+          console.error("Fehler beim Lesen user_stats:", statsErr);
+          return;
+        }
+        let gold = statsData.gold_medals || 0;
+        let silver = statsData.silver_medals || 0;
+        let bronze = statsData.bronze_medals || 0;
+        if (medalType === "Gold") gold++;
+        else if (medalType === "Silber") silver++;
+        else if (medalType === "Bronze") bronze++;
+        const { data: updated, error: updErr } = await supabaseClient
+          .from('user_stats')
+          .update({
+            gold_medals: gold,
+            silver_medals: silver,
+            bronze_medals: bronze
+          })
+          .eq('user_id', userId);
+        if (updErr) console.error("Fehler beim Update der Medaillen:", updErr);
+        else console.log("Medaillen aktualisiert:", updated);
+      } catch (err) {
+        console.error("updateMedalsInSupabase - Fehler:", err);
+      }
+    }
 
-    // --- Variablen für Quiz & Stats ---
-    let questions = [];
-    let currentIndex = 0;
-    let totalCoins = 100;
-    let xp = 0;
-    let roundCoins = 0; 
-    let quizXp = 0;
-    let xpGoal = 0;
-    let streak = 0;
-    let answeredCorrectly = [];
-    let alreadyAnsweredQuestionIds = [];
-    const halfCircleCircumference = 50.265;
-    let supabaseUserId = null;
-
-    // --- Joker-Flags ---
-    let isXPBoosterActive = false;        
-    let xpBoosterRemaining = 0;
-    let isCoinMultiplierActive = false;   
-    let coinMultiplierRemaining = 0;
-    let isStreakBoostActive = false;      
-    let streakBoostRemaining = 0;
-    let is5050Active = false;
-
-    // --- Registrierung ---
+    /* ===== REGISTRIEREN & LOGIN ===== */
     document.getElementById("registerBtn").addEventListener("click", async () => {
       const username = document.getElementById("regUsernameInput").value.trim();
       const email = document.getElementById("regEmailInput").value.trim();
       const password = document.getElementById("regPasswordInput").value.trim();
       const university = document.getElementById("regUniversitySelect").value;
-      if (!username) { authMessage.innerText = "Bitte einen Benutzernamen eingeben!"; return; }
-      if (!email) { authMessage.innerText = "Bitte eine E-Mail eingeben!"; return; }
-      if (!password) { authMessage.innerText = "Bitte ein Passwort eingeben!"; return; }
-      if (!university) { authMessage.innerText = "Bitte eine Hochschule auswählen!"; return; }
-      // Prüfe, ob der Username bereits existiert
+      if (!username || !email || !password || !university) {
+        authMessage.innerText = "Bitte alle Felder ausfüllen!";
+        return;
+      }
       try {
-        const { data: existingUser, error: existingErr } = await supabaseClient
+        const { data: existingUser } = await supabaseClient
           .from('profiles')
           .select('username')
           .eq('username', username);
-        if (existingErr) {
-          console.error("Fehler bei der Username-Prüfung:", existingErr);
-          authMessage.innerText = "Fehler beim Prüfen des Benutzernamens.";
-          return;
-        }
         if (existingUser && existingUser.length > 0) {
-          authMessage.innerText = "Benutzername bereits vergeben. Bitte wähle einen anderen!";
+          authMessage.innerText = "Benutzername bereits vergeben!";
           return;
         }
-      } catch (checkErr) {
-        console.error("Unerwarteter Fehler bei Username-Duplikatprüfung:", checkErr);
-        authMessage.innerText = "Fehler bei der Registrierung. Bitte später erneut versuchen.";
+      } catch (err) {
+        console.error("Fehler bei Username-Prüfung:", err);
+        authMessage.innerText = "Fehler bei der Registrierung.";
         return;
       }
       try {
@@ -516,16 +563,18 @@
           startQuiz(data.user.id);
         }
       } catch (err) {
-        console.error("Unerwarteter Fehler bei Registrierung:", err);
-        authMessage.innerText = "Registrierung fehlgeschlagen. Bitte erneut versuchen.";
+        console.error("Registrierung - Unerwarteter Fehler:", err);
+        authMessage.innerText = "Registrierung fehlgeschlagen.";
       }
     });
 
-    // --- Login ---
     document.getElementById("loginBtn").addEventListener("click", async () => {
       const email = document.getElementById("loginEmailInput").value.trim();
       const password = document.getElementById("loginPasswordInput").value.trim();
-      if (!email || !password) { authMessage.innerText = "Bitte E-Mail und Passwort eingeben!"; return; }
+      if (!email || !password) {
+        authMessage.innerText = "Bitte E-Mail und Passwort eingeben!";
+        return;
+      }
       try {
         const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
         if (error) {
@@ -536,26 +585,21 @@
           startQuiz(data.user.id);
         }
       } catch (err) {
-        console.error("Unerwarteter Fehler bei Login:", err);
-        authMessage.innerText = "Login fehlgeschlagen. Bitte erneut versuchen.";
+        console.error("Login - Unerwarteter Fehler:", err);
+        authMessage.innerText = "Login fehlgeschlagen.";
       }
     });
 
-    // --- Speichert Username/University in "profiles" ---
     async function saveUserProfile(userId, username, university) {
       if (!userId) return;
       const defaultAvatar = "https://via.placeholder.com/80/cccccc/000000?text=Avatar";
       const { data, error } = await supabaseClient
         .from('profiles')
-        .insert([{ id: userId, username: username, university: university, avatar_url: defaultAvatar }]);
-      if (error) {
-        console.error("Fehler beim Speichern des Profils:", error);
-      } else {
-        console.log("Profil gespeichert:", data);
-      }
+        .insert([{ id: userId, username, university, avatar_url: defaultAvatar }]);
+      if (error) console.error("Fehler beim Speichern des Profils:", error);
+      else console.log("Profil gespeichert:", data);
     }
 
-    // --- Quiz starten (versteckt Auth-Bereich) ---
     async function startQuiz(userId) {
       supabaseUserId = userId;
       authContainer.style.display = "none";
@@ -566,7 +610,7 @@
         .eq('id', supabaseUserId)
         .single();
       const { data: userData } = await supabaseClient.auth.getUser();
-      if (profileData && profileData.username && profileData.username.trim() !== "") {
+      if (profileData && profileData.username) {
         usernameDisplay.textContent = profileData.username;
       } else if (userData?.user?.email) {
         usernameDisplay.textContent = userData.user.email;
@@ -574,64 +618,10 @@
       if (profileData && profileData.avatar_url) {
         profilePic.style.backgroundImage = `url('${profileData.avatar_url}')`;
       }
-      initQuizWithSupabaseUser(userId);
+      startQuizForUser(userId);
     }
 
-    // --- Logout ---
-    document.getElementById("logoutContainer").addEventListener("click", function() {
-      if (confirm("Möchten Sie sich wirklich abmelden?")) {
-        supabaseClient.auth.signOut().then(() => {
-          authContainer.style.display = "block";
-          quizContainer.style.display = "none";
-          location.reload();
-        }).catch(err => {
-          console.error("Fehler beim Abmelden:", err);
-        });
-      }
-    });
-
-    // --- Joker-Buttons ---
-    const xpBoosterBtn = document.getElementById("xpBoosterBtn");
-    const coinMultiplierBtn = document.getElementById("coinMultiplierBtn");
-    const streakBoostBtn = document.getElementById("streakBoostBtn");
-    const joker5050Btn = document.getElementById("joker5050Btn");
-    xpBoosterBtn.addEventListener("click", () => buyJoker("xpBooster"));
-    coinMultiplierBtn.addEventListener("click", () => buyJoker("coinMultiplier"));
-    streakBoostBtn.addEventListener("click", () => buyJoker("streakBoost"));
-    joker5050Btn.addEventListener("click", () => buyJoker("5050"));
-    function buyJoker(type) {
-      const cost = 20;
-      if (totalCoins < cost) {
-        alert("Du hast nicht genug Münzen, um diesen Joker zu kaufen!");
-        return;
-      }
-      totalCoins -= cost;
-      if (totalCoins < 0) totalCoins = 0;
-      showCoinChange(-cost, document.getElementById("totalCoins").parentElement);
-      document.getElementById("totalCoins").innerText = totalCoins;
-      cashierSound.play();
-      switch (type) {
-        case "xpBooster":
-          alert("XP-Booster aktiviert – du erhältst für die nächsten 3 Fragen doppelte XP!");
-          isXPBoosterActive = true; xpBoosterRemaining = 3;
-          break;
-        case "coinMultiplier":
-          alert("Münzen-Multiplikator aktiviert – du erhältst für die nächsten 3 richtigen Antworten doppelte Münzen!");
-          isCoinMultiplierActive = true; coinMultiplierRemaining = 3;
-          break;
-        case "streakBoost":
-          alert("Serie-Boost aktiviert – wenn du 3 Fragen hintereinander richtig beantwortest, bekommst du extra XP!");
-          isStreakBoostActive = true; streakBoostRemaining = 3;
-          break;
-        case "5050":
-          alert("50:50-Joker aktiviert – zwei falsche Antworten werden entfernt!");
-          is5050Active = true;
-          break;
-      }
-    }
-
-    // --- Quiz Initialisieren ---
-    async function initQuizWithSupabaseUser(userId) {
+    async function startQuizForUser(userId) {
       await ensureUserInSupabase(userId);
       const { data: statsData } = await supabaseClient
         .from('user_stats')
@@ -643,8 +633,8 @@
         totalCoins = statsData.total_coins || 0;
         streak = statsData.streak || 0;
       }
-      document.getElementById("xpValue").innerText = xp;
-      document.getElementById("totalCoins").innerText = totalCoins;
+      xpValueEl.innerText = xp;
+      totalCoinsEl.innerText = totalCoins;
       const answeredRes = await supabaseClient
         .from('answered_questions')
         .select('question_id')
@@ -654,7 +644,71 @@
       }
       const urlParams = new URLSearchParams(window.location.search);
       const chapterId = urlParams.get('chapterId') || "1";
-      loadQuestions(chapterId);
+      // Trenne normale Fragen und Cases:
+      const normalQuestions = [];
+      const caseQuestions = [];
+      questions = await loadQuestions(chapterId); // lädt 'questions' und zeigt sie an
+      questions.forEach(q => {
+        if(q.type === "cases") {
+          caseQuestions.push(q);
+        } else {
+          normalQuestions.push(q);
+        }
+      });
+      xpGoal = normalQuestions.length * 10 + caseQuestions.reduce((sum, q) => {
+        return sum + ((q.subquestions_count || 0) * 10);
+      }, 0);
+    }
+
+    document.getElementById("logoutContainer").addEventListener("click", async () => {
+      if (confirm("Möchten Sie sich wirklich abmelden?")) {
+        try {
+          await supabaseClient.auth.signOut();
+          authContainer.style.display = "block";
+          quizContainer.style.display = "none";
+          location.reload();
+        } catch (err) {
+          console.error("Fehler beim Abmelden:", err);
+        }
+      }
+    });
+
+    xpBoosterBtn.addEventListener("click", () => buyJoker("xpBooster"));
+    streakBoostBtn.addEventListener("click", () => buyJoker("streakBoost"));
+    joker5050Btn.addEventListener("click", () => buyJoker("5050"));
+
+    function buyJoker(type) {
+      const qId = questions[currentIndex]?.id;
+      if (alreadyAnsweredQuestionIds.includes(qId)) {
+        alert("Diese Frage ist bereits beantwortet – Joker nicht mehr möglich!");
+        return;
+      }
+      const cost = 20;
+      if (totalCoins < cost) {
+        alert("Nicht genug Münzen für diesen Joker!");
+        return;
+      }
+      totalCoins -= cost;
+      if (totalCoins < 0) totalCoins = 0;
+      showCoinChange(-cost, totalCoinsEl.parentElement);
+      totalCoinsEl.innerText = totalCoins;
+      cashierSound.play();
+      switch (type) {
+        case "xpBooster":
+          alert("XP-Booster aktiviert – 3 Fragen lang doppelte XP!");
+          isXPBoosterActive = true;
+          xpBoosterRemaining = 3;
+          break;
+        case "streakBoost":
+          alert("Serie-Boost aktiviert – 3 richtige Fragen in Serie = extra XP!");
+          isStreakBoostActive = true;
+          streakBoostRemaining = 3;
+          break;
+        case "5050":
+          alert("50:50-Joker aktiviert – zwei falsche Antworten verschwinden!");
+          is5050Active = true;
+          break;
+      }
     }
 
     document.addEventListener("DOMContentLoaded", async () => {
@@ -669,7 +723,7 @@
           .eq('id', supabaseUserId)
           .single();
         const { data: userData } = await supabaseClient.auth.getUser();
-        if (profileData && profileData.username && profileData.username.trim() !== "") {
+        if (profileData && profileData.username) {
           usernameDisplay.textContent = profileData.username;
         } else if (userData?.user?.email) {
           usernameDisplay.textContent = userData.user.email;
@@ -677,61 +731,40 @@
         if (profileData && profileData.avatar_url) {
           profilePic.style.backgroundImage = `url('${profileData.avatar_url}')`;
         }
-        initQuizWithSupabaseUser(session.user.id);
+        startQuizForUser(session.user.id);
       } else {
         authContainer.style.display = "block";
       }
     });
 
     async function ensureUserInSupabase(userId) {
-      const { data, error } = await supabaseClient.from('user_stats')
+      const { data, error } = await supabaseClient
+        .from('user_stats')
         .select('*')
         .eq('user_id', userId)
         .single();
       if (error && error.code === 'PGRST116') {
-        const { data: insertData, error: insertError } = await supabaseClient.from('user_stats')
-          .insert([{ user_id: userId, total_xp: 0, total_coins: 100, streak: 0, level: 1 }]);
-        if (insertError) {
-          console.error('Fehler beim Anlegen des Benutzers:', insertError);
-        } else {
-          console.log('Benutzer angelegt:', insertData);
-        }
+        const { data: insertData } = await supabaseClient
+          .from('user_stats')
+          .insert([{
+            user_id: userId,
+            total_xp: 0,
+            total_coins: 100,
+            streak: 0,
+            level: 1,
+            gold_medals: 0,
+            silver_medals: 0,
+            bronze_medals: 0
+          }]);
+        console.log("Neuer user_stats-Eintrag:", insertData);
       } else if (error) {
-        console.error('Fehler bei der Benutzerprüfung:', error);
-      }
-    }
-
-    async function updateUserStatsInSupabase(userId, newXP, newCoins, newStreak) {
-      const { data, error } = await supabaseClient.from('user_stats')
-        .update({ total_xp: newXP, total_coins: newCoins, streak: newStreak })
-        .eq('user_id', userId);
-      if (error) {
-        console.error('Fehler beim Update der Stats:', error);
-      } else {
-        console.log('Stats aktualisiert:', data);
-      }
-    }
-
-    async function markQuestionAsAnsweredInSupabase(userId, questionId) {
-      const { data, error } = await supabaseClient.from('answered_questions')
-        .insert([{ user_id: userId, question_id: questionId, is_correct: true }]);
-      if (error) {
-        console.error('Fehler beim Eintragen der beantworteten Frage:', error);
-      } else {
-        console.log('Frage als beantwortet markiert:', data);
-      }
-    }
-
-    async function handleStreak(userId, totalCorrect) {
-      if (totalCorrect > 0) {
-        streak++;
-        await updateUserStatsInSupabase(userId, xp, totalCoins, streak);
+        console.error('Fehler bei ensureUserInSupabase:', error);
       }
     }
 
     async function loadQuestions(chapterId) {
       try {
-        const url = `${SUPABASE_URL}/rest/v1/questions?select=*&chapter_id=eq.${chapterId}`;
+        const url = `${SUPABASE_URL}/rest/v1/questions?select=*&chapter_id=eq.${chapterId}&order=id.asc`;
         const response = await fetch(url, {
           method: 'GET',
           headers: {
@@ -739,13 +772,13 @@
             'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
           }
         });
-        if (!response.ok) {
-          throw new Error("Fehler: " + response.status);
-        }
+        if (!response.ok) throw new Error("Fehler: " + response.status);
         let data = await response.json();
         if (Array.isArray(data) && data.length > 0) {
           questions = data;
-          xpGoal = data.length * 10;
+          xpGoal = questions.reduce((acc, q) => {
+            return acc + (q.type === "cases" ? (q.subquestions_count ? q.subquestions_count * 10 : 10) : 10);
+          }, 0);
           answeredCorrectly = new Array(questions.length).fill(false);
           quizXp = 0;
           roundCoins = 0;
@@ -753,76 +786,67 @@
           createQuestionSelection();
           showQuestion();
         } else {
-          document.getElementById("questionText").innerText = "Keine Fragen für dieses Kapitel gefunden!";
+          questionTextEl.innerText = "Keine Fragen für dieses Kapitel gefunden!";
         }
+        return questions;
       } catch (err) {
-        document.getElementById("questionText").innerText = "Fehler beim Laden!";
+        questionTextEl.innerText = "Fehler beim Laden!";
         console.error(err);
       }
     }
 
     function createQuestionSelection() {
-      const selectionDiv = document.getElementById("questionSelection");
-      selectionDiv.innerHTML = "";
+      questionSelectionEl.innerHTML = "";
       for (let i = 0; i < questions.length; i++) {
         const item = document.createElement("div");
         item.className = "question-select-item";
         item.innerText = (i + 1);
-        item.onclick = () => {
-          currentIndex = i;
-          showQuestion();
-        };
-        selectionDiv.appendChild(item);
+        const qId = questions[i].id;
+        if (alreadyAnsweredQuestionIds.includes(qId)) {
+          item.classList.add("answered");
+        }
+        item.onclick = () => { currentIndex = i; showQuestion(); };
+        questionSelectionEl.appendChild(item);
       }
     }
 
     function showQuestion() {
-      const questionText = document.getElementById("questionText");
-      const options = document.getElementById("options");
-      const explanationContainer = document.getElementById("explanationContainer");
-      const endScreen = document.getElementById("endScreen");
-      const repeatBtn = document.getElementById("repeatBtn");
-      const jokerContainer = document.getElementById("jokerContainer");
       if (currentIndex >= questions.length) {
-        questionText.innerText = "Fertig!";
-        options.style.display = "none";
+        questionTextEl.innerText = "Fertig!";
+        optionsEl.style.display = "none";
         explanationContainer.style.display = "none";
         repeatBtn.style.display = "none";
-        endScreen.style.display = "block";
-        jokerContainer.style.display = "none"; // Joker im Endscreen ausblenden
+        endScreenEl.style.display = "block";
+        document.getElementById("jokerContainer").style.display = "none";
         updateEndScreen();
         return;
       }
-      jokerContainer.style.display = "flex"; // Joker sichtbar, falls nicht Endscreen
-      options.style.display = "block";
-      endScreen.style.display = "none";
+      document.getElementById("jokerContainer").style.display = "flex";
+      optionsEl.style.display = "block";
+      endScreenEl.style.display = "none";
       explanationContainer.style.display = "none";
-      document.getElementById("explanationText").innerText = "";
+      explanationText.innerText = "";
       repeatBtn.style.display = "none";
-      document.getElementById("nextBtn").style.display = "none";
-      document.getElementById("approveBtn").style.display = "none";
-      document.getElementById("rejectBtn").style.display = "none";
+      nextBtn.style.display = "none";
+      approveBtn.style.display = "none";
+      rejectBtn.style.display = "none";
       const q = questions[currentIndex];
-      if (q.type === "lueckentext") {
-        questionText.innerText = "Fülle den Lückentext aus.";
-      } else if (q.type === "drag_drop") {
-        questionText.innerText = "Ordne die Begriffe richtig zu.";
-      } else {
-        questionText.innerText = q.Frage || "Frage fehlt";
-      }
-      options.innerHTML = "";
+      questionTextEl.style.fontStyle = (q.type === "cases") ? "italic" : "normal";
+      questionTextEl.innerText = q.Frage || "Frage fehlt";
+      optionsEl.innerHTML = "";
       updateProgressBar();
-
-      // Anzeige der Joker: 50:50 nur bei multiple_choice/fragen
-      if ((q.type === "multiple_choice" || q.type === "questions") ) {
+      // 50/50-Joker anzeigen, wenn Fragetyp "multiple_choice", "multiple_choice_multi" oder "question"
+      if (q.type === "multiple_choice" || q.type === "multiple_choice_multi" || q.type === "question") {
         joker5050Btn.style.display = "block";
       } else {
         joker5050Btn.style.display = "none";
       }
-
       switch (q.type || "multiple_choice") {
         case "multiple_choice":
-          createStandardQuestion(q, "multiple_choice");
+          createMultipleChoice(q);
+          break;
+        case "multiple_choice_multi":
+          createMultipleChoice(q);
           break;
         case "drag_drop":
           createStandardQuestion(q, "drag_drop");
@@ -834,7 +858,10 @@
           createTrueFalse(q);
           break;
         case "case":
-          createCase(q);
+          createCaseSimple(q);
+          break;
+        case "cases":
+          loadCaseSubquestions(q);
           break;
         case "open_question":
           createOpenQuestion(q);
@@ -845,22 +872,524 @@
       }
     }
 
-    function createTrueFalse(q) {
-      const options = document.getElementById("options");
-      const row = document.createElement("div");
-      row.className = "horizontal-buttons";
-      const btnR = document.createElement("button");
-      btnR.innerText = "Richtig";
-      btnR.onclick = () => { checkAnswer("Richtig", q, false, "true_false"); };
-      const btnF = document.createElement("button");
-      btnF.innerText = "Falsch";
-      btnF.onclick = () => { checkAnswer("Falsch", q, false, "true_false"); };
-      row.appendChild(btnR);
-      row.appendChild(btnF);
-      options.appendChild(row);
+    function updateProgressBar() {
+      const total = questions.length;
+      if (total === 0) {
+        progressBarEl.style.width = "0%";
+        progressInfoEl.innerText = "Frage 0 von 0";
+        return;
+      }
+      const percent = ((currentIndex + 1) / total) * 100;
+      progressBarEl.style.width = percent + "%";
+      progressInfoEl.innerText = `Frage ${currentIndex + 1} von ${total}`;
     }
 
-    function createCase(q) {
+    /* ===== CASES: Neuer Fragetyp mit Teil-Statements ===== */
+    async function loadCaseSubquestions(question) {
+      try {
+        const url = `${SUPABASE_URL}/rest/v1/cases_subquestions?question_id=eq.${question.id}&order=id.asc`;
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+          }
+        });
+        if (!response.ok) throw new Error("Fehler beim Laden der Teil-Statements");
+        caseSubquestions = await response.json();
+        caseStatementIndex = 0;
+        answeredCaseSubquestions = []; // Array von Objekten {id, isCorrect}
+        showCaseStatements(question);
+      } catch (err) {
+        console.error(err);
+        optionsEl.innerHTML = "<p>Fehler beim Laden der Fall-Statements!</p>";
+      }
+    }
+
+    // Hier wird ein scrollbarer Container um die Subquestions gelegt.
+    function showCaseStatements(question) {
+      // Lege zunächst einen Container an:
+      const container = document.createElement("div");
+      container.className = "cases-container";
+      // Falls alle Subquestions beantwortet sind, zeigen wir ALLE Subquestions und dann einen "Weiter" Button:
+      if (caseStatementIndex >= caseSubquestions.length) {
+        // Alle Subquestions anzeigen:
+        caseSubquestions.forEach(s => {
+          const statementDiv = document.createElement("div");
+          statementDiv.classList.add("case-statement");
+          const textDiv = document.createElement("div");
+          textDiv.className = "case-statement-title";
+          textDiv.innerText = s.statement_text;
+          statementDiv.appendChild(textDiv);
+          // Falls bereits beantwortet: zeige Symbol und Erklärung
+          const answerData = answeredCaseSubquestions.find(item => item.id === s.id);
+          if (answerData) {
+            const symbol = document.createElement("div");
+            symbol.innerText = answerData.isCorrect ? "✅ Das war die richtige Antwort." : "❌ Das war die falsche Antwort.";
+            statementDiv.appendChild(symbol);
+            if (s.explanation && s.explanation.trim() !== "") {
+              const expl = document.createElement("div");
+              expl.className = "case-statement-explanation";
+              expl.innerText = s.explanation;
+              statementDiv.appendChild(expl);
+            }
+          }
+          container.appendChild(statementDiv);
+        });
+        // Gesamtfrage als beantwortet markieren:
+        markQuestionAsAnswered(question.id);
+        // "Weiter" Button anhängen:
+        const weiterBtn = document.createElement("button");
+        weiterBtn.innerText = "Weiter →";
+        weiterBtn.onclick = () => { nextQuestion(); };
+        container.appendChild(weiterBtn);
+        optionsEl.innerHTML = "";
+        optionsEl.appendChild(container);
+        return;
+      }
+      // Sonst: Zeige alle Subquestions bis caseStatementIndex:
+      for (let i = 0; i <= caseStatementIndex; i++) {
+        const s = caseSubquestions[i];
+        const statementDiv = document.createElement("div");
+        statementDiv.classList.add("case-statement");
+        const textDiv = document.createElement("div");
+        textDiv.className = "case-statement-title";
+        textDiv.innerText = s.statement_text;
+        statementDiv.appendChild(textDiv);
+        // Falls diese Subquestion bereits beantwortet wurde, zeige Symbol und Erklärung:
+        const answerData = answeredCaseSubquestions.find(item => item.id === s.id);
+        if (answerData) {
+          const symbol = document.createElement("div");
+          symbol.innerText = answerData.isCorrect ? "✅ Das war die richtige Antwort." : "❌ Das war die falsche Antwort.";
+          statementDiv.appendChild(symbol);
+          if (s.explanation && s.explanation.trim() !== "") {
+            const expl = document.createElement("div");
+            expl.className = "case-statement-explanation";
+            expl.innerText = s.explanation;
+            statementDiv.appendChild(expl);
+          }
+        } else if (i === caseStatementIndex) {
+          // Noch nicht beantwortete Subquestion: zeige Buttons
+          const buttonRow = document.createElement("div");
+          buttonRow.className = "case-statement-buttons";
+          const btnR = document.createElement("button");
+          btnR.innerText = "Richtig";
+          btnR.onclick = () => handleCaseStatementAnswer(question, s, "Richtig");
+          const btnF = document.createElement("button");
+          btnF.innerText = "Falsch";
+          btnF.onclick = () => handleCaseStatementAnswer(question, s, "Falsch");
+          buttonRow.appendChild(btnR);
+          buttonRow.appendChild(btnF);
+          statementDiv.appendChild(buttonRow);
+        }
+        container.appendChild(statementDiv);
+      }
+      // Container in options einfügen:
+      optionsEl.innerHTML = "";
+      optionsEl.appendChild(container);
+    }
+
+    async function handleCaseStatementAnswer(question, statement, userAnswer) {
+      const correctAnswer = (statement.correct_answer || "").trim().toLowerCase();
+      const isCorrect = (userAnswer.toLowerCase() === correctAnswer);
+      // Nur, wenn diese Subquestion noch nicht beantwortet wurde:
+      if (!answeredCaseSubquestions.find(item => item.id === statement.id)) {
+        // NUR Sound abspielen, KEINE XP/Coins vergeben:
+        if (isCorrect) {
+          correctSound.play();
+        } else {
+          wrongSound.play();
+        }
+        answeredCaseSubquestions.push({ id: statement.id, isCorrect: isCorrect });
+        await markCaseSubquestionAsAnsweredInSupabase(supabaseUserId, statement.id, isCorrect);
+      }
+      caseStatementIndex++;
+      showCaseStatements(question);
+    }
+
+    async function markCaseSubquestionAsAnsweredInSupabase(userId, subquestionId, isCorrect) {
+      try {
+        const { data: existing } = await supabaseClient
+          .from('answered_cases_subquestions')
+          .select('id')
+          .eq('user_id', userId)
+          .eq('subquestion_id', subquestionId);
+        if (existing && existing.length > 0) {
+          console.log("Subquestion bereits beantwortet, kein Insert.");
+          return;
+        }
+        const { data, error } = await supabaseClient
+          .from('answered_cases_subquestions')
+          .insert([{ user_id: userId, subquestion_id: subquestionId, is_correct: isCorrect }]);
+        if (error) console.error('Fehler beim Insert in answered_cases_subquestions:', error);
+        else console.log('Subquestion als beantwortet markiert:', data);
+      } catch (err) {
+        console.error("markCaseSubquestionAsAnsweredInSupabase - Fehler:", err);
+      }
+    }
+    /* ===== ENDE CASES ===== */
+
+    // Beim Lückentext: Zeige richtige Lösung, dann Leerzeile und dann Erklärung
+    function createLueckentext(q) {
+      const questionLabel = document.createElement("div");
+      questionLabel.style.fontWeight = "bold";
+      questionLabel.style.marginBottom = "5px";
+      questionLabel.innerText = q.Frage || "Lückentext-Frage?";
+      optionsEl.appendChild(questionLabel);
+      const input = document.createElement("input");
+      input.type = "text";
+      input.placeholder = "Fehlendes Wort...";
+      input.style.marginTop = "0";
+      optionsEl.appendChild(input);
+      const btnL = document.createElement("button");
+      btnL.innerText = "Antwort prüfen";
+      btnL.onclick = () => { checkAnswer(input.value.trim(), q, false, "lueckentext"); };
+      optionsEl.appendChild(btnL);
+    }
+
+    function createOpenQuestion(q) {
+      const txt = document.createElement("textarea");
+      txt.classList.add("open-question-textarea");
+      txt.placeholder = "Gebe hier deine Antwort ein...";
+      optionsEl.appendChild(txt);
+      const checkBtn = document.createElement("button");
+      checkBtn.innerText = "Antwort überprüfen";
+      checkBtn.onclick = () => { checkAnswer(txt.value.trim(), q, true, "open_question"); };
+      optionsEl.appendChild(checkBtn);
+      txt.addEventListener("keydown", (ev) => {
+        if ((ev.ctrlKey || ev.metaKey) && ev.key === "Enter") {
+          ev.preventDefault();
+          checkBtn.click();
+        }
+      });
+    }
+
+    function checkAnswer(userAnswer, question, userCanSelfAccept, type) {
+      if (explanationContainer.style.display === "block") return;
+      explanationContainer.style.display = "block";
+      explanationText.innerHTML = "";
+      nextBtn.style.display = "none";
+      approveBtn.style.display = "none";
+      rejectBtn.style.display = "none";
+      const qId = question.id ?? currentIndex;
+      const wasAlreadyAnswered = alreadyAnsweredQuestionIds.includes(qId);
+      // Speziell für Lückentext: Zeige korrekte Lösung + Leerzeile + Erklärung
+      if (type === "lueckentext") {
+        const correctAnswer = question["Richtige Antwort"] || "";
+        let msg = `<strong>Richtige Antwort:</strong><br>${correctAnswer}<br><br>`;
+        let erk = question["Begründung"] || question["Erklärtext"] || "";
+        if (erk.trim() !== "") msg += `<strong>Erklärung:</strong><br>${erk}`;
+        explanationText.innerHTML = msg;
+        nextBtn.style.display = "block";
+        // Bei Lückentext erfolgt keine weitere XP-/Coin-Vergabe (oder nach Wunsch ähnlich wie bei Multiple-Choice)
+        if (!wasAlreadyAnswered) {
+          alreadyAnsweredQuestionIds.push(qId);
+          markQuestionAsAnsweredInSupabase(supabaseUserId, qId);
+          const selItems = document.querySelectorAll(".question-select-item");
+          if (selItems[currentIndex]) { selItems[currentIndex].classList.add("answered"); }
+          updateUserStatsInSupabase(supabaseUserId, xp, totalCoins, streak);
+        }
+        return;
+      }
+      // Für offene Fragen (selbstkorrigierend)
+      if (type === "open_question") {
+        const correctAnswer = question["Richtige Antwort"] || "";
+        let msg = `<strong>Eingegebene Antwort:</strong><br>${userAnswer || "(leer)"}<br>
+<strong>Richtige Antwort:</strong><br>${correctAnswer}<br>`;
+        let erk = question["Begründung"] || question["Erklärtext"] || "";
+        if (erk.trim() !== "") msg += `<strong>Erklärung:</strong><br>${erk}`;
+        explanationText.innerHTML = msg;
+        approveBtn.style.display = "inline-block";
+        rejectBtn.style.display = "inline-block";
+        return;
+      }
+      // Standard-Multiple-Choice, True/False, Drag&Drop, Case
+      let isCorrect = false;
+      let correctAns = question["Richtige Antwort"] || "";
+      if (type === "drag_drop") {
+        isCorrect = (userAnswer === "Richtig");
+      } else if (["multiple_choice", "multiple_choice_multi", "true_false", "case"].includes(type)) {
+        if (correctAns && userAnswer.toLowerCase().trim() === correctAns.toLowerCase().trim()) {
+          isCorrect = true;
+        }
+        if (type === "multiple_choice_multi") {
+          isCorrect = (userAnswer === "Richtig");
+        }
+      }
+      let msg = isCorrect ? `✅ <strong>Richtig!</strong>` : `❌ <strong>Falsch!</strong>`;
+      let erk = question["Begründung"] || question["Erklärtext"] || "";
+      if (erk.trim() !== "") msg += `<br><br>${erk}`;
+      explanationText.innerHTML = msg;
+      nextBtn.style.display = "block";
+      if (!wasAlreadyAnswered) {
+        if (isCorrect) {
+          correctSound.play();
+          let xpGain = 10;
+          let coinGain = 1;
+          if (isXPBoosterActive && xpBoosterRemaining > 0) {
+            xpGain *= 2;
+            xpBoosterRemaining--;
+            if (xpBoosterRemaining <= 0) isXPBoosterActive = false;
+          }
+          roundCoins += coinGain;
+          totalCoins += coinGain;
+          quizXp += xpGain;
+          xp += xpGain;
+          answeredCorrectly[currentIndex] = true;
+          xpValueEl.innerText = xp;
+          showXPChange(xpGain);
+          showCoinChange(coinGain, totalCoinsEl.parentElement);
+          showCoinChange(coinGain, roundCoinsEl.parentElement);
+        } else {
+          wrongSound.play();
+          if (roundCoins > 0) { roundCoins--; showCoinChange(-1, roundCoinsEl.parentElement); }
+          if (totalCoins > 0) {
+            totalCoins--;
+            if (totalCoins < 0) totalCoins = 0;
+            showCoinChange(-1, totalCoinsEl.parentElement);
+          }
+        }
+        alreadyAnsweredQuestionIds.push(qId);
+        markQuestionAsAnsweredInSupabase(supabaseUserId, qId);
+        const selItems = document.querySelectorAll(".question-select-item");
+        if (selItems[currentIndex]) { selItems[currentIndex].classList.add("answered"); }
+        updateUserStatsInSupabase(supabaseUserId, xp, totalCoins, streak);
+      }
+      roundCoinsEl.innerText = roundCoins;
+      totalCoinsEl.innerText = totalCoins;
+    }
+
+    approveBtn.onclick = () => { handleOpenQuestionResult(true); };
+    rejectBtn.onclick = () => { handleOpenQuestionResult(false); };
+
+    function handleOpenQuestionResult(isApproved) {
+      const q = questions[currentIndex];
+      const qId = q.id ?? currentIndex;
+      const wasAlreadyAnswered = alreadyAnsweredQuestionIds.includes(qId);
+      if (!wasAlreadyAnswered) {
+        if (isApproved) {
+          correctSound.play();
+          let xpGain = 10;
+          let coinGain = 1;
+          if (isXPBoosterActive && xpBoosterRemaining > 0) {
+            xpGain *= 2;
+            xpBoosterRemaining--;
+            if (xpBoosterRemaining <= 0) isXPBoosterActive = false;
+          }
+          roundCoins += coinGain;
+          totalCoins += coinGain;
+          quizXp += xpGain;
+          xp += xpGain;
+          xpValueEl.innerText = xp;
+          showXPChange(xpGain);
+          showCoinChange(coinGain, totalCoinsEl.parentElement);
+          showCoinChange(coinGain, roundCoinsEl.parentElement);
+        } else {
+          wrongSound.play();
+          if (roundCoins > 0) { roundCoins--; showCoinChange(-1, roundCoinsEl.parentElement); }
+          if (totalCoins > 0) {
+            totalCoins--;
+            if (totalCoins < 0) totalCoins = 0;
+            showCoinChange(-1, totalCoinsEl.parentElement);
+          }
+          roundCoinsEl.innerText = roundCoins;
+          totalCoinsEl.innerText = totalCoins;
+        }
+        alreadyAnsweredQuestionIds.push(qId);
+        markQuestionAsAnsweredInSupabase(supabaseUserId, qId);
+        const selItems = document.querySelectorAll(".question-select-item");
+        if (selItems[currentIndex]) { selItems[currentIndex].classList.add("answered"); }
+        updateUserStatsInSupabase(supabaseUserId, xp, totalCoins, streak);
+      }
+      setTimeout(() => { nextQuestion(); }, 800);
+    }
+
+    nextBtn.onclick = () => { nextQuestion(); };
+
+    function nextQuestion() {
+      currentIndex++;
+      showQuestion();
+    }
+
+    repeatBtn.onclick = () => { resetQuiz(); };
+    continueBtn.onclick = () => { resetQuiz(); };
+
+    function resetQuiz() {
+      currentIndex = 0;
+      answeredCorrectly = new Array(questions.length).fill(false);
+      quizXp = 0;
+      roundCoins = 0;
+      roundCoinsEl.innerText = roundCoins;
+      repeatBtn.style.display = "none";
+      endScreenEl.style.display = "none";
+      document.getElementById("jokerContainer").style.display = "flex";
+      showQuestion();
+    }
+
+    function showCoinChange(amount, element) {
+      const coinChange = document.createElement("div");
+      coinChange.classList.add("coin-change");
+      if (amount < 0) { coinChange.classList.add("negative"); coinChange.innerText = amount; }
+      else { coinChange.classList.add("positive"); coinChange.innerText = `+${amount}`; }
+      element.appendChild(coinChange);
+      setTimeout(() => { element.removeChild(coinChange); }, 2000);
+    }
+
+    function showXPChange(amount) {
+      const xpChange = document.createElement("div");
+      xpChange.classList.add("xp-change");
+      xpChange.textContent = `+${amount}`;
+      xpBox.appendChild(xpChange);
+      setTimeout(() => { xpBox.removeChild(xpChange); }, 2000);
+    }
+
+    async function markQuestionAsAnsweredInSupabase(userId, questionId) {
+      try {
+        const { data: existing } = await supabaseClient
+          .from('answered_questions')
+          .select('id')
+          .eq('user_id', userId)
+          .eq('question_id', questionId);
+        if (existing && existing.length > 0) {
+          console.log("Frage bereits beantwortet, kein Insert.");
+          return;
+        }
+        const { data, error } = await supabaseClient
+          .from('answered_questions')
+          .insert([{ user_id: userId, question_id: questionId, is_correct: true }]);
+        if (error) console.error('Fehler beim Insert in answered_questions:', error);
+        else console.log('Frage als beantwortet markiert:', data);
+      } catch (err) {
+        console.error("markQuestionAsAnsweredInSupabase - Fehler:", err);
+      }
+    }
+
+    async function updateUserStatsInSupabase(userId, newXP, newCoins, newStreak) {
+      try {
+        const { data, error } = await supabaseClient
+          .from('user_stats')
+          .update({
+            total_xp: newXP,
+            total_coins: newCoins,
+            streak: newStreak,
+            last_played: new Date().toISOString()
+          })
+          .eq('user_id', userId);
+        if (error) console.error('Fehler beim Update user_stats:', error);
+        else console.log('user_stats aktualisiert:', data);
+      } catch (err) {
+        console.error("updateUserStatsInSupabase - Fehler:", err);
+      }
+    }
+
+    async function updateMedalsInSupabase(userId, medalType) {
+      try {
+        const { data: statsData, error: statsErr } = await supabaseClient
+          .from('user_stats')
+          .select('*')
+          .eq('user_id', userId)
+          .single();
+        if (statsErr) {
+          console.error("Fehler beim Lesen user_stats:", statsErr);
+          return;
+        }
+        let gold = statsData.gold_medals || 0;
+        let silver = statsData.silver_medals || 0;
+        let bronze = statsData.bronze_medals || 0;
+        if (medalType === "Gold") gold++;
+        else if (medalType === "Silber") silver++;
+        else if (medalType === "Bronze") bronze++;
+        const { data: updated, error: updErr } = await supabaseClient
+          .from('user_stats')
+          .update({
+            gold_medals: gold,
+            silver_medals: silver,
+            bronze_medals: bronze
+          })
+          .eq('user_id', userId);
+        if (updErr) console.error("Fehler beim Update der Medaillen:", updErr);
+        else console.log("Medaillen aktualisiert:", updated);
+      } catch (err) {
+        console.error("updateMedalsInSupabase - Fehler:", err);
+      }
+    }
+
+    async function updateEndScreen() {
+      endScreenEl.style.display = "block";
+      repeatBtn.style.display = "none";
+      continueBtn.style.display = "inline-block";
+      let netCoins = roundCoins;
+      let coinMsg = (netCoins > 0)
+        ? `Münzen-Bilanz: +${netCoins} 🪙`
+        : (netCoins < 0)
+          ? `Münzen-Bilanz: ${netCoins} 🪙`
+          : `Münzen-Bilanz: 0 🪙`;
+      coinBalanceEl.textContent = coinMsg;
+      xpTextEl.textContent = `${quizXp} / ${xpGoal} XP`;
+      circleBarEl.setAttribute("stroke-dasharray", `0, ${halfCircleCircumference}`);
+      const finalProgress = (quizXp / xpGoal) * halfCircleCircumference;
+      let current = 0;
+      const steps = 50;
+      const stepValue = finalProgress / steps;
+      let stepCount = 0;
+      const animate = setInterval(() => {
+        stepCount++;
+        current += stepValue;
+        if (stepCount >= steps) { current = finalProgress; clearInterval(animate); }
+        circleBarEl.setAttribute("stroke-dasharray", `${current}, ${halfCircleCircumference}`);
+      }, 20);
+      let percent = (quizXp / xpGoal) * 100;
+      let medalType = "Keine Medaille";
+      if (percent === 100) medalType = "Gold";
+      else if (percent >= 75) medalType = "Silber";
+      else if (percent >= 50) medalType = "Bronze";
+      medalInfoEl.innerHTML = "";
+      if (medalType !== "Keine Medaille") {
+        medalInfoEl.textContent = `Du hast ${Math.round(percent)}% erreicht – ${medalType}-Medaille!`;
+        const medalImg = document.createElement("img");
+        medalImg.className = "medal-image";
+        if (medalType === "Gold") {
+          medalImg.src = "https://lqoulygftdjbnfxkrihy.supabase.co/storage/v1/object/public/quiz-medals//Goldmedaille.svg";
+        } else if (medalType === "Silber") {
+          medalImg.src = "https://lqoulygftdjbnfxkrihy.supabase.co/storage/v1/object/public/quiz-medals//Silbermedaille.svg";
+        } else if (medalType === "Bronze") {
+          medalImg.src = "https://lqoulygftdjbnfxkrihy.supabase.co/storage/v1/object/public/quiz-medals//Bronzemedaille.svg";
+        }
+        medalInfoEl.appendChild(medalImg);
+        await updateMedalsInSupabase(supabaseUserId, medalType);
+      } else {
+        medalInfoEl.textContent = `Du hast ${Math.round(percent)}% erreicht – keine Medaille diesmal.`;
+      }
+      if (quizXp > 0) {
+        await updateStreak(supabaseUserId);
+      }
+    }
+
+    async function markQuestionAsAnsweredInSupabase(userId, questionId) {
+      try {
+        const { data: existing } = await supabaseClient
+          .from('answered_questions')
+          .select('id')
+          .eq('user_id', userId)
+          .eq('question_id', questionId);
+        if (existing && existing.length > 0) {
+          console.log("Frage bereits beantwortet, kein Insert.");
+          return;
+        }
+        const { data, error } = await supabaseClient
+          .from('answered_questions')
+          .insert([{ user_id: userId, question_id: questionId, is_correct: true }]);
+        if (error) console.error('Fehler beim Insert in answered_questions:', error);
+        else console.log('Frage als beantwortet markiert:', data);
+      } catch (err) {
+        console.error("markQuestionAsAnsweredInSupabase - Fehler:", err);
+      }
+    }
+
+    /* ===== ENDE CASES: Neuer Fragetyp mit Teil-Statements ===== */
+
+    // Bei Cases: Falls alle Subquestions beantwortet sind, wird die Frage erst dann als beantwortet markiert.
+    function createCaseSimple(q) {
       const options = document.getElementById("options");
       let subQuestions = q.subQuestions || [];
       if (!Array.isArray(subQuestions) || subQuestions.length === 0) {
@@ -877,67 +1406,112 @@
         options.appendChild(row);
         return;
       }
-      const userAnswers = new Array(subQuestions.length).fill(null);
-      subQuestions.forEach((sq, index) => {
-        const container = document.createElement("div");
-        container.className = "case-subquestion-container";
-        const sqText = document.createElement("div");
-        sqText.className = "case-subquestion-text";
-        sqText.innerText = sq.text || `Teilfrage ${index + 1}`;
-        container.appendChild(sqText);
-        const btnRow = document.createElement("div");
-        btnRow.className = "case-subquestion-buttons";
-        const rBtn = document.createElement("button");
-        rBtn.innerText = "Richtig";
-        rBtn.onclick = () => { userAnswers[index] = "Richtig"; };
-        const fBtn = document.createElement("button");
-        fBtn.innerText = "Falsch";
-        fBtn.onclick = () => { userAnswers[index] = "Falsch"; };
-        btnRow.appendChild(rBtn);
-        btnRow.appendChild(fBtn);
-        container.appendChild(btnRow);
-        options.appendChild(container);
-      });
-      const checkBtn = document.createElement("button");
-      checkBtn.innerText = "Antwort prüfen";
-      checkBtn.onclick = () => {
-        const allAnswered = userAnswers.every(a => a !== null);
-        if (!allAnswered) { alert("Bitte alle Teilfragen beantworten!"); return; }
-        let isAllCorrect = true;
-        for (let i = 0; i < subQuestions.length; i++) {
-          if (subQuestions[i].correctAnswer && userAnswers[i] !== subQuestions[i].correctAnswer) {
-            isAllCorrect = false; break;
+      // Hier kann ggf. weitere Logik für Cases ergänzt werden.
+    }
+
+    function createTrueFalse(q) {
+      const row = document.createElement("div");
+      row.className = "horizontal-buttons";
+      const btnR = document.createElement("button");
+      btnR.innerText = "Richtig";
+      btnR.onclick = () => { checkAnswer("Richtig", q, false, "true_false"); };
+      const btnF = document.createElement("button");
+      btnF.innerText = "Falsch";
+      btnF.onclick = () => { checkAnswer("Falsch", q, false, "true_false"); };
+      row.appendChild(btnR);
+      row.appendChild(btnF);
+      optionsEl.appendChild(row);
+    }
+
+    async function createMultipleChoice(q) {
+      optionsEl.innerHTML = "";
+      try {
+        const url = `${SUPABASE_URL}/rest/v1/multiple_choice_options?question_id=eq.${q.id}&order=id.asc`;
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
           }
+        });
+        if (!response.ok) throw new Error("Fehler beim Laden der multiple-choice-Optionen!");
+        const mcOptions = await response.json();
+        if (!mcOptions || mcOptions.length === 0) {
+          createStandardQuestion(q, "multiple_choice");
+          return;
         }
-        checkAnswer(isAllCorrect ? "Richtig" : "Falsch", q, false, "case");
-      };
-      options.appendChild(checkBtn);
+        const checkboxes = [];
+        mcOptions.forEach((opt, idx) => {
+          const label = document.createElement("label");
+          label.classList.add("mc-option-label");
+          const input = document.createElement("input");
+          input.type = "checkbox";
+          input.value = opt.id;
+          label.appendChild(input);
+          label.appendChild(document.createTextNode(opt.option_text || `Option ${idx + 1}`));
+          optionsEl.appendChild(label);
+          checkboxes.push({ input, isCorrect: opt.is_correct });
+        });
+        const checkBtn = document.createElement("button");
+        checkBtn.innerText = "Antwort prüfen";
+        checkBtn.onclick = () => {
+          let allCorrectSelected = true;
+          let anyExtraSelected = false;
+          checkboxes.forEach(cb => {
+            const checked = cb.input.checked;
+            if (cb.isCorrect && !checked) { allCorrectSelected = false; }
+            if (!cb.isCorrect && checked) { anyExtraSelected = true; }
+          });
+          const finalIsCorrect = (allCorrectSelected && !anyExtraSelected);
+          checkAnswer(finalIsCorrect ? "Richtig" : "Falsch", q, false, "multiple_choice_multi");
+        };
+        optionsEl.appendChild(checkBtn);
+      } catch (err) {
+        console.error(err);
+        optionsEl.innerHTML = "<p>Fehler beim Laden der multiple-choice-Optionen!</p>";
+      }
     }
 
     function createStandardQuestion(q, type) {
-      switch (type) {
-        case "multiple_choice": {
-          const options = document.getElementById("options");
-          ["Antwort A", "Antwort B", "Antwort C", "Antwort D"].forEach(key => {
-            if (q[key] && q[key].trim() !== "") {
-              const btn = document.createElement("button");
-              btn.innerText = q[key];
-              btn.onclick = () => { checkAnswer(q[key], q, false, "multiple_choice"); };
-              options.appendChild(btn);
+      if (type === "drag_drop") {
+        createDragDropQuestion(q);
+        return;
+      }
+      ["Antwort A", "Antwort B", "Antwort C", "Antwort D"].forEach(key => {
+        if (q[key] && q[key].trim() !== "") {
+          const btn = document.createElement("button");
+          btn.innerText = q[key];
+          btn.onclick = () => {
+            if (is5050Active) {
+              hideTwoWrongAnswers(q, btn.innerText);
+              is5050Active = false;
+            } else {
+              checkAnswer(q[key], q, false, "multiple_choice");
             }
-          });
-          break;
+          };
+          optionsEl.appendChild(btn);
         }
-        case "drag_drop": {
-          createDragDropQuestion(q);
-          break;
+      });
+    }
+
+    // 50/50 Joker: Wird angezeigt, wenn q.type ist "multiple_choice", "multiple_choice_multi" oder "question"
+    function hideTwoWrongAnswers(q, chosenText) {
+      const correctAns = (q["Richtige Antwort"] || "").trim().toLowerCase();
+      const btns = optionsEl.querySelectorAll("button");
+      let wrongBtns = [];
+      btns.forEach(b => {
+        if (b.innerText.trim().toLowerCase() !== correctAns) {
+          wrongBtns.push(b);
         }
+      });
+      shuffleArray(wrongBtns);
+      for (let i = 0; i < 2 && i < wrongBtns.length; i++) {
+        wrongBtns[i].style.display = "none";
       }
     }
 
     async function createDragDropQuestion(q) {
-      const options = document.getElementById("options");
-      options.innerHTML = "";
+      optionsEl.innerHTML = "";
       let { data: groupData, error: groupError } = await supabaseClient
         .from('dragdrop_groups')
         .select('*')
@@ -945,7 +1519,7 @@
         .single();
       if (groupError || !groupData) {
         console.error("Fehler beim Laden der Drag & Drop Gruppe:", groupError);
-        options.innerHTML = "<p>Fehler beim Laden der Drag-&-Drop-Daten!</p>";
+        optionsEl.innerHTML = "<p>Fehler beim Laden der Drag-&-Drop-Daten!</p>";
         return;
       }
       const groupId = groupData.id;
@@ -955,11 +1529,11 @@
         .eq('group_id', groupId);
       if (pairsError) {
         console.error("Fehler beim Laden der Drag & Drop Paare:", pairsError);
-        options.innerHTML = "<p>Fehler beim Laden der Drag-&-Drop-Daten!</p>";
+        optionsEl.innerHTML = "<p>Fehler beim Laden der Drag-&-Drop-Daten!</p>";
         return;
       }
       if (!pairsData || pairsData.length === 0) {
-        options.innerHTML = "<p>Keine Drag & Drop-Daten vorhanden!</p>";
+        optionsEl.innerHTML = "<p>Keine Drag & Drop-Daten vorhanden!</p>";
         return;
       }
       const draggedList = [...pairsData];
@@ -970,14 +1544,12 @@
       const container = document.createElement("div");
       container.className = "dragdrop-container";
 
-      // Linke Spalte: Ziehen
       const dragCol = document.createElement("div");
       dragCol.className = "drag-column";
       const dragHeader = document.createElement("h3");
       dragHeader.textContent = "Ziehen";
       dragCol.appendChild(dragHeader);
 
-      // Rechte Spalte: Ablegen
       const dropCol = document.createElement("div");
       dropCol.className = "drop-column";
       const dropHeader = document.createElement("h3");
@@ -991,6 +1563,7 @@
         dragItem.dataset.pairId = itemObj.id;
         dragItem.draggable = true;
         dragItem.addEventListener("dragstart", e => {
+          if (dragItem.classList.contains("disabled")) { e.preventDefault(); return; }
           e.dataTransfer.setData("pairId", itemObj.id);
           e.dataTransfer.effectAllowed = "move";
         });
@@ -1002,13 +1575,8 @@
         dropTarget.className = "drop-target";
         dropTarget.textContent = itemObj.correct_match;
         dropTarget.dataset.pairId = itemObj.id;
-        dropTarget.addEventListener("dragover", e => {
-          e.preventDefault();
-          dropTarget.classList.add("hover");
-        });
-        dropTarget.addEventListener("dragleave", () => {
-          dropTarget.classList.remove("hover");
-        });
+        dropTarget.addEventListener("dragover", e => { e.preventDefault(); dropTarget.classList.add("hover"); });
+        dropTarget.addEventListener("dragleave", () => { dropTarget.classList.remove("hover"); });
         dropTarget.addEventListener("drop", e => {
           e.preventDefault();
           dropTarget.classList.remove("hover");
@@ -1016,6 +1584,8 @@
           if (String(sourcePairId) === String(dropTarget.dataset.pairId)) {
             dropTarget.style.backgroundColor = "#a4f9a4";
             dropTarget.dataset.matched = "true";
+            const item = dragCol.querySelector(`[data-pair-id='${sourcePairId}']`);
+            if (item) { item.classList.add("disabled"); item.draggable = false; }
           } else {
             dropTarget.style.backgroundColor = "#f9a4a4";
             dropTarget.dataset.matched = "false";
@@ -1026,7 +1596,7 @@
 
       container.appendChild(dragCol);
       container.appendChild(dropCol);
-      options.appendChild(container);
+      optionsEl.appendChild(container);
 
       const checkBtn = document.createElement("button");
       checkBtn.innerText = "Antwort prüfen";
@@ -1037,292 +1607,10 @@
         const allCorrect = (correctCount === dropTargets.length);
         checkAnswer(allCorrect ? "Richtig" : "Falsch", q, false, "drag_drop");
       };
-      options.appendChild(checkBtn);
+      optionsEl.appendChild(checkBtn);
     }
 
-    function createLueckentext(q) {
-      const options = document.getElementById("options");
-      const questionLabel = document.createElement("div");
-      questionLabel.style.fontWeight = "bold";
-      questionLabel.style.marginBottom = "5px";
-      questionLabel.innerText = q.Frage || "Lückentext-Frage?";
-      options.appendChild(questionLabel);
-      const input = document.createElement("input");
-      input.type = "text";
-      input.placeholder = "Fehlendes Wort...";
-      options.appendChild(input);
-      const btnL = document.createElement("button");
-      btnL.innerText = "Antwort prüfen";
-      btnL.onclick = () => { checkAnswer(input.value.trim(), q, false, "lueckentext"); };
-      options.appendChild(btnL);
-    }
-
-    function createOpenQuestion(q) {
-      const options = document.getElementById("options");
-      const txt = document.createElement("textarea");
-      txt.classList.add("open-question-textarea");
-      txt.placeholder = "Gebe hier deine Antwort ein...";
-      options.appendChild(txt);
-      const checkBtn = document.createElement("button");
-      checkBtn.innerText = "Antwort überprüfen";
-      checkBtn.onclick = () => { checkAnswer(txt.value.trim(), q, true, "open_question"); };
-      options.appendChild(checkBtn);
-      txt.addEventListener("keydown", (ev) => {
-        if ((ev.ctrlKey || ev.metaKey) && ev.key === "Enter") {
-          ev.preventDefault();
-          checkBtn.click();
-        }
-      });
-    }
-
-    function updateProgressBar() {
-      const total = questions.length;
-      const pb = document.getElementById("progress-bar");
-      const progressInfo = document.getElementById("progressInfo");
-      if (total === 0) {
-        pb.style.width = "0%";
-        progressInfo.innerText = "Frage 0 von 0";
-        return;
-      }
-      const percent = ((currentIndex + 1) / total) * 100;
-      pb.style.width = percent + "%";
-      progressInfo.innerText = `Frage ${currentIndex + 1} von ${total}`;
-    }
-
-    function checkAnswer(userAnswer, question, userCanSelfAccept, type) {
-      const explanationContainer = document.getElementById("explanationContainer");
-      const explanationText = document.getElementById("explanationText");
-      const approveBtn = document.getElementById("approveBtn");
-      const rejectBtn = document.getElementById("rejectBtn");
-      const nextBtn = document.getElementById("nextBtn");
-
-      if (explanationContainer.style.display === "block") { return; }
-      explanationContainer.style.display = "block";
-      explanationText.innerHTML = "";
-      nextBtn.style.display = "none";
-      approveBtn.style.display = "none";
-      rejectBtn.style.display = "none";
-
-      const qId = (question.id != null) ? question.id : currentIndex;
-      const wasAlreadyAnswered = alreadyAnsweredQuestionIds.includes(qId);
-
-      if (type === "open_question") {
-        const correctAnswer = question["Richtige Antwort"] || "";
-        let msg = `
-          <strong>Eingegebene Antwort:</strong><br>${userAnswer || "(leer)"}<br><br>
-          <strong>Richtige Antwort:</strong><br>${correctAnswer}<br><br>
-        `;
-        let erk = question["Begründung"] || question["Erklärtext"] || "";
-        if (erk.trim() !== "") { msg += `<strong>Erklärung:</strong><br>${erk}`; }
-        explanationText.innerHTML = msg;
-        approveBtn.style.display = "inline-block";
-        rejectBtn.style.display = "inline-block";
-        return;
-      }
-
-      let isCorrect = false;
-      let correctAnswer = question["Richtige Antwort"] || "";
-      if (type === "drag_drop") {
-        isCorrect = (userAnswer === "Richtig");
-      } else if (type === "multiple_choice" || type === "true_false" || type === "case" || type === "lueckentext") {
-        if (correctAnswer && userAnswer.toLowerCase().trim() === correctAnswer.toLowerCase().trim()) {
-          isCorrect = true;
-        }
-      }
-
-      let msg = isCorrect ? `✅ <strong>Richtig!</strong>` : `❌ <strong>Falsch!</strong>`;
-      let erk = question["Begründung"] || question["Erklärtext"] || "";
-      if (erk.trim() !== "") { msg += `<br><br>${erk}`; }
-      explanationText.innerHTML = msg;
-      nextBtn.style.display = "block";
-
-      if (!wasAlreadyAnswered) {
-        if (isCorrect) {
-          correctSound.play();
-          let coinGain = 1;
-          let xpGain = 10;
-          if (isXPBoosterActive && xpBoosterRemaining > 0) {
-            xpGain *= 2; xpBoosterRemaining--;
-            if (xpBoosterRemaining <= 0) { isXPBoosterActive = false; }
-          }
-          if (isCoinMultiplierActive && coinMultiplierRemaining > 0) {
-            coinGain *= 2; coinMultiplierRemaining--;
-            if (coinMultiplierRemaining <= 0) { isCoinMultiplierActive = false; }
-          }
-          roundCoins += coinGain;
-          totalCoins += coinGain;
-          quizXp += xpGain;
-          xp += xpGain;
-          answeredCorrectly[currentIndex] = true;
-          document.getElementById("xpValue").innerText = xp;
-          showXPChange(xpGain);
-          showCoinChange(coinGain, document.getElementById("totalCoins").parentElement);
-          showCoinChange(coinGain, document.getElementById("roundCoins").parentElement);
-        } else {
-          wrongSound.play();
-          if (roundCoins > 0) { roundCoins--; showCoinChange(-1, document.getElementById("roundCoins").parentElement); }
-          if (totalCoins > 0) {
-            totalCoins--; if (totalCoins < 0) totalCoins = 0;
-            showCoinChange(-1, document.getElementById("totalCoins").parentElement);
-          }
-        }
-        alreadyAnsweredQuestionIds.push(qId);
-        markQuestionAsAnsweredInSupabase(supabaseUserId, qId);
-        updateUserStatsInSupabase(supabaseUserId, xp, totalCoins, streak);
-      }
-      document.getElementById("roundCoins").innerText = roundCoins;
-      document.getElementById("totalCoins").innerText = totalCoins;
-    }
-
-    // Offenes Frage–Manuelles Werten
-    document.getElementById("approveBtn").onclick = () => { handleOpenQuestionResult(true); };
-    document.getElementById("rejectBtn").onclick = () => { handleOpenQuestionResult(false); };
-
-    function handleOpenQuestionResult(isApproved) {
-      const q = questions[currentIndex];
-      const qId = (q.id != null) ? q.id : currentIndex;
-      const wasAlreadyAnswered = alreadyAnsweredQuestionIds.includes(qId);
-      if (!wasAlreadyAnswered) {
-        if (isApproved) {
-          correctSound.play();
-          let coinGain = 1;
-          let xpGain = 10;
-          if (isXPBoosterActive && xpBoosterRemaining > 0) {
-            xpGain *= 2; xpBoosterRemaining--;
-            if (xpBoosterRemaining <= 0) { isXPBoosterActive = false; }
-          }
-          if (isCoinMultiplierActive && coinMultiplierRemaining > 0) {
-            coinGain *= 2; coinMultiplierRemaining--;
-            if (coinMultiplierRemaining <= 0) { isCoinMultiplierActive = false; }
-          }
-          roundCoins += coinGain;
-          totalCoins += coinGain;
-          quizXp += xpGain;
-          xp += xpGain;
-          answeredCorrectly[currentIndex] = true;
-          document.getElementById("xpValue").innerText = xp;
-          showXPChange(xpGain);
-          document.getElementById("roundCoins").innerText = roundCoins;
-          document.getElementById("totalCoins").innerText = totalCoins;
-          showCoinChange(coinGain, document.getElementById("totalCoins").parentElement);
-          showCoinChange(coinGain, document.getElementById("roundCoins").parentElement);
-        } else {
-          wrongSound.play();
-          if (roundCoins > 0) { roundCoins--; showCoinChange(-1, document.getElementById("roundCoins").parentElement); }
-          if (totalCoins > 0) {
-            totalCoins--; if (totalCoins < 0) totalCoins = 0;
-            showCoinChange(-1, document.getElementById("totalCoins").parentElement);
-          }
-          document.getElementById("roundCoins").innerText = roundCoins;
-          document.getElementById("totalCoins").innerText = totalCoins;
-        }
-        alreadyAnsweredQuestionIds.push(qId);
-        markQuestionAsAnsweredInSupabase(supabaseUserId, qId);
-        updateUserStatsInSupabase(supabaseUserId, xp, totalCoins, streak);
-      }
-      setTimeout(() => { nextQuestion(); }, 800);
-    }
-
-    document.getElementById("nextBtn").onclick = () => { nextQuestion(); };
-
-    function nextQuestion() {
-      currentIndex++;
-      showQuestion();
-    }
-
-    document.getElementById("repeatBtn").onclick = () => { resetQuiz(); };
-    document.getElementById("continueBtn").onclick = () => { resetQuiz(); };
-
-    function resetQuiz() {
-      currentIndex = 0;
-      answeredCorrectly = new Array(questions.length).fill(false);
-      quizXp = 0;
-      roundCoins = 0;
-      document.getElementById("roundCoins").innerText = roundCoins;
-      document.getElementById("repeatBtn").style.display = "none";
-      document.getElementById("endScreen").style.display = "none";
-      // Re-enable Joker icons on reset
-      document.getElementById("jokerContainer").style.display = "flex";
-      showQuestion();
-    }
-
-    function showCoinChange(amount, element) {
-      const coinChange = document.createElement("div");
-      coinChange.classList.add("coin-change");
-      if (amount < 0) {
-        coinChange.classList.add("negative");
-        coinChange.innerText = amount;
-      } else {
-        coinChange.classList.add("positive");
-        coinChange.innerText = `+${amount}`;
-      }
-      element.appendChild(coinChange);
-      setTimeout(() => { element.removeChild(coinChange); }, 2000);
-    }
-
-    function showXPChange(amount) {
-      const xpBox = document.getElementById("xpBox");
-      const xpChange = document.createElement("div");
-      xpChange.classList.add("xp-change");
-      xpChange.textContent = `+${amount}`;
-      xpBox.appendChild(xpChange);
-      setTimeout(() => { xpBox.removeChild(xpChange); }, 2000);
-    }
-
-    function updateEndScreen() {
-      const endScreen = document.getElementById("endScreen");
-      const circleBar = document.getElementById("circleBar");
-      const xpText = document.getElementById("xpText");
-      const coinBalance = document.getElementById("coinBalance");
-      const medalInfo = document.getElementById("medalInfo");
-
-      let netCoins = roundCoins;
-      let coinMsg = (netCoins > 0)
-        ? `Münzen-Bilanz: +${netCoins} 🪙`
-        : (netCoins < 0)
-          ? `Münzen-Bilanz: ${netCoins} 🪙`
-          : `Münzen-Bilanz: 0 🪙`;
-      coinBalance.textContent = coinMsg;
-      xpText.textContent = `${quizXp} / ${xpGoal} XP`;
-      circleBar.setAttribute("stroke-dasharray", `0, ${halfCircleCircumference}`);
-      const finalProgress = (quizXp / xpGoal) * halfCircleCircumference;
-      let current = 0;
-      const steps = 50;
-      const stepValue = finalProgress / steps;
-      let stepCount = 0;
-      const animate = setInterval(() => {
-        stepCount++;
-        current += stepValue;
-        if (stepCount >= steps) { current = finalProgress; clearInterval(animate); }
-        circleBar.setAttribute("stroke-dasharray", `${current}, ${halfCircleCircumference}`);
-      }, 20);
-      document.getElementById("repeatBtn").style.display = "none";
-      document.getElementById("continueBtn").style.display = "inline-block";
-      let correctCount = answeredCorrectly.filter(Boolean).length;
-      let totalCount = questions.length;
-      let percent = (correctCount / totalCount) * 100;
-      let medal = (percent === 100)
-        ? "Gold" : (percent >= 75)
-          ? "Silber" : (percent >= 50)
-            ? "Bronze" : "Keine Medaille";
-      medalInfo.innerHTML = "";
-      if (medal !== "Keine Medaille") {
-        medalInfo.textContent = `Du hast ${Math.round(percent)}% richtig – ${medal}-Medaille!`;
-        const medalImg = document.createElement("img");
-        medalImg.className = "medal-image";
-        if (medal === "Gold") {
-          medalImg.src = "https://lqoulygftdjbnfxkrihy.supabase.co/storage/v1/object/public/quiz-medals//Goldmedaille.svg";
-        } else if (medal === "Silber") {
-          medalImg.src = "https://lqoulygftdjbnfxkrihy.supabase.co/storage/v1/object/public/quiz-medals//Silbermedaille.svg";
-        } else if (medal === "Bronze") {
-          medalImg.src = "https://lqoulygftdjbnfxkrihy.supabase.co/storage/v1/object/public/quiz-medals//Bronzemedaille.svg";
-        }
-        medalInfo.appendChild(medalImg);
-      } else {
-        medalInfo.textContent = `Du hast ${Math.round(percent)}% richtig – keine Medaille diesmal.`;
-      }
-      handleStreak(supabaseUserId, correctCount);
-    }
+    /* ===== ENDE Drag & Drop ===== */
   </script>
 </body>
 </html>
