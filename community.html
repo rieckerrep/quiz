@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>RieckerRep – Community</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Supabase JavaScript Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <style>
+    /* ========== Global Reset & Base ========== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Cambria, serif;
+    }
+    body {
+      background-color: #000; /* Schwarz */
+      color: #fff;            /* Weißer Text */
+      overflow-x: hidden;
+    }
+
+    /* ========== Top-Bar ========== */
+    #topBar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: #111;
+      padding: 10px 20px;
+      border-bottom: 2px solid #444;
+      position: relative;
+    }
+    #topBar .leftArea {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    #topBar .leftArea img {
+      width: 50px; /* Logo */
+      height: auto;
+    }
+    #topBar .titleArea {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    #logoutIcon {
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+      display: none; /* Only visible if logged in */
+    }
+
+    /* ========== Container for Profile/Auth ========== */
+    #profileContainer {
+      width: 95%;
+      margin: 20px auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      position: relative; 
+    }
+
+    /* ========== Big League Icon top-right, shifted left ========== */
+    #bigLeagueContainer {
+      position: absolute;
+      top: 20px;
+      right: 70px; /* SHIFT IT A BIT MORE LEFT */
+      width: 150px;
+      text-align: center;
+    }
+    #bigLeagueIcon {
+      width: 120px;
+      height: 120px;
+      display: block;
+      margin: 0 auto;
+    }
+    #bigLeagueName {
+      margin-top: 5px;
+      font-size: 1rem;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    /* ========== Auth (Login/Registration) ========== */
+    #authRow {
+      display: none; /* Shown if NOT logged in */
+      gap: 40px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .authBox {
+      background-color: #222;
+      border: 1px solid #444;
+      border-radius: 8px;
+      width: 300px;
+      max-width: 90%;
+      padding: 20px;
+    }
+    .authBox h3 {
+      margin-bottom: 10px;
+      font-size: 1.1rem;
+      text-align: center;
+    }
+    .authBox input,
+    .authBox select,
+    .authBox button {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 8px;
+      font-size: 1rem;
+      border-radius: 5px;
+      border: 1px solid #666;
+      background-color: #333;
+      color: #fff;
+    }
+    .authBox button {
+      background-color: #444;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .authBox button:hover {
+      background-color: #666;
+    }
+    #authMessage {
+      text-align: center;
+      font-weight: bold;
+      color: red;
+      margin-bottom: 8px;
+    }
+
+    /* ========== Profile Info (if logged in) ========== */
+    #profileInfo {
+      display: none; /* Shown if logged in */
+      width: 100%;
+      padding: 10px 0;
+      flex-wrap: wrap;
+      gap: 40px;
+      align-items: center;
+    }
+    /* Container for Avatar + XP Ring */
+    .avatarXPContainer {
+      position: relative;
+      width: 150px;
+      height: 150px;
+      overflow: visible;
+    }
+    .xpRingContainer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 150px;
+      height: 150px;
+      pointer-events: none;
+      overflow: visible;
+    }
+    .xpRingContainer svg {
+      width: 150px;
+      height: 150px;
+    }
+    .ring-bg {
+      fill: none;
+      stroke: #333;
+      stroke-width: 4;
+    }
+    .ring-fg {
+      fill: none;
+      stroke: gold;
+      stroke-width: 4;
+      stroke-linecap: round;
+      transition: stroke-dasharray 1s ease;
+    }
+    /* Avatar Circle */
+    .avatarCircle {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background-color: #555;
+      background-size: cover;
+      background-position: center;
+      position: absolute;
+      top: 25px;
+      left: 25px;
+      overflow: hidden;
+    }
+    /* + Button in white circle center */
+    .avatarPlusBtn {
+      position: absolute;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background-color: #fff;
+      color: #000;
+      font-size: 1.5rem;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      cursor: pointer;
+    }
+    /* Profile text (Name, Uni, Medals, etc.) */
+    .profileText {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 400px;
+    }
+    .profileNameRow {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .profileNameRow h2 {
+      font-size: 1.3rem;
+      margin: 0;
+    }
+    /* Medals side-by-side */
+    .medalsRow {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .medalsRow div {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+    }
+    .medalsRow img {
+      width: 20px;
+      height: 20px;
+    }
+    .universityLabel {
+      font-size: 0.9rem;
+      color: #ccc;
+    }
+    .xpLabel {
+      font-size: 1rem;
+      font-weight: bold;
+    }
+    .coinsLabel {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1rem;
+      font-weight: bold;
+    }
+    /* Liga & Level (small icon if needed) */
+    .leagueLevelBox {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .leagueRow {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .leagueIcon {
+      width: 64px;
+      height: 64px;
+    }
+    .levelIcon {
+      width: 30px;
+      height: 30px;
+    }
+
+    /* ========== Leaderboards Section ========== */
+    #tablesContainer {
+      width: 95%;
+      margin: 20px auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .tablePanel {
+      flex: 1;
+      min-width: 280px;
+      background-color: #222;
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 15px;
+    }
+    .tablePanel h3 {
+      margin-bottom: 8px;
+      font-size: 1.1rem;
+      border-bottom: 1px solid #444;
+      padding-bottom: 5px;
+    }
+    .tableWrapper {
+      max-height: 320px;
+      overflow-y: auto;
+      margin-top: 8px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    table th, table td {
+      border: 1px solid #555;
+      padding: 8px;
+      text-align: left;
+      background-color: #333;
+      color: #fff;
+      font-size: 0.9rem;
+    }
+    table th {
+      font-weight: bold;
+      background-color: #444;
+    }
+    /* Avatar in Liga Table */
+    .leagueAvatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background-size: cover;
+      background-position: center;
+      margin-right: 5px;
+    }
+
+    /* ========== Highlighting user/university row ========== */
+    .highlight-row {
+      background-color: #666 !important; /* highlight for the player's row */
+      font-weight: bold;
+    }
+    .highlight-uni {
+      background-color: #664400 !important; /* highlight for the user's uni row */
+      font-weight: bold;
+    }
+
+    /* ========== Avatar-Shop Overlay ========== */
+    #avatarShopOverlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.7);
+      z-index: 9999;
+    }
+    .avatarShopContent {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #222;
+      color: #fff;
+      border: 2px solid #444;
+      border-radius: 8px;
+      padding: 20px;
+      width: 600px;
+      max-width: 90%;
+      max-height: 90%;
+      overflow-y: auto;
+      position: relative;
+    }
+    .avatarShopContent h2 {
+      margin-bottom: 10px;
+      font-size: 1.2rem;
+      border-bottom: 1px solid #444;
+      padding-bottom: 5px;
+    }
+    .avatarGrid {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      margin-top: 10px;
+    }
+    .shopCategory {
+      margin-bottom: 20px;
+    }
+    .shopCategory h3 {
+      margin-bottom: 10px;
+      font-size: 1.1rem;
+      color: #fff;
+      border-bottom: 1px solid #444;
+      padding-bottom: 5px;
+    }
+    .avatarItems {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    .avatarItem {
+      width: 120px;
+      height: 120px;
+      background-color: #555;
+      background-size: cover;
+      background-position: center;
+      position: relative;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .avatarTitle {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      background-color: rgba(0,0,0,0.5);
+      text-align: center;
+      font-size: 0.8rem;
+      color: #fff;
+      padding: 2px 0;
+    }
+    .avatarPrice {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: rgba(0,0,0,0.5);
+      text-align: center;
+      font-size: 0.9rem;
+      color: #fff;
+      padding: 2px 0;
+    }
+    .closeShopBtn {
+      background-color: #444;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-size: 1rem;
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
+    .closeShopBtn:hover {
+      background-color: #666;
+    }
+
+    /* ========== White Dot Above Selected League Icon ========== */
+    .leagueIconsRowContainer {
+      display: flex; 
+      gap: 10px; 
+      justify-content: center; 
+      margin-bottom: 8px;
+    }
+    .league-icon-wrap {
+      position: relative; /* for the dot */
+      width: 40px; 
+      height: 40px;
+      cursor: pointer;
+    }
+    .league-icon-dot {
+      position: absolute;
+      top: -10px; /* place the dot above the icon */
+      left: 50%;
+      transform: translateX(-50%);
+      width: 8px; 
+      height: 8px;
+      border-radius: 50%;
+      background-color: #fff; 
+      display: none; /* only show if selected */
+    }
+    .league-icon-img {
+      width: 40px; 
+      height: 40px;
+    }
+    .league-icon-wrap.selected .league-icon-dot {
+      display: block;
+    }
+
+    /* ========== Responsive ========== */
+    @media (max-width: 768px) {
+      #profileInfo {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      #bigLeagueContainer {
+        position: static;
+        margin-top: 20px;
+      }
+      .avatarXPContainer {
+        margin-bottom: 15px;
+      }
+      #tablesContainer {
+        flex-direction: column;
+      }
+      .tablePanel {
+        min-width: unset;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div id="topBar">
+  <div class="leftArea">
+    <img src="https://lqoulygftdjbnfxkrihy.supabase.co/storage/v1/object/public/quiz-assets//Logo.svg" alt="RieckerRep Logo">
+    <div class="titleArea">Community</div>
+  </div>
+  <img id="logoutIcon"
+       src="https://lqoulygftdjbnfxkrihy.supabase.co/storage/v1/object/public/quiz-assets//abmelden.svg"
+       alt="Abmelden" />
+</div>
+
+<div id="profileContainer">
+  <!-- Big league icon container -->
+  <div id="bigLeagueContainer">
+    <img id="bigLeagueIcon" src="" alt="Liga-Groß">
+    <div id="bigLeagueName"></div>
+  </div>
+
+  <!-- Auth (Login/Registrierung) -->
+  <div id="authRow">
+    <div class="authBox">
+      <h3>Registrieren</h3>
+      <div id="authMessage"></div>
+      <input type="text" id="regUsernameInput" placeholder="Benutzername">
+      <input type="email" id="regEmailInput" placeholder="E-Mail">
+      <input type="password" id="regPasswordInput" placeholder="Passwort">
+      <select id="regUniversitySelect"></select>
+      <button id="registerBtn">Registrieren</button>
+    </div>
+    <div class="authBox">
+      <h3>Anmelden</h3>
+      <input type="email" id="loginEmailInput" placeholder="E-Mail">
+      <input type="password" id="loginPasswordInput" placeholder="Passwort">
+      <button id="loginBtn">Anmelden</button>
+    </div>
+  </div>
+
+  <!-- Profilinfo, wenn eingeloggt -->
+  <div id="profileInfo">
+    <!-- Avatar + XP-Ring -->
+    <div class="avatarXPContainer">
+      <div class="xpRingContainer">
+        <svg viewBox="0 0 36 36">
+          <path class="ring-bg"
+                d="M18 2
+                   a 16 16 0 0 1 0 32
+                   a 16 16 0 0 1 0 -32" />
+          <path id="xpRingFg" class="ring-fg"
+                stroke-dasharray="0, 100"
+                d="M18 2
+                   a 16 16 0 0 1 0 32
+                   a 16 16 0 0 1 0 -32" />
+        </svg>
+      </div>
+      <div class="avatarCircle" id="avatarCircle">
+        <div class="avatarPlusBtn" id="avatarPlusBtn">+</div>
+      </div>
+    </div>
+
+    <!-- Profile text (Name, Uni, Medals, XP, etc.) -->
+    <div class="profileText">
+      <div class="profileNameRow">
+        <h2 id="usernameDisplay">[Benutzername]</h2>
+        <!-- Medals side-by-side -->
+        <div class="medalsRow">
+          <div>
+            <img src="https://lqoulygftdjbnfxkrihy.supabase.co/storage/v1/object/public/quiz-medals//Goldmedaille.svg" alt="Gold">
+            <span id="goldLabel">0</span>
+          </div>
+          <div>
+            <img src="https://lqoulygftdjbnfxkrihy.supabase.co/storage/v1/object/public/quiz-medals//Silbermedaille.svg" alt="Silber">
+            <span id="silverLabel">0</span>
+          </div>
+          <div>
+            <img src="https://lqoulygftdjbnfxkrihy.supabase.co/storage/v1/object/public/quiz-medals//Bronzemedaille.svg" alt="Bronze">
+            <span id="bronzeLabel">0</span>
+          </div>
+        </div>
+      </div>
+      <div class="universityLabel" id="universityDisplay">[Universität]</div>
+      <div class="xpLabel" id="xpLabel">0 / 0 XP</div>
+      <div class="coinsLabel">
+        <span id="coinsLabel">0</span>
+        🪙
+      </div>
+      <div class="leagueLevelBox">
+        <div class="leagueRow">
+          <span>Liga:</span>
+          <span id="leagueName">Holzliga</span>
+        </div>
+        <div class="leagueRow">
+          <span>Level:</span>
+          <img src="" alt="Level-Bild" class="levelIcon" id="levelImage">
+          <span id="levelNumber">1</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Leaderboards -->
+<div id="tablesContainer">
+  <!-- University Leaderboard -->
+  <div class="tablePanel">
+    <h3>University-Leaderboard</h3>
+    <div class="tableWrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Platz</th>
+            <th>Universität</th>
+            <th>Punkte (XP)</th>
+          </tr>
+        </thead>
+        <tbody id="uniTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Aktuelle Liga -->
+  <div class="tablePanel">
+    <!-- 6 league icons row (above heading) -->
+    <div id="leagueIconsRow" class="leagueIconsRowContainer">
+      <!-- We'll fill with 6 icons for each league, plus a white dot if selected -->
+    </div>
+    <h3>Aktuelle Liga</h3>
+    <div class="tableWrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Platz</th>
+            <th>Avatar</th>
+            <th>Spieler</th>
+            <th>Punkte</th>
+          </tr>
+        </thead>
+        <tbody id="leagueTableBody"></tbody>
+      </table>
+    </div>
+    <p style="text-align: center; margin-top: 10px; font-size: 0.9rem;">
+      Wähle eine Liga und den Spieler (in deiner Gruppe) zum Anzeigen.
+    </p>
+  </div>
+
+  <!-- Spieler-Leaderboard -->
+  <div class="tablePanel">
+    <h3>Spieler - Leaderboard</h3>
+    <div class="tableWrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Platz</th>
+            <th>Spieler</th>
+            <th>XP</th>
+          </tr>
+        </thead>
+        <tbody id="playerTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Avatar-Shop Overlay -->
+<div id="avatarShopOverlay">
+  <div class="avatarShopContent">
+    <button class="closeShopBtn" id="closeShopBtn">X</button>
+    <h2>Avatar-Shop</h2>
+    <div class="avatarGrid" id="avatarGrid"></div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  /* ========== SUPABASE SETUP ========== */
+  const SUPABASE_URL = 'https://lqoulygftdjbnfxkrihy.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxxb3VseWdmdGRqYm5meGtyaWh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk0NzUzMDAsImV4cCI6MjA1NTA1MTMwMH0.VInK_7i6zY_f5zjHSR0U93Ut0L7ku_Q0C9xS-u4Lols';
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  /* ========== ELEMENTS ========== */
+  const authRow = document.getElementById("authRow");
+  const authMessage = document.getElementById("authMessage");
+  const registerBtn = document.getElementById("registerBtn");
+  const loginBtn = document.getElementById("loginBtn");
+
+  const regUsernameInput = document.getElementById("regUsernameInput");
+  const regEmailInput = document.getElementById("regEmailInput");
+  const regPasswordInput = document.getElementById("regPasswordInput");
+  const regUniversitySelect = document.getElementById("regUniversitySelect");
+
+  const loginEmailInput = document.getElementById("loginEmailInput");
+  const loginPasswordInput = document.getElementById("loginPasswordInput");
+
+  const logoutIcon = document.getElementById("logoutIcon");
+
+  const profileInfo = document.getElementById("profileInfo");
+  const xpRingFg = document.getElementById("xpRingFg");
+  const avatarCircle = document.getElementById("avatarCircle");
+  const avatarPlusBtn = document.getElementById("avatarPlusBtn");
+
+  const usernameDisplay = document.getElementById("usernameDisplay");
+  const universityDisplay = document.getElementById("universityDisplay");
+  const xpLabel = document.getElementById("xpLabel");
+  const coinsLabel = document.getElementById("coinsLabel");
+  const goldLabel = document.getElementById("goldLabel");
+  const silverLabel = document.getElementById("silverLabel");
+  const bronzeLabel = document.getElementById("bronzeLabel");
+
+  const leagueIcon = document.getElementById("leagueIcon");
+  const leagueName = document.getElementById("leagueName");
+  const levelImage = document.getElementById("levelImage");
+  const levelNumber = document.getElementById("levelNumber");
+
+  const bigLeagueIcon = document.getElementById("bigLeagueIcon");
+  const bigLeagueName = document.getElementById("bigLeagueName");
+
+  const uniTableBody = document.getElementById("uniTableBody");
+  const leagueTableBody = document.getElementById("leagueTableBody");
+  const playerTableBody = document.getElementById("playerTableBody");
+  const leagueIconsRow = document.getElementById("leagueIconsRow");
+
+  const avatarShopOverlay = document.getElementById("avatarShopOverlay");
+  const avatarGrid = document.getElementById("avatarGrid");
+  const closeShopBtn = document.getElementById("closeShopBtn");
+
+  let currentUserId = null;
+  let levelsCache = [];
+  let leaguesCache = [];
+  let selectedLeagueName = null; // for "Aktuelle Liga" table switching
+
+  /* ========== ON LOAD ========== */
+  await loadUniversities();
+  await loadLeagues();
+  await checkSession();
+  await loadAllLeaderboards();
+  setupLeagueIconsRow(); 
+
+  registerBtn.addEventListener("click", handleRegister);
+  loginBtn.addEventListener("click", handleLogin);
+  logoutIcon.addEventListener("click", handleLogout);
+
+  avatarPlusBtn.addEventListener("click", () => {
+    avatarShopOverlay.style.display = "block";
+    loadAvatarShop();
+  });
+  closeShopBtn.addEventListener("click", () => {
+    avatarShopOverlay.style.display = "none";
+  });
+
+  /* ========== UNIVERSITIES-DROPDOWN ========== */
+  async function loadUniversities() {
+    regUniversitySelect.innerHTML = "";
+    try {
+      const { data, error } = await supabaseClient
+        .from('universities')
+        .select('name')
+        .order('name', { ascending: true });
+      if (error) {
+        console.error("Fehler beim Laden der Universitäten:", error);
+        regUniversitySelect.innerHTML = `
+          <option value="">Hochschule auswählen</option>
+          <option value="Universität Augsburg">Universität Augsburg</option>
+          <option value="Universität Bayreuth">Universität Bayreuth</option>
+          <option value="Andere / Sonstige">Andere / Sonstige</option>
+        `;
+        return;
+      }
+      let html = `<option value="">Hochschule auswählen</option>`;
+      if (data) {
+        data.forEach(u => {
+          const uniName = u.name || "Unbekannt";
+          html += `<option value="${uniName}">${uniName}</option>`;
+        });
+      }
+      regUniversitySelect.innerHTML = html;
+    } catch (err) {
+      console.error("loadUniversities error:", err);
+    }
+  }
+
+  /* ========== LEAGUES ========== */
+  async function loadLeagues() {
+    try {
+      const { data, error } = await supabaseClient
+        .from('leagues')
+        .select('*')
+        .order('id', { ascending: true });
+      if (error) {
+        console.error("Fehler beim Laden der Ligen:", error);
+        leaguesCache = [];
+        return;
+      }
+      leaguesCache = data || [];
+    } catch (err) {
+      console.error("loadLeagues error:", err);
+    }
+  }
+
+  /* ========== Setup 6 league icons (with white dot if selected) ========== */
+  function setupLeagueIconsRow() {
+    leagueIconsRow.innerHTML = "";
+    leaguesCache.forEach(league => {
+      const wrap = document.createElement("div");
+      wrap.className = "league-icon-wrap";
+
+      const dot = document.createElement("div");
+      dot.className = "league-icon-dot";
+      wrap.appendChild(dot);
+
+      const img = document.createElement("img");
+      img.src = league.league_img;
+      img.className = "league-icon-img";
+      img.title = league.name;
+
+      wrap.addEventListener("click", () => {
+        selectedLeagueName = league.name;
+        // Mark the selected icon with the white dot
+        highlightSelectedLeagueIcon(league.name);
+        loadLeagueLeaderboard(selectedLeagueName);
+      });
+
+      wrap.appendChild(img);
+      leagueIconsRow.appendChild(wrap);
+    });
+  }
+  function highlightSelectedLeagueIcon(leagueName) {
+    // Clear all
+    const allWraps = leagueIconsRow.querySelectorAll(".league-icon-wrap");
+    allWraps.forEach(w => w.classList.remove("selected"));
+    // Find the wrap whose child has the correct title
+    const wraps = [...allWraps];
+    for (let w of wraps) {
+      const img = w.querySelector(".league-icon-img");
+      if (img && img.title === leagueName) {
+        w.classList.add("selected");
+        break;
+      }
+    }
+  }
+
+  /* ========== SESSION CHECK ========== */
+  async function checkSession() {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (session && session.user) {
+      currentUserId = session.user.id;
+      showLoggedInUI();
+      await loadLevelsCache();
+      await loadProfileAndStats();
+    } else {
+      showLoggedOutUI();
+    }
+  }
+
+  function showLoggedInUI() {
+    authRow.style.display = "none";
+    profileInfo.style.display = "flex";
+    logoutIcon.style.display = "block";
+  }
+  function showLoggedOutUI() {
+    authRow.style.display = "flex";
+    profileInfo.style.display = "none";
+    logoutIcon.style.display = "none";
+  }
+
+  /* ========== REGISTER ========== */
+  async function handleRegister() {
+    authMessage.textContent = "";
+    const username = regUsernameInput.value.trim();
+    const email = regEmailInput.value.trim();
+    const password = regPasswordInput.value.trim();
+    const university = regUniversitySelect.value;
+
+    if (!username || !email || !password || !university) {
+      authMessage.textContent = "Bitte alle Felder ausfüllen!";
+      return;
+    }
+    try {
+      const { data: existingUser } = await supabaseClient
+        .from('profiles')
+        .select('username')
+        .eq('username', username);
+      if (existingUser && existingUser.length > 0) {
+        authMessage.textContent = "Benutzername bereits vergeben!";
+        return;
+      }
+      const { data, error } = await supabaseClient.auth.signUp({ email, password });
+      if (error) {
+        authMessage.textContent = "Registrierung fehlgeschlagen: " + error.message;
+        return;
+      }
+      // Determine league_group for "Holzliga" (up to 50 users each group)
+      const leagueGroup = await findAvailableLeagueGroup("Holzliga");
+
+      // Create profile
+      await supabaseClient
+        .from('profiles')
+        .insert([{
+          id: data.user.id,
+          username,
+          university,
+          avatar_url: ""
+        }]);
+      // Create user_stats
+      await supabaseClient
+        .from('user_stats')
+        .insert([{
+          user_id: data.user.id,
+          total_xp: 0,
+          total_coins: 100,
+          gold_medals: 0,
+          silver_medals: 0,
+          bronze_medals: 0,
+          level: 1,
+          current_league: 'Holzliga',
+          league_group: leagueGroup
+        }]);
+      authMessage.textContent = "Registrierung erfolgreich!";
+      currentUserId = data.user.id;
+      showLoggedInUI();
+      await loadLevelsCache();
+      await loadProfileAndStats();
+      await loadAllLeaderboards();
+    } catch (err) {
+      console.error("Register Error:", err);
+      authMessage.textContent = "Registrierung fehlgeschlagen.";
+    }
+  }
+
+  /* ========== Simple client-side approach for assigning a group ========== */
+  async function findAvailableLeagueGroup(leagueName) {
+    try {
+      // Get counts for each group
+      // We'll do a query: SELECT league_group, count(*) as cnt FROM user_stats 
+      //   WHERE current_league = 'Holzliga'
+      //   GROUP BY league_group
+      //   ORDER BY league_group ASC
+      const { data, error } = await supabaseClient
+        .from('user_stats')
+        .select('league_group, user_id', { count: 'exact' })
+        .eq('current_league', leagueName);
+      if (error || !data) {
+        console.error("Error retrieving league group info:", error);
+        return 1; // fallback to group 1
+      }
+      // We'll build a map of group->count
+      const groupCounts = {};
+      data.forEach(row => {
+        const grp = row.league_group || 1;
+        if (!groupCounts[grp]) groupCounts[grp] = 0;
+        groupCounts[grp]++;
+      });
+      // find the first group with < 50
+      let maxGroup = 0;
+      for (const g of Object.keys(groupCounts).map(Number).sort((a,b)=>a-b)) {
+        if (groupCounts[g] < 50) {
+          return g;
+        }
+        maxGroup = Math.max(maxGroup, g);
+      }
+      // If none found, create new group = maxGroup + 1
+      return maxGroup + 1 || 1;
+    } catch (err) {
+      console.error("findAvailableLeagueGroup error:", err);
+      return 1; // fallback
+    }
+  }
+
+  /* ========== LOGIN ========== */
+  async function handleLogin() {
+    authMessage.textContent = "";
+    const email = loginEmailInput.value.trim();
+    const password = loginPasswordInput.value.trim();
+    if (!email || !password) {
+      authMessage.textContent = "Bitte E-Mail und Passwort eingeben!";
+      return;
+    }
+    try {
+      const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      if (error) {
+        authMessage.textContent = "Login fehlgeschlagen: " + error.message;
+        return;
+      }
+      authMessage.textContent = "Login erfolgreich!";
+      currentUserId = data.user.id;
+      showLoggedInUI();
+      await loadLevelsCache();
+      await loadProfileAndStats();
+      await loadAllLeaderboards();
+    } catch (err) {
+      console.error("Login Error:", err);
+      authMessage.textContent = "Login fehlgeschlagen.";
+    }
+  }
+
+  /* ========== LOGOUT ========== */
+  async function handleLogout() {
+    if (!confirm("Möchten Sie sich wirklich abmelden?")) return;
+    try {
+      await supabaseClient.auth.signOut();
+      currentUserId = null;
+      showLoggedOutUI();
+      authMessage.textContent = "";
+    } catch (err) {
+      console.error("Logout Error:", err);
+    }
+  }
+
+  /* ========== LEVELS CACHE ========== */
+  async function loadLevelsCache() {
+    let { data, error } = await supabaseClient
+      .from('levels')
+      .select('*')
+      .order('level_number', { ascending: true });
+    if (error) {
+      console.error("Error loading levels:", error);
+      levelsCache = [];
+      return;
+    }
+    levelsCache = data || [];
+  }
+
+  /* ========== PROFILE & STATS ========== */
+  async function loadProfileAndStats() {
+    if (!currentUserId) return;
+    let { data: profileData } = await supabaseClient
+      .from('profiles')
+      .select('*')
+      .eq('id', currentUserId)
+      .single();
+    if (!profileData) return;
+
+    let { data: statsData } = await supabaseClient
+      .from('user_stats')
+      .select('*')
+      .eq('user_id', currentUserId)
+      .single();
+    if (!statsData) return;
+
+    // Fill profile UI
+    usernameDisplay.textContent = profileData.username || "[Benutzername]";
+    universityDisplay.textContent = profileData.university || "[Universität]";
+    if (profileData.avatar_url) {
+      avatarCircle.style.backgroundImage = `url('${profileData.avatar_url}')`;
+    } else {
+      avatarCircle.style.backgroundImage = "none";
+    }
+
+    const xpVal = statsData.total_xp || 0;
+    const userCoins = statsData.total_coins || 0;
+    coinsLabel.textContent = userCoins;
+
+    goldLabel.textContent = statsData.gold_medals || 0;
+    silverLabel.textContent = statsData.silver_medals || 0;
+    bronzeLabel.textContent = statsData.bronze_medals || 0;
+
+    let userLevel = statsData.level || 1;
+    let currentLevelObj = levelsCache.find(l => l.level_number === userLevel);
+    // find the next level
+    let nextLevelObj = levelsCache.find(l => l.level_number === userLevel + 1);
+
+    // if user is at the highest known level, fallback to the current level xp_required
+    let xpRequired;
+    if (nextLevelObj) {
+      xpRequired = nextLevelObj.xp_required;
+    } else if (currentLevelObj) {
+      xpRequired = currentLevelObj.xp_required;
+    } else {
+      xpRequired = 300; // fallback
+    }
+
+    xpLabel.textContent = `${xpVal} / ${xpRequired} XP`;
+
+    // show the current level image
+    if (currentLevelObj && currentLevelObj.level_image) {
+      levelImage.src = currentLevelObj.level_image;
+    } else {
+      levelImage.src = "";
+    }
+    // show the current level + title
+    if (currentLevelObj && currentLevelObj.level_title) {
+      levelNumber.textContent = userLevel + " (" + currentLevelObj.level_title + ")";
+    } else {
+      levelNumber.textContent = userLevel;
+    }
+
+    animateXpRing(xpVal, xpRequired);
+
+    // Big league icon top-right
+    let userLeagueName = statsData.current_league || "Holzliga";
+    let { data: leagueData } = await supabaseClient
+      .from('leagues')
+      .select('*')
+      .eq('name', userLeagueName)
+      .single();
+    if (leagueData) {
+      bigLeagueIcon.src = leagueData.league_img || "";
+      bigLeagueName.textContent = leagueData.name || userLeagueName;
+    } else {
+      bigLeagueIcon.src = "";
+      bigLeagueName.textContent = userLeagueName;
+    }
+  }
+
+  function animateXpRing(xpVal, xpRequired) {
+    const ringLength = 100;
+    const percent = Math.min((xpVal / xpRequired) * 100, 100);
+    const dashVal = (percent * ringLength) / 100;
+    setTimeout(() => {
+      xpRingFg.setAttribute("stroke-dasharray", `${dashVal}, ${ringLength}`);
+    }, 200);
+  }
+
+  /* ========== LEADERBOARDS ========== */
+  async function loadAllLeaderboards() {
+    await loadUniLeaderboard();
+    await loadLeagueLeaderboard();
+    await loadPlayerLeaderboard();
+  }
+
+  /* ========== University Leaderboard ========== */
+  async function loadUniLeaderboard() {
+    uniTableBody.innerHTML = "";
+    let userProfile = await supabaseClient
+      .from('profiles')
+      .select('university')
+      .eq('id', currentUserId)
+      .single();
+    let userUni = userProfile?.data?.university || "";
+
+    try {
+      const { data, error } = await supabaseClient.rpc('get_university_leaderboard');
+      if (error) {
+        console.error("Uni LB RPC error:", error);
+        return;
+      }
+      if (data) {
+        let rank = 1;
+        data.forEach(row => {
+          const tr = document.createElement("tr");
+
+          const tdRank = document.createElement("td");
+          tdRank.textContent = rank;
+
+          const tdUni = document.createElement("td");
+          tdUni.textContent = row.university;
+
+          const tdXP = document.createElement("td");
+          tdXP.textContent = row.xp_sum;
+
+          // highlight if row.university == userUni
+          if (row.university === userUni) {
+            tr.classList.add("highlight-uni");
+          }
+
+          tr.appendChild(tdRank);
+          tr.appendChild(tdUni);
+          tr.appendChild(tdXP);
+          uniTableBody.appendChild(tr);
+          rank++;
+        });
+      }
+    } catch (err) {
+      console.error("loadUniLeaderboard error:", err);
+    }
+  }
+
+  /* ========== Liga Leaderboard ========== */
+  async function loadLeagueLeaderboard(overrideLeagueName = null) {
+    leagueTableBody.innerHTML = "";
+    if (!currentUserId) return;
+
+    let { data: profileData } = await supabaseClient
+      .from('profiles')
+      .select('username')
+      .eq('id', currentUserId)
+      .single();
+    let currentUsername = profileData?.username || "";
+
+    let { data: statsData } = await supabaseClient
+      .from('user_stats')
+      .select('current_league')
+      .eq('user_id', currentUserId)
+      .single();
+    if (!statsData) return;
+
+    const leagueNameVal = overrideLeagueName || statsData.current_league || "Holzliga";
+    highlightSelectedLeagueIcon(leagueNameVal); // highlight the chosen icon with the white dot
+
+    try {
+      const { data: lbData, error } = await supabaseClient.rpc('get_league_leaderboard', {
+        league_name: leagueNameVal
+      });
+      if (error) {
+        console.error("League LB RPC error:", error);
+        return;
+      }
+      if (lbData) {
+        let rank = 1;
+        lbData.forEach(row => {
+          const tr = document.createElement("tr");
+
+          const tdRank = document.createElement("td");
+          tdRank.textContent = rank;
+
+          const tdAvatar = document.createElement("td");
+          if (row.avatar_url) {
+            const img = document.createElement("img");
+            img.src = row.avatar_url;
+            img.className = "leagueAvatar";
+            tdAvatar.appendChild(img);
+          } else {
+            tdAvatar.textContent = "-";
+          }
+
+          const tdUser = document.createElement("td");
+          tdUser.textContent = row.username;
+
+          const tdPoints = document.createElement("td");
+          tdPoints.textContent = row.xp;
+
+          // highlight if row.username == currentUsername
+          if (row.username === currentUsername) {
+            tr.classList.add("highlight-row");
+          }
+
+          tr.appendChild(tdRank);
+          tr.appendChild(tdAvatar);
+          tr.appendChild(tdUser);
+          tr.appendChild(tdPoints);
+          leagueTableBody.appendChild(tr);
+          rank++;
+        });
+      }
+    } catch (err) {
+      console.error("League LB error:", err);
+    }
+  }
+
+  /* ========== Spieler-Leaderboard ========== */
+  async function loadPlayerLeaderboard() {
+    playerTableBody.innerHTML = "";
+
+    let { data: profileData } = await supabaseClient
+      .from('profiles')
+      .select('username')
+      .eq('id', currentUserId)
+      .single();
+    let currentUsername = profileData?.username || "";
+
+    try {
+      const { data, error } = await supabaseClient.rpc('get_player_leaderboard');
+      if (error) {
+        console.error("Player LB RPC error:", error);
+        return;
+      }
+      if (data) {
+        let rank = 1;
+        data.forEach(row => {
+          const tr = document.createElement("tr");
+
+          const tdRank = document.createElement("td");
+          tdRank.textContent = rank;
+
+          const tdUser = document.createElement("td");
+          tdUser.textContent = row.username;
+
+          const tdXP = document.createElement("td");
+          tdXP.textContent = row.xp;
+
+          // highlight if row.username === currentUsername
+          if (row.username === currentUsername) {
+            tr.classList.add("highlight-row");
+          }
+
+          tr.appendChild(tdRank);
+          tr.appendChild(tdUser);
+          tr.appendChild(tdXP);
+          playerTableBody.appendChild(tr);
+          rank++;
+        });
+      }
+    } catch (err) {
+      console.error("Player LB error:", err);
+    }
+  }
+
+  /* ========== AVATAR-SHOP ========== */
+  async function loadAvatarShop() {
+    avatarGrid.innerHTML = "";
+    try {
+      const { data, error } = await supabaseClient
+        .from('shop_avatars')
+        .select('*')
+        .eq('active', true)
+        .order('price', { ascending: true });
+      if (error) {
+        console.error("Shop load error:", error);
+        return;
+      }
+      const groups = {};
+      if (data) {
+        data.forEach(av => {
+          if (!groups[av.category]) groups[av.category] = [];
+          groups[av.category].push(av);
+        });
+      }
+      Object.keys(groups).sort().forEach(category => {
+        const catDiv = document.createElement("div");
+        catDiv.className = "shopCategory";
+
+        const catH3 = document.createElement("h3");
+        catH3.textContent = category;
+        catDiv.appendChild(catH3);
+
+        const itemsWrap = document.createElement("div");
+        itemsWrap.className = "avatarItems";
+
+        groups[category].forEach(av => {
+          const item = document.createElement("div");
+          item.className = "avatarItem";
+          item.style.backgroundImage = `url('${av.image_url}')`;
+
+          // Show the avatar title at the top
+          const titleDiv = document.createElement("div");
+          titleDiv.className = "avatarTitle";
+          titleDiv.textContent = av.title || "Avatar";
+          item.appendChild(titleDiv);
+
+          // Show the price at the bottom
+          const priceDiv = document.createElement("div");
+          priceDiv.className = "avatarPrice";
+          priceDiv.textContent = av.price + " 🪙";
+          item.appendChild(priceDiv);
+
+          item.addEventListener("click", () => buyAvatar(av));
+          itemsWrap.appendChild(item);
+        });
+        catDiv.appendChild(itemsWrap);
+        avatarGrid.appendChild(catDiv);
+      });
+    } catch (err) {
+      console.error("Shop load error:", err);
+    }
+  }
+
+  async function buyAvatar(avatar) {
+    if (!currentUserId) {
+      alert("Bitte anmelden!");
+      return;
+    }
+    try {
+      const { data: statsData } = await supabaseClient
+        .from('user_stats')
+        .select('total_coins')
+        .eq('user_id', currentUserId)
+        .single();
+      if (!statsData) {
+        alert("Fehler beim Laden deiner Daten!");
+        return;
+      }
+      const currentCoins = statsData.total_coins;
+      if (currentCoins < avatar.price) {
+        alert("Nicht genug Münzen!");
+        return;
+      }
+      const newCoins = currentCoins - avatar.price;
+      await supabaseClient
+        .from('user_stats')
+        .update({ total_coins: newCoins })
+        .eq('user_id', currentUserId);
+      await supabaseClient
+        .from('profiles')
+        .update({ avatar_url: avatar.image_url })
+        .eq('id', currentUserId);
+      alert("Avatar erfolgreich gekauft!");
+      avatarShopOverlay.style.display = "none";
+      await loadProfileAndStats();
+    } catch (err) {
+      console.error("buyAvatar error:", err);
+      alert("Fehler beim Kauf des Avatars!");
+    }
+  }
+
+  /* ========== HELPER FOR LEAGUE-ICON DOT ========== */
+  function highlightSelectedLeagueIcon(leagueName) {
+    const allWraps = leagueIconsRow.querySelectorAll(".league-icon-wrap");
+    allWraps.forEach(w => w.classList.remove("selected"));
+    for (let w of allWraps) {
+      const img = w.querySelector(".league-icon-img");
+      if (img && img.title === leagueName) {
+        w.classList.add("selected");
+        break;
+      }
+    }
+  }
+});
+</script>
+</body>
+</html>
